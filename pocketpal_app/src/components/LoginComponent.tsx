@@ -1,11 +1,9 @@
 import { useEffect, useState } from "react";
-
-
 import Auth from "./AuthenticationComponent.tsx"
 import { auth } from "../config/firebase";
 
 
-function App() {
+LoginComponent() {
     const [loggedIn, setLoggedIn] = useState(false);
 
     useEffect(() => {
@@ -21,7 +19,7 @@ function App() {
     });
 
     return (
-        <div className="App">
+        <div>
             <Auth/>
             {loggedIn ? (
                 <h4>Użytkownik zalogowany</h4>
@@ -35,4 +33,4 @@ function App() {
     );
 }
 
-export default App;
+export default LoginComponent;

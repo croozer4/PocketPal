@@ -1,17 +1,18 @@
 import './App.css'
 import NavbarComponent from './components/NavbarComponent'
-import { MantineProvider } from "@mantine/core";
+import AuthComponent from './components/AuthenticationComponent'
 
 function App() {
   return (
-    <MantineProvider>
+    <>
       <NavbarComponent/>
-        <div className="App">
-            <p>
-              Edit <code>src/App.tsx</code> and save to reload.
-            </p>
-        </div>
-    </MantineProvider>
+      <div className="App">
+          <p>
+            Edit <code>src/App.tsx</code> and save to reload.
+          </p>
+      </div>
+      <AuthComponent/>
+    </>
   )
 }
 

@@ -40,3 +40,15 @@
 .read-the-docs {
   color: #888;
 }
+
+.Navbar {
+  background-color: #333; /* Zmień kolor tła na ciemny szary */
+}
+
+.Navbar.Brand {
+  color: #fff; /* Zmień kolor tekstu na biały */
+}
+
+.Nav.Link {
+  color: #fff; /* Zmień kolor tekstu na biały */
+}

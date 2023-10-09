@@ -6,6 +6,14 @@
   <component name="ChangeListManager">
     <list default="true" id="48dae3d9-6259-46ea-8a80-270b114f56d1" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pocketpal_app/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/pocketpal_app/package-lock.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pocketpal_app/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/pocketpal_app/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pocketpal_app/src/App.css" beforeDir="false" afterPath="$PROJECT_DIR$/pocketpal_app/src/App.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pocketpal_app/src/App.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/pocketpal_app/src/App.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pocketpal_app/src/components/AuthenticationComponent.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/pocketpal_app/src/components/AuthenticationComponent.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pocketpal_app/src/components/BasicPieChart.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/pocketpal_app/src/components/BasicPieChart.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pocketpal_app/src/components/LoginComponent.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/pocketpal_app/src/components/LoginComponent.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pocketpal_app/src/components/NavbarComponent.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/pocketpal_app/src/components/NavbarComponent.tsx" afterDir="false" />
     </list>
     <list id="8be2b088-1ae8-48a2-938d-bcedee583f9e" name="Changes by Konrad" comment="" />
     <option name="SHOW_DIALOG" value="false" />
@@ -26,9 +34,9 @@
   <component name="MarkdownSettingsMigration">
     <option name="stateVersion" value="1" />
   </component>
-  <component name="ProjectColorInfo"><![CDATA[{
-  "associatedIndex": 0
-}]]></component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 0
+}</component>
   <component name="ProjectId" id="2WWK4LOWoDx5k5raCoA2pIP9I0I" />
   <component name="ProjectLevelVcsManager">
     <ConfirmationsSetting value="2" id="Add" />
@@ -52,7 +60,7 @@
     "node.js.selected.package.eslint": "(autodetect)",
     "node.js.selected.package.tslint": "(autodetect)",
     "nodejs_package_manager_path": "npm",
-    "ts.external.directory.path": "C:\\Users\\marce\\AppData\\Local\\Programs\\WebStorm\\plugins\\javascript-impl\\jsLanguageServicesImpl\\external",
+    "ts.external.directory.path": "C:\\Users\\marce\\Documents\\GitHub\\ProjektZespolowy\\pocketpal_app\\node_modules\\typescript\\lib",
     "vue.rearranger.settings.migration": "true"
   }
 }]]></component>
@@ -71,6 +79,8 @@
       <option name="presentableId" value="Default" />
       <updated>1696842703922</updated>
       <workItem from="1696842704959" duration="5305000" />
+      <workItem from="1696853848800" duration="313000" />
+      <workItem from="1696855500593" duration="656000" />
     </task>
     <servers />
   </component>

@@ -1,7 +1,7 @@
 import { auth, provider } from "../config/firebase";
 import { signInWithPopup } from "firebase/auth";
 
-const LoginComponent = () => {
+const AuthComponent = () => {
     const login = () => {
         signInWithPopup(auth, provider)
             .then((result) => {
@@ -20,4 +20,4 @@ const LoginComponent = () => {
     );
 };
 
-export default LoginComponent;
+export default AuthComponent;
