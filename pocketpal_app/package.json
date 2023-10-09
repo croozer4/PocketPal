@@ -1,5 +1,5 @@
 {
-  "name": "pocketpal_application",
+  "name": "pocketpal_app",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -10,6 +10,10 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@mantine/core": "^6.0.20",
+    "@mantine/hooks": "^6.0.17",
+    "@tabler/icons-react": "^2.38.0",
+    "firebase": "^10.4.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   },
