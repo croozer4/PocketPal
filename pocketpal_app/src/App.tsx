@@ -48,7 +48,7 @@ function App() {
       </div>
       {/* <AuthComponent/> */}
 
-      <BasicPieChart data={data}/>
+      <BasicPieChart/>
       siema
     </>
   )
