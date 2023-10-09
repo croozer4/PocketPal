@@ -3,7 +3,7 @@ import Auth from "./AuthenticationComponent.tsx"
 import { auth } from "../config/firebase";
 
 
-LoginComponent() {
+function LoginComponent() {
     const [loggedIn, setLoggedIn] = useState(false);
 
     useEffect(() => {
