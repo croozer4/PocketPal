@@ -1,0 +1,73 @@
+.authForm {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    max-width: 400px;
+    padding: 20px;
+    border-radius: 15px;
+    background-color: rgb(42, 42, 42);
+}
+
+.close-button {
+    position: relative;
+    top: -10px;
+    right: -190px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: transparent;
+    cursor: pointer;
+    padding: 0;
+    margin: 0;
+    height: 40px;
+    width: 40px;
+    filter: invert(1);
+}
+
+.close-button svg {
+    width: 30px;
+    height: 30px;
+}
+
+.close-button:hover {
+    transform: scale(1.1);
+}
+
+.userAvatarAuth {
+    border-radius: 50%;
+    width: 100px;
+    height: 100px;
+}
+
+.accountDetails {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin: 0;
+}
+
+.dropdownMenu {
+    border-radius: 20px;
+}
+
+.dropdownItem {
+    border-radius: 15px;
+}
+
+.loginMenuButton {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.loginMenuButton svg {
+    width: 20px;
+    height: auto;
+    margin: 2px;
+}

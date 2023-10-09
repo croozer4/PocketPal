@@ -1,150 +1,120 @@
-.close-button {
-  
-    position: relative;
-    top: -10px;
-    right: -100px;
-  
-  
-    background: none;
-    border: none;
-    background-color: white;
-    font-size: 24px;
-    cursor: pointer;
-    color: darkgray;
-    padding: 0;
-    margin: 0;
-  }
-  
-  .user-avatar {
-    border-radius: 50%; /* Zaokrąglenie obrazka do kształtu okręgu */
-    width: 50px; /* Dostosuj rozmiar obrazka według potrzeb */
-    height: 50px;
-  }
-  
-  /* Styl przycisku logowania */
-  .login-button {
-    background-color: transparent;
-    border: none;
-    cursor: pointer;
+/*----------- Logo -----------*/
+
+.logoContainer {
     display: flex;
+    justify-content: flex-start;
     align-items: center;
-    padding: 0;
-    margin: 0;
-  }
-  
-  /* Dodaj odpowiednie style dla innych elementów według potrzeb */
-  
-  
-  .overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
+    margin: 0px 15px;
+}
+
+.logo {
+    height: 30px;
+    width: auto;
+    margin: 0px 10px;
+}
+
+/*----------- Navbar -----------*/
+
+.navbar {
+    top: 16px;
+    position: sticky;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
     width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.5);
+    background-color: rgba(29, 47, 58, 0.7);
+    backdrop-filter: blur(7px);
+    border-radius: 25px;
+}
+
+.navbarContent {
     display: flex;
-    justify-content: center;
+    flex-direction: row;
     align-items: center;
-    z-index: 1000;
-  }
-  
-  .login-button {
-    background-color: #282c34;
-    color: white;
-    border: none;
-    border-radius: 50%; /* Okrągły kształt */
+    justify-content: space-between;
+    gap: 10px;
+    margin: 0px 2px;
+}
+
+.nav_button {
     padding: 10px;
+    border-radius: 15px;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(1, .2, 0, .79);
+}
+
+.nav_button:hover {
+    transform: scale(1.1);
+}
+
+.nav_button:active {
+    transform: scale(0.95);
+}
+
+/*----------- Login Modal -----------*/
+
+.login-button {
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255, 0.9);
+    border: none;
     cursor: pointer;
     display: flex;
     align-items: center;
-    justify-content: center;
-    transition: background-color 0.3s;
-  }
-  
-  .login-button:hover {
-    background-color: #808080;
-  }
-  
-  .login-button svg {
-    fill: currentColor;
+    margin: 2px;
+    max-height: 40px;
+    max-width: 40px;
+}
+
+.login-button svg {
+    margin: 8px;
     width: 1.5em;
     height: 1.5em;
-  }
-  
-  
-  /* Stylizacja dla diva overlay */
-  .overlay {
-    background: rgba(0, 0, 0, 0.5);
-    display: flex;
-    justify-content: center;
-    align-items: center;
+}
+
+.user-avatar {
+    border-radius: 50%; /* Zaokrąglenie obrazka do kształtu okręgu */
+    width: 100%; /* Dostosuj rozmiar obrazka według potrzeb */
+    height: 100%;
+}
+
+.overlay {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(15px);
     z-index: 1000;
-  }
-  
-  
-  .login-box {
+}
+
+.login-box {
     background-color: #fff;
     padding: 20px;
     border-radius: 5px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     margin: 20px;
     text-align: center;
-  }
-  
-  .login-box h4 {
+}
+
+.login-box h4 {
     margin: 10px 0;
-  }
-  
-  .login-box button {
+}
+
+.login-box button {
     background-color: #282c34;
     color: white;
     border: none;
     border-radius: 5px;
     padding: 10px 20px;
     cursor: pointer;
-  }
-  
-  .login-box button:hover {
-    background-color: #808080;
-  }
+}
 
-  .custom_navbar {
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    background-color: #282c34;
-    min-height: 10vh;
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-evenly;
-    font-size: calc(10px + 2vmin);
-    color: white;
-    min-height: 70px;
-  }
-  
-    a {
-      color: white;
-      text-decoration: none;
-    }
-  
-    .nav_button {
-      background-color: #282c34;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      padding: 10px;
-      /* font-size: 20px; */
-      cursor: pointer;
-      
-    }
-  
-    .nav_button:hover {
-      background-color: #808080;
-      color: white;
-    }
+.login-box button:hover {
+    background-color: #808080;
+}
+

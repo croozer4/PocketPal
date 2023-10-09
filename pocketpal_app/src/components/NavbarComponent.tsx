@@ -1,14 +1,23 @@
-import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Route, Link, Routes } from 'react-router-dom';
-import { auth, provider } from '../config/firebase';
+import { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Link, Routes } from 'react-router-dom';
+import { auth } from '../config/firebase';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faTimes, faUser } from '@fortawesome/free-solid-svg-icons';
-import "../styles/NavbarComponentStyles.css";
+import { faUser } from '@fortawesome/free-solid-svg-icons';
+import '../styles/NavbarComponentStyles.css';
 import LoginComponent from './LoginComponent';
+import logo from '../assets/pocketpal_logo.png';
+import { Menu, Text, UnstyledButton } from '@mantine/core';
+import {AiOutlineMenu} from "react-icons/ai";
+import {
+  IconSettings,
+  IconUsers,
+  IconHistory, IconLogout,
+} from '@tabler/icons-react';
 
 export function CustomNavbar() {
   const [showLoginBox, setShowLoginBox] = useState(false);
   const [userPhotoURL, setUserPhotoURL] = useState('');
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
 
   const openLoginBox = () => setShowLoginBox(true);
   const closeLoginBox = () => setShowLoginBox(false);
@@ -25,37 +34,130 @@ export function CustomNavbar() {
     return () => unsubscribe();
   }, []);
 
+  useEffect(() => {
+    setIsMobile(window.innerWidth >= 768);
+
+    const handleResize = () => {
+      setIsMobile(window.innerWidth >= 768);
+    };
+
+    window.addEventListener('resize', handleResize);
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []);
+
   return (
-    <div>
-      <Router>
-        <nav className="custom_navbar">
-          <div className="nav_button">
-            <Link to="/">Home</Link>
-          </div>
-          <div className="nav_button">
-            <Link to="/Wiki">Wikipedia</Link>
-          </div>
-          <div className="nav-button-container">
-          <button className="login-button" onClick={openLoginBox}>
-              {userPhotoURL ? (
-                <img src={userPhotoURL} alt="User Profile" className="user-avatar" />
-              ) : (
-                <FontAwesomeIcon icon={faUser} />
-              )}
-            </button>
-          </div>
+    <>
+      {isMobile ? (
+        <nav className="navbar">
+          <Router>
+            <div className="logoContainer">
+              <img src={logo} alt="PocketPal logo" className="logo" />
+              <Text size={'xl'}>PocketPal</Text>
+            </div>
+            <div className="navbarContent">
+              <div className="nav_button">
+                <Link to="/history">
+                  <Text>Historia</Text>
+                </Link>
+              </div>
+              <div className="nav_button">
+                <Link to="/family">
+                  <Text>Rodzina</Text>
+                </Link>
+              </div>
+              <div className="nav-button-container">
+                <UnstyledButton className="login-button" onClick={openLoginBox}>
+                  {userPhotoURL ? (
+                    <img src={userPhotoURL} alt="User Profile" className="user-avatar" />
+                  ) : (
+                    <FontAwesomeIcon icon={faUser} />
+                  )}
+                </UnstyledButton>
+              </div>
+            </div>
+            <Routes></Routes>
+          </Router>
         </nav>
-        <Routes>
-
-        </Routes>
-      </Router>
-
+      ) : (
+        <nav className="navbar">
+          <Router>
+            <div className="logoContainer">
+              <img src={logo} alt="PocketPal logo" className="logo" />
+              <Text size={'xl'}>PocketPal</Text>
+            </div>
+            <div className="navbarContent">
+              <Menu
+                width={200}
+                position="bottom-end"
+                transitionProps={{ transition: 'pop-top-right' }}
+                offset={20}
+                classNames={{
+                  dropdown: 'dropdownMenu',
+                  item: 'dropdownItem',
+                }}
+              >
+                <Menu.Target>
+                  <UnstyledButton className="login-button">
+                    <AiOutlineMenu size={40} />
+                  </UnstyledButton>
+                </Menu.Target>
+                <Menu.Dropdown>
+                  <Menu.Label>Profil</Menu.Label>
+                  <Menu.Item>
+                    {userPhotoURL ? (
+                        <div className="accountDetails">
+                          <img src={userPhotoURL} alt="User Profile" className="user-avatar" />
+                          <Text>{auth.currentUser?.displayName}</Text>
+                        </div>
+                      ) : (
+                        <UnstyledButton onClick={openLoginBox} className="loginMenuButton">
+                          <FontAwesomeIcon icon={faUser}/>
+                          <Text size={"sm"} style={{width: "100%"}}>Zaloguj się</Text>
+                        </UnstyledButton>
+                      )}
+                  </Menu.Item>
+                  <Menu.Divider />
+                  <Menu.Item
+                    icon={<IconHistory />}
+                  >
+                    Historia
+                  </Menu.Item>
+                  <Menu.Item
+                    icon={<IconUsers />}
+                  >
+                    Rodzina
+                  </Menu.Item>
+                  <Menu.Divider />
+                  <Menu.Item
+                    icon={<IconSettings />}
+                  >
+                    Ustawienia
+                  </Menu.Item>
+                  <Menu.Divider />
+                  <Menu.Item
+                    color={"red"}
+                    icon={<IconLogout />}
+                    onClick={() => auth.signOut()}
+                  >
+                    Wyloguj
+                  </Menu.Item>
+                </Menu.Dropdown>
+              </Menu>
+            </div>
+            <Routes></Routes>
+          </Router>
+        </nav>
+      )}
       {showLoginBox && (
         <div className="overlay">
           <LoginComponent onClose={closeLoginBox} userPhotoURL={userPhotoURL} />
         </div>
       )}
-    </div>
+    </>
   );
 }
+
 export default CustomNavbar;
