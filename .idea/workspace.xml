@@ -5,18 +5,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="48dae3d9-6259-46ea-8a80-270b114f56d1" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/pocketpal_app/src/assets/pocketpal_logo.jpg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/pocketpal_app/src/components/AuthenticationComponent.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/pocketpal_app/src/components/BasicPieChart.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/pocketpal_app/src/components/NavbarComponent.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/pocketpal_app/src/config/firebase.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pocketpal_app/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/pocketpal_app/package-lock.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pocketpal_app/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/pocketpal_app/package.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pocketpal_app/src/App.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/pocketpal_app/src/App.tsx" afterDir="false" />
     </list>
     <list id="8be2b088-1ae8-48a2-938d-bcedee583f9e" name="Changes by Konrad" comment="" />
-    <list id="9b84884b-cb4c-41f6-b919-435f0732b6e5" name="Changes by rataj" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -61,7 +52,7 @@
     "node.js.selected.package.eslint": "(autodetect)",
     "node.js.selected.package.tslint": "(autodetect)",
     "nodejs_package_manager_path": "npm",
-    "ts.external.directory.path": "C:\\Users\\marce\\Documents\\GitHub\\ProjektZespolowy\\pocketpal_app\\node_modules\\typescript\\lib",
+    "ts.external.directory.path": "C:\\Users\\marce\\AppData\\Local\\Programs\\WebStorm\\plugins\\javascript-impl\\jsLanguageServicesImpl\\external",
     "vue.rearranger.settings.migration": "true"
   }
 }]]></component>
@@ -79,7 +70,7 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1696842703922</updated>
-      <workItem from="1696842704959" duration="4717000" />
+      <workItem from="1696842704959" duration="5305000" />
     </task>
     <servers />
   </component>
