@@ -10,6 +10,11 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@mantine/core": "^6.0.20",
+    "@mantine/hooks": "^6.0.20",
+    "@tabler/icons-react": "^2.38.0",
+    "firebase": "^10.4.0",
+    "nivo": "^0.2.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   },
