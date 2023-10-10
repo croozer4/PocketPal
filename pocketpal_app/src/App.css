@@ -1,35 +1,49 @@
 #root {
-  width: 100%;
-  padding: 0rem 1rem 1rem;
-  text-align: center;
+    width: 100%;
+    padding: 0rem 1rem 1rem;
+    text-align: center;
 }
 
 .interface {
-  margin-top: 32px;
+    margin-top: 32px;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+  gap: 50px;
+}
+
+.overview {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-width: 30vw;
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
+    a:nth-of-type(2) .logo {
+        animation: logo-spin infinite 20s linear;
+    }
 }
 
 .card {
-  padding: 2em;
+    padding: 2em;
 }
 
 .read-the-docs {
-  color: #888;
+    color: #888;
 }
 
 .Navbar {
-  background-color: #333; /* Zmień kolor tła na ciemny szary */
+    background-color: #333; /* Zmień kolor tła na ciemny szary */
 }
 
 .Navbar.Brand {
-  color: #fff; /* Zmień kolor tekstu na biały */
+    color: #fff; /* Zmień kolor tekstu na biały */
 }
 
 .Nav.Link {
-  color: #fff; /* Zmień kolor tekstu na biały */
+    color: #fff; /* Zmień kolor tekstu na biały */
 }
