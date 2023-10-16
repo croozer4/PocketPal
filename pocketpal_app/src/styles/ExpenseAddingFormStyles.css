@@ -1,11 +1,19 @@
-.expense-adding-form{
-    /* width: 200px !important;
-    max-width: 200px !important; */
-    /* height: 100px !important; */
-    width: 100% !important;
-    height: 100% !important;
-    position: fixed !important;
-    top: 0% !important;
-    left: 0px !important;
-    margin: 0px !important;
+.modalInner {
+    padding-left: unset;
+    padding-right: unset;
+    right: 0;
+    left: 0;
+}
+
+.modalButton {
+    position: fixed;
+    bottom: 20px;
+    right: 25px;
+    cursor: pointer;
+    border: 0;
+    transition: all 0.25s;
+}
+
+.modalButton:hover {
+    transform: scale(1.1) translateY(-5px) translateX(-5px);
 }
