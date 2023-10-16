@@ -1,5 +1,8 @@
 import { auth, provider } from "../config/firebase";
 import { signInWithPopup } from "firebase/auth";
+//import Google Icon from tabler icons;
+// import { IconGoogle } from '@tabler/icons-react';
+
 
 const AuthComponent = () => {
     const login = () => {
@@ -14,8 +17,8 @@ const AuthComponent = () => {
 
     return (
         <div>
-            <h1>Logowanie</h1>
-            <button onClick={login}>Zaloguj</button>
+            
+            <button onClick={login}>Google</button>
         </div>
     );
 };

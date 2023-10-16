@@ -1,12 +1,12 @@
 import './App.css'
 import CustomNavbar from './components/NavbarComponent'
 import BasicPieChart from './components/BasicPieChart'
-import {Text} from "@mantine/core";
+import {MantineProvider, Text} from "@mantine/core";
 import HistoryComponent from "./components/HistoryComponent.tsx";
 
 function App() {
   return (
-    <>
+    <MantineProvider theme={{colorScheme:'dark'}}>
       <CustomNavbar/>
       <div className="interface">
         <div className="overview">
@@ -21,7 +21,7 @@ function App() {
         </div>
         <HistoryComponent/>
       </div>
-    </>
+    </MantineProvider>
   )
 }
 

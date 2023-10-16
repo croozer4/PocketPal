@@ -47,3 +47,64 @@
 .Nav.Link {
     color: #fff; /* Zmień kolor tekstu na biały */
 }
+
+.authForm{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+
+    
+    min-width: 30vw;
+}
+
+.authInput{
+    width: 100%;
+    min-width: 400px;
+    margin: 0.5rem 0;
+    border-radius: 8px;
+    position: relative;
+    top: -25px;
+
+}
+
+.auth_log{
+    position: relative;
+    top: -65px;
+    
+    
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-width: 30vw;
+}
+.close-button{
+    position: relative;
+    top: -65px;
+    left: 45%;
+    background-color: #333;
+    color: #fff;
+    width: 90px;
+    height: 40px;
+    border-radius: 8px;
+    padding: 0.6em 1.2em;
+    cursor: pointer;
+    transition: background-color 0.25s;
+    
+}
+.area_button{
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+}
+.Reg_form{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-width: 30vw;
+    height: 500px;
+}
