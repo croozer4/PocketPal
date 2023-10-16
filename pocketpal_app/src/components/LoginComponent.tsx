@@ -1,118 +1,134 @@
-import { useEffect, useState } from "react";
+import {useEffect, useState} from "react";
 import Auth from "./AuthenticationComponent.tsx"
-import { auth } from "../config/firebase";
-import { PasswordInput, TextInput, UnstyledButton, Button } from "@mantine/core";
-import { GrClose } from "react-icons/gr";
+import {auth} from "../config/firebase";
+import {PasswordInput, TextInput, Button, Modal, UnstyledButton} from "@mantine/core";
 import "../styles/LoginComponentStyles.css";
-import { signInWithEmailAndPassword } from "firebase/auth";
-import { createUserWithEmailAndPassword } from "firebase/auth";
+import {signInWithEmailAndPassword} from "firebase/auth";
+import {createUserWithEmailAndPassword} from "firebase/auth";
+import {useDisclosure} from "@mantine/hooks";
+import "../styles/LoginComponentStyles.css";
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
+import {faUser} from "@fortawesome/free-solid-svg-icons";
 
-function LoginComponent({ onClose, userPhotoURL }) {
-    const [loggedIn, setLoggedIn] = useState(false);
+function LoginComponent({userPhotoURL}) {
+  const [opened, {open, close}] = useDisclosure(false);
 
-    const [section, setSection] = useState("login");
+  const [loggedIn, setLoggedIn] = useState(false);
 
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
-    const [repeatPassword, setRepeatPassword] = useState("");
+  const [section, setSection] = useState("login");
 
-    const handleLogin = () => {
-        signInWithEmailAndPassword(auth, email, password)
-            .then((userCredential) => {
-                // Signed in
-                const user = userCredential.user;
-                console.log(user);
-                // ...
-            })
-            .catch((error) => {
-                const errorCode = error.code;
-                const errorMessage = error.message;
-            });
-    }
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [repeatPassword, setRepeatPassword] = useState("");
 
-    const handleRegister = () => {
-        createUserWithEmailAndPassword(auth, email, password)
-            .then((userCredential) => {
-                // Signed in 
-                const user = userCredential.user;
-                console.log(user);
-                // ...
-            })
-            .catch((error) => {
-                const errorCode = error.code;
-                const errorMessage = error.message;
-                console.error(errorCode, errorMessage);
-                // ..
-            });
-            
-        }
+  const handleLogin = () => {
+    signInWithEmailAndPassword(auth, email, password)
+      .then((userCredential) => {
+        // Signed in
+        const user = userCredential.user;
+        console.log(user);
+      })
+      .catch((error) => {
+        const errorCode = error.code;
+        const errorMessage = error.message;
+        console.error(errorCode, errorMessage);
+      });
+  }
 
-    useEffect(() => {
-        auth.onAuthStateChanged((user) => {
-            if (user) {
-                setLoggedIn(true);
-                console.log("User logged in");
-            } else {
-                setLoggedIn(false);
-                console.log("User logged out");
-            }
-            
-        });
+  const handleRegister = () => {
+    createUserWithEmailAndPassword(auth, email, password)
+      .then((userCredential) => {
+        const user = userCredential.user;
+        console.log(user);
+      })
+      .catch((error) => {
+        const errorCode = error.code;
+        const errorMessage = error.message;
+        console.error(errorCode, errorMessage);
+      });
 
+  }
 
+  useEffect(() => {
+    auth.onAuthStateChanged((user) => {
+      if (user) {
+        setLoggedIn(true);
+        console.log("User logged in");
+      } else {
+        setLoggedIn(false);
+        console.log("User logged out");
+      }
     });
-
-    
-
-    return (
-        <div className="authForm">
-
-            <UnstyledButton onClick={onClose} className="close-button" style={{ width: '50px', height: '80px'}}>
-                <GrClose />
-            </UnstyledButton>
+  });
 
 
-            {loggedIn ? (
-                <>
-                    <h4>Użytkownik zalogowany</h4>
-                    <img src={userPhotoURL} alt="User Profile" className="userAvatarAuth" />
-                </>
-            ) : (
-                <>
-                    {section == "login" ? (
-                        <div>
-                            <h2 className="auth_log">Logowanie</h2>
-                            <TextInput type="text" placeholder="Email" className="authInput" onChange={(e)=>setEmail(e.target.value) } />
-                            <PasswordInput type="password" placeholder="Hasło" className="authInput" onChange={(e)=>setPassword(e.target.value) } />
-                            <div className="area_button">
-                                <Button className="registerButton" color="dark" onClick={() => setSection("register")}>Rejestracja</Button>
-                                <Button className="loginButton" color="blue" onClick={() => handleLogin()}>Zaloguj się</Button>
-                                <Auth />
-                            </div>
-
-                        </div>
-                    ) : (
-                        <div>
-                            <h2 className="auth_log">Rejestracja</h2>
-                            <TextInput type="text" placeholder="Email" className="authInput" onChange={(e)=>setEmail(e.target.value) } />
-                            <PasswordInput type="password" placeholder="Hasło" className="authInput" onChange={(e)=>setPassword(e.target.value) }/>
-                            <PasswordInput type="password" placeholder="Powtórz hasło" className="authInput" onChange={(e)=>setRepeatPassword(e.target.value) }/>
-                            <div className="area_button">
-                                <Button className="registerButton" color="dark" onClick={() => setSection("login")}>Logowanie</Button>
-                                <Button className="loginButton" onClick={() => handleRegister()}>Zarejestruj się</Button>
-                                <Auth />
-                            </div>
-                        </div>
-                    )
-                    }
-                </>
-            )}
-
-            {loggedIn ? (
-                <button onClick={() => auth.signOut()}>Wyloguj</button>
-            ) : null}
-        </div>
-    );
+  return (
+    <>
+      <UnstyledButton className="login-button" onClick={open}>
+        {userPhotoURL ? (
+          <img src={userPhotoURL} alt="User Profile" className="user-avatar"/>
+        ) : (
+          <FontAwesomeIcon icon={faUser}/>
+        )}
+      </UnstyledButton>
+      {loggedIn ? (
+        <Modal
+          opened={opened}
+          onClose={close}
+          size={"lg"}
+          title="Logowanie"
+          classNames={{inner: "modalInner"}}
+        >
+          <h4>Użytkownik zalogowany</h4>
+          <img src={userPhotoURL} alt="User Profile" className="userAvatarAuth"/>
+          <button onClick={() => auth.signOut()}>Wyloguj</button>
+        </Modal>
+      ) : (
+        <>
+          {section == "login" ? (
+            <Modal
+              opened={opened}
+              onClose={close}
+              size={"lg"}
+              title="Logowanie"
+              classNames={{inner: "modalInner"}}
+            >
+              <TextInput type="text" placeholder="Email" className="authInput"
+                         onChange={(e) => setEmail(e.target.value)}/>
+              <PasswordInput type="password" placeholder="Hasło" className="authInput"
+                             onChange={(e) => setPassword(e.target.value)}/>
+              <div className="area_button">
+                <Button className="registerButton" color="dark"
+                        onClick={() => setSection("register")}>Rejestracja</Button>
+                <Button className="loginButton" color="blue" onClick={() => handleLogin()}>Zaloguj się</Button>
+                <Auth/>
+              </div>
+            </Modal>
+          ) : (
+            <Modal
+              opened={opened}
+              onClose={close}
+              size={"lg"}
+              title="Rejestracja"
+              classNames={{inner: "modalInner"}}
+            >
+              <TextInput type="text" placeholder="Email" className="authInput"
+                         onChange={(e) => setEmail(e.target.value)}/>
+              <PasswordInput type="password" placeholder="Hasło" className="authInput"
+                             onChange={(e) => setPassword(e.target.value)}/>
+              <PasswordInput type="password" placeholder="Powtórz hasło" className="authInput"
+                             onChange={(e) => setRepeatPassword(e.target.value)}/>
+              <div className="area_button">
+                <Button className="registerButton" color="dark" onClick={() => setSection("login")}>Logowanie</Button>
+                <Button className="loginButton" onClick={() => handleRegister()}>Zarejestruj się</Button>
+                <Auth/>
+              </div>
+            </Modal>
+          )}
+        </>
+      )}
+    </>
+  );
 }
 
 export default LoginComponent;

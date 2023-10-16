@@ -20,7 +20,6 @@ export function CustomNavbar() {
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
 
   const openLoginBox = () => setShowLoginBox(true);
-  const closeLoginBox = () => setShowLoginBox(false);
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
@@ -69,13 +68,14 @@ export function CustomNavbar() {
                 </Link>
               </div>
               <div className="nav-button-container">
-                <UnstyledButton className="login-button" onClick={openLoginBox}>
-                  {userPhotoURL ? (
-                    <img src={userPhotoURL} alt="User Profile" className="user-avatar" />
-                  ) : (
-                    <FontAwesomeIcon icon={faUser} />
-                  )}
-                </UnstyledButton>
+                {/*<UnstyledButton className="login-button" onClick={openLoginBox}>*/}
+                {/*  {userPhotoURL ? (*/}
+                {/*    <img src={userPhotoURL} alt="User Profile" className="user-avatar" />*/}
+                {/*  ) : (*/}
+                {/*    <FontAwesomeIcon icon={faUser} />*/}
+                {/*  )}*/}
+                {/*</UnstyledButton>*/}
+                <LoginComponent userPhotoURL={userPhotoURL} />
               </div>
             </div>
             <Routes></Routes>
@@ -153,7 +153,7 @@ export function CustomNavbar() {
       )}
       {showLoginBox && (
         <div className="overlay">
-          <LoginComponent onClose={closeLoginBox} userPhotoURL={userPhotoURL} />
+          <LoginComponent userPhotoURL={userPhotoURL} />
         </div>
       )}
     </>

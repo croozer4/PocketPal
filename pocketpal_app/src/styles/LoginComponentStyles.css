@@ -71,3 +71,31 @@
     height: auto;
     margin: 2px;
 }
+
+.modalInner {
+    padding-left: unset;
+    padding-right: unset;
+    right: 0;
+    left: 0;
+}
+
+.modalButton {
+    position: fixed;
+    bottom: 20px;
+    right: 25px;
+    cursor: pointer;
+    border: 0;
+    transition: all 0.25s;
+}
+
+.login-button {
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255, 0.9);
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    margin: 2px;
+    max-height: 40px;
+    max-width: 40px;
+}
