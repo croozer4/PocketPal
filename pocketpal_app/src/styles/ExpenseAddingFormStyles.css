@@ -1,0 +1,11 @@
+.expense-adding-form{
+    /* width: 200px !important;
+    max-width: 200px !important; */
+    /* height: 100px !important; */
+    width: 100% !important;
+    height: 100% !important;
+    position: fixed !important;
+    top: 0% !important;
+    left: 0px !important;
+    margin: 0px !important;
+}
