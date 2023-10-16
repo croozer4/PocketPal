@@ -3,8 +3,13 @@ import CustomNavbar from './components/NavbarComponent'
 import BasicPieChart from './components/BasicPieChart'
 import {MantineProvider, Text} from "@mantine/core";
 import HistoryComponent from "./components/HistoryComponent.tsx";
+import ExpenseAddingForm from './components/ExpenseAddingForm.tsx';
+import { useDisclosure } from '@mantine/hooks';
 
 function App() {
+
+  const [openedAddingExpense, { open, close }] = useDisclosure(false);
+
   return (
     <MantineProvider theme={{colorScheme:'dark'}}>
       <CustomNavbar/>
@@ -20,6 +25,8 @@ function App() {
           <BasicPieChart/>
         </div>
         <HistoryComponent/>
+        <ExpenseAddingForm openedAddingExpense={openedAddingExpense}/>
+        <button onClick={open}>Dodaj wydatek</button>
       </div>
     </MantineProvider>
   )
