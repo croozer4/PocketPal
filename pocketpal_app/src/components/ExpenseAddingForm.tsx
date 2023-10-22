@@ -5,6 +5,8 @@ import {Select, NumberInput, Switch, TextInput, Modal, Button} from "@mantine/co
 import {DatePicker} from "@mantine/dates";
 import {useDisclosure} from "@mantine/hooks";
 import "../styles/ExpenseAddingFormStyles.css";
+import {toast} from "react-toastify";
+import {QuickAlertTime} from "../config/globals.tsx";
 
 function ExpenseAddingForm() {
   const [opened, {open, close}] = useDisclosure(false);
@@ -31,6 +33,17 @@ function ExpenseAddingForm() {
       value: InputValue,
     });
     console.log("Document written with ID: ", docRef.id);
+
+    toast.success('Dodano wydatek!', {
+      position: "top-center",
+      autoClose: QuickAlertTime,
+      hideProgressBar: true,
+      closeOnClick: true,
+      pauseOnHover: false,
+      draggable: true,
+      progress: undefined,
+      theme: "dark",
+    });
 
     alert("Pomyślnie dodano wydatek");
   };
