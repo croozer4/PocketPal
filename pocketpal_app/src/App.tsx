@@ -5,6 +5,7 @@ import {MantineProvider, Text} from "@mantine/core";
 import HistoryComponent from "./components/HistoryComponent.tsx";
 import ExpenseAddingForm from './components/ExpenseAddingForm.tsx';
 import {ToastContainer} from "react-toastify";
+import 'react-toastify/dist/ReactToastify.css';
 
 function App() {
   const colorScheme = 'dark';
