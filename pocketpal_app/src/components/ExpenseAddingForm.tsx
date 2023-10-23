@@ -11,7 +11,7 @@ import {QuickAlertTime} from "../config/globals.tsx";
 function ExpenseAddingForm() {
   const [opened, {open, close}] = useDisclosure(false);
 
-  const [InputValue, setInputValue] = useState<number>(0); // Ustaw początkową wartość na 0
+  const [InputValue, setInputValue] = useState<number>(); // Ustaw początkową wartość na 0
   const [InputCategory, setInputCategory] = useState<string>();
   const [InputCreationDate, setInputCreationDate] = useState<Date | null>(null);
   const [InputType, setInputType] = useState<boolean>(false);
@@ -19,10 +19,24 @@ function ExpenseAddingForm() {
   // const [InputDate, setInputDate] = useState<Date | null>(null);
 
   const handleSubmit = async (event: React.FormEvent) => {
-    console.log("submitting form");
+    // console.log("submitting form");
     event.preventDefault();
 
     if (!auth.currentUser) return;
+    
+    if(InputValue === null || InputValue === undefined || InputValue <= 0) {
+      toast.error('Wpisz poprawną wartość wydatku!', {
+        position: "top-center",
+        autoClose: QuickAlertTime,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: false,
+        draggable: true,
+        progress: undefined,
+        theme: "dark",
+      });
+      return;
+    }
 
     const docRef = await addDoc(collection(projectFirestore, "usersData"), {
       description: InputDescription,
@@ -32,7 +46,7 @@ function ExpenseAddingForm() {
       user: auth.currentUser.uid,
       value: InputValue,
     });
-    console.log("Document written with ID: ", docRef.id);
+    // console.log("Document written with ID: ", docRef.id);
 
     toast.success('Dodano wydatek!', {
       position: "top-center",
@@ -45,7 +59,16 @@ function ExpenseAddingForm() {
       theme: "dark",
     });
 
-    alert("Pomyślnie dodano wydatek");
+    // alert("Pomyślnie dodano wydatek");
+
+    close();
+
+    // wyzeruj stan
+    setInputValue(undefined);
+    setInputCategory("");
+    setInputCreationDate(null);
+    setInputType(false);
+    setInputDescription("");
   };
 
   return (
@@ -69,8 +92,9 @@ function ExpenseAddingForm() {
             label="Wartość wydatku"
             name="InputValue"
             value={InputValue} // Przypisz stan InputValue jako wartość
-            min={0} // Opcjonalnie, jeśli chcesz określić minimalną wartość
-            onChange={(value) => setInputValue(Number(value))}
+            rightSection={"zł"} // Opcjonalnie, jeśli chcesz dodać sekcję po prawej stronie
+            onChange={(value) => { if(value) setInputValue(Number(value)) } }
+            placeholder="Wpisz wartość wydatku"
           />
           <Select
             label="Kategoria"
@@ -98,7 +122,8 @@ function ExpenseAddingForm() {
             placeholder="Opis wydatku"
             onChange={(e) => setInputDescription(e.target.value)}
           />
-          <input type="submit" value="Dodaj" onClick={handleSubmit}/>
+          {/* <input type="submit" value="Dodaj" onClick={handleSubmit}/> */}
+          <Button type="submit" onClick={handleSubmit}>Dodaj</Button>
         </form>
       </Modal>
     </>
