@@ -1,54 +1,30 @@
 import {Accordion, MantineProvider} from '@mantine/core';
+import { format } from 'date-fns';
 
-type record = {
-  id: string,
-  category: string,
-  price: number,
-  date: string,
-  description: string
+type Expense = {
+  id: string;
+  category: string;
+  creationDate: Date;
+  description?: string;
+  type: boolean;
+  user: string;
+  value: number;
 }
 
-const data = [
-  {
-    id: "1",
-    category: 'Jedzenie',
-    price: 10.00,
-    date: '2021-01-01',
-    description: 'Kupiłem burgera'
-  },
-  {
-    id: "2",
-    category: 'Jedzenie',
-    price: 5.00,
-    date: '2021-01-02',
-    description: 'Kupiłem napój'
-  },
-  {
-    id: "3",
-    category: 'Rachunki',
-    price: 100.00,
-    date: '2021-01-03',
-    description: 'Zapłaciłem za prąd'
-  },
-  {
-    id: "4",
-    category: 'Rozrywka',
-    price: 20.00,
-    date: '2021-01-04',
-    description: 'Byłem w kinie'
-  }
-]
+const PeekDetails = (item: Expense) => {
+  // Formatowanie daty przy użyciu date-fns
+  const dateFormatted = format(Number(item.creationDate), "dd/MM/yyyy HH:mm:ss");
 
-const PeekDetails = (item: record) => {
   return (
     <Accordion.Item key={item.id} value={item.id}>
-      <Accordion.Control>{item.category} | {item.price}zł ({item.date})</Accordion.Control>
+      <Accordion.Control>{item.category} | {item.value}zł ({dateFormatted})</Accordion.Control>
       <Accordion.Panel>{item.description}</Accordion.Panel>
     </Accordion.Item>
-  )
+  );
 }
 
-const HistoryComponent = () => {
+
+const HistoryComponent = ({data}: { data: Array<Expense> }) => {
   return (
     <MantineProvider theme={{ colorScheme: 'dark' }}>
       <Accordion multiple style={{ minWidth: "50vw"}}>

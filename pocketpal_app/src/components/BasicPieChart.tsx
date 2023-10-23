@@ -1,11 +1,8 @@
-import { ResponsivePie } from '@nivo/pie';
+import {ResponsivePie} from '@nivo/pie';
 import {useEffect, useState} from "react";
-import { getDocs } from '@firebase/firestore';
-import {auth, db} from "../config/firebase.tsx";
-import {collection, query, where} from "firebase/firestore";
+import {auth} from "../config/firebase.tsx";
 import {toast} from "react-toastify";
 import {DefaultAlertTime} from "../config/globals.tsx";
-import {forEach} from "react-bootstrap/ElementChildren";
 
 type Expense = {
   id: string;
@@ -17,10 +14,8 @@ type Expense = {
   value: number;
 }
 
-function BasicPieChart() {
-  const [data, setData] = useState<Expense[]>();
-  const [pieChartData, setPieChartData] = useState<number[]>();
-
+function BasicPieChart({data}: { data: Array<Expense> }) {
+  const [pieChartData, setPieChartData] = useState<number[]>([0, 0, 0, 0]);
 
   let categories = [
     {
@@ -49,92 +44,53 @@ function BasicPieChart() {
     }
   ];
 
-  const [reload, setReload] = useState<boolean>(true);
-
-  const fetchData = async () => {
-    try {
-      // pobierz wszystkie dokumenty z kolekcji 'usersData' z katalogu danego użytkownika
-      const uid = auth.currentUser?.uid || null;
-
-      if(uid) {
-        const q = query(collection(db, 'usersData'), where('user', '==', uid));
-        const querySnapshot = await getDocs(q);
-
-        const fetchedData : Expense[] = [];
-
-        if (querySnapshot) {
-          querySnapshot.forEach((doc) => {
-            const docData = doc.data();
-            fetchedData.push({
-              id: doc.id,
-              category: docData.category,
-              creationDate: docData.creationDate,
-              description: docData.description,
-              type: docData.type,
-              user: docData.user,
-              value: docData.value,
-            });
-          });
-          setData(fetchedData);
-          console.log(fetchedData);
-
-          const overallValue = fetchedData.reduce((a, b) => a + b.value, 0);
-          let pieChartDataTemp: number[] = [0, 0, 0, 0];
-
-          fetchedData.forEach((item) => {
-            console.log(item.category);
-            if (item.category === "jedzenie") {
-              pieChartDataTemp[0] += item.value;
-            } else if (item.category === "rozrywka") {
-              pieChartDataTemp[1] += item.value;
-            } else if (item.category === "transport") {
-              pieChartDataTemp[2] += item.value;
-            } else {
-              pieChartDataTemp[3] += item.value;
-            }
-          });
-
-          setPieChartData(pieChartDataTemp);
-
-          console.log(pieChartDataTemp);
-        }
-        setReload(true);
-      }
-    } catch (error) {
-      toast.error('Nie udało się pobrać danych!', {
-        position: "top-center",
-        autoClose: DefaultAlertTime,
-        hideProgressBar: true,
-        closeOnClick: true,
-        pauseOnHover: false,
-        draggable: true,
-        progress: undefined,
-        theme: "dark",
-      });
-    }
-  }
-
   useEffect(() => {
-    if(reload) {
-      auth.onAuthStateChanged((user) => {
-        if (user) {
-          fetchData().then(() => {
-            setReload(false);
-          });
+    const fetchData = async () => {
+      try {
+        const pieChartDataTemp: number[] = [0, 0, 0, 0];
+        for (const item of data) {
+          if (item.category === "jedzenie") {
+            pieChartDataTemp[0] += item.value;
+          } else if (item.category === "rozrywka") {
+            pieChartDataTemp[1] += item.value;
+          } else if (item.category === "transport") {
+            pieChartDataTemp[2] += item.value;
+          } else {
+            pieChartDataTemp[3] += item.value;
+          }
+          setPieChartData(pieChartDataTemp);
         }
-      });
+      } catch (error) {
+        console.error(error);
+        toast.error('Nie udało się pobrać danych!', {
+          position: "top-center",
+          autoClose: DefaultAlertTime,
+          hideProgressBar: true,
+          closeOnClick: true,
+          pauseOnHover: false,
+          draggable: true,
+          progress: undefined,
+          theme: "dark",
+        });
+      }
     }
-  }, [reload]);
+
+    fetchData().then();
+  }, [data]);
 
   return (
-    <div style={{ height: "400px", width: "400px"}}>
-      <h5 style={{ marginBottom:0}}>Podsumowanie</h5>
+    <div style={{height: "400px", width: "400px"}}>
+      <h5 style={{marginBottom: 0}}>Podsumowanie</h5>
       <ResponsivePie
         data={
-          //jeżeli kategoria ma wartość 0, to nie wyświetlaj jej w wykresie
           categories.filter((item) => item.value !== 0)
         }
-        margin={{ top: 40, right: 100, bottom: 80, left: 100 }}
+        margin={{top: 40, right: 100, bottom: 80, left: 100}}
+        tooltip={({datum}) => (
+          <div style={{color: datum.color, padding: "3px 6px", borderRadius: "3px", backgroundColor: "#333333"}}>
+            {datum.id}: {datum.value} zł
+          </div>
+        )}
         innerRadius={0.5}
         padAngle={0.7}
         cornerRadius={3}
@@ -152,7 +108,7 @@ function BasicPieChart() {
         arcLinkLabelsSkipAngle={10}
         arcLinkLabelsTextColor="#FFFFFF"
         arcLinkLabelsThickness={2}
-        arcLinkLabelsColor={{ from: 'color' }}
+        arcLinkLabelsColor={{from: 'color'}}
         arcLabelsSkipAngle={10}
         arcLabelsTextColor={{
           from: 'color',
@@ -169,7 +125,7 @@ function BasicPieChart() {
             type: 'patternDots',
             background: 'inherit',
             color: 'rgba(255, 255, 255, 0.3)',
-            size: 2,
+            size: 4,
             padding: 1,
             stagger: true
           },
@@ -179,59 +135,35 @@ function BasicPieChart() {
             background: 'inherit',
             color: 'rgba(255, 255, 255, 0.3)',
             rotation: -45,
-            lineWidth: 6,
+            lineWidth: 3,
             spacing: 10
           }
         ]}
         fill={[
           {
             match: {
-              id: 'ruby'
+              id: 'Jedzenie'
             },
             id: 'dots'
           },
           {
             match: {
-              id: 'c'
+              id: 'Rozrywka'
+            },
+            id: 'lines'
+          },
+          {
+            match: {
+              id: 'Transport'
             },
             id: 'dots'
           },
           {
             match: {
-              id: 'go'
-            },
-            id: 'dots'
-          },
-          {
-            match: {
-              id: 'python'
-            },
-            id: 'dots'
-          },
-          {
-            match: {
-              id: 'scala'
+              id: 'Inne'
             },
             id: 'lines'
           },
-          {
-            match: {
-              id: 'lisp'
-            },
-            id: 'lines'
-          },
-          {
-            match: {
-              id: 'elixir'
-            },
-            id: 'lines'
-          },
-          {
-            match: {
-              id: 'javascript'
-            },
-            id: 'lines'
-          }
         ]}
         legends={[
           {

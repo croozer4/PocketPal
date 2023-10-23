@@ -10,6 +10,8 @@ import { useDisclosure } from "@mantine/hooks";
 import "../styles/LoginComponentStyles.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faUser } from "@fortawesome/free-solid-svg-icons";
+import {DefaultAlertTime, QuickAlertTime} from "../config/globals.tsx";
+import {toast} from "react-toastify";
 
 interface LoginComponentProps {
   userPhotoURL: string;
@@ -26,17 +28,11 @@ function LoginComponent({ userPhotoURL }: LoginComponentProps) {
   const [password, setPassword] = useState("");
   const [repeatPassword, setRepeatPassword] = useState("");
 
-  const [resetPasswordModal, setResetPasswordModal] = useState(false);
   const [resetPasswordEmail, setResetPasswordEmail] = useState("");
 
 
   const handleLogin = () => {
     signInWithEmailAndPassword(auth, email, password)
-      .then((userCredential) => {
-        // Signed in
-        const user = userCredential.user;
-        console.log(user);
-      })
       .catch((error) => {
         const errorCode = error.code;
         const errorMessage = error.message;
@@ -45,27 +41,35 @@ function LoginComponent({ userPhotoURL }: LoginComponentProps) {
   }
 
   const handleRegister = () => {
-    createUserWithEmailAndPassword(auth, email, password)
-      .then((userCredential) => {
-        const user = userCredential.user;
-        console.log(user);
+    if(password !== repeatPassword) {
+      createUserWithEmailAndPassword(auth, email, password)
+        .catch((error) => {
+          const errorCode = error.code;
+          const errorMessage = error.message;
+          console.error(errorCode, errorMessage);
+        });
+    } else {
+      toast.error('Hasła nie są takie same!', {
+        position: "top-center",
+        autoClose: QuickAlertTime,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: false,
+        draggable: true,
+        progress: undefined,
+        theme: "dark",
       })
-      .catch((error) => {
-        const errorCode = error.code;
-        const errorMessage = error.message;
-        console.error(errorCode, errorMessage);
-      });
-
+    }
   }
 
   useEffect(() => {
     auth.onAuthStateChanged((user) => {
       if (user) {
         setLoggedIn(true);
-        console.log("User logged in");
+        // console.log("User logged in");
       } else {
         setLoggedIn(false);
-        console.log("User logged out");
+        // console.log("User logged out");
       }
     });
   });
@@ -74,9 +78,16 @@ function LoginComponent({ userPhotoURL }: LoginComponentProps) {
   const resetPassword = () => {
     sendPasswordResetEmail(auth, email)
       .then(() => {
-        // Password reset email sent!
-        // ..
-        
+        toast.info('Wysłano link do zresetowania hasła!', {
+          position: "top-center",
+          autoClose: DefaultAlertTime,
+          hideProgressBar: true,
+          closeOnClick: true,
+          pauseOnHover: false,
+          draggable: true,
+          progress: undefined,
+          theme: "dark",
+        })
       })
       .catch((error) => {
         const errorMessage = error.message;
@@ -84,10 +95,17 @@ function LoginComponent({ userPhotoURL }: LoginComponentProps) {
       });
   }
 
-  
+  const handleClose = () => {
+    close();
+    setEmail("");
+    setPassword("");
+    setRepeatPassword("");
+    setResetPasswordEmail("");
 
-
-
+    setTimeout(() => {
+      setSection("login");
+    }, 200);
+  }
 
   return (
     <>
@@ -101,26 +119,40 @@ function LoginComponent({ userPhotoURL }: LoginComponentProps) {
       {loggedIn ? (
         <Modal
           opened={opened}
-          onClose={close}
+          onClose={handleClose}
           size={"lg"}
           title="Logowanie"
           classNames={{ inner: "modalInner" }}
         >
           <h4>Użytkownik zalogowany</h4>
           <img src={userPhotoURL} alt="User Profile" className="userAvatarAuth" />
-          <button onClick={() => auth.signOut()}>Wyloguj</button>
+          <button onClick={() => {
+            auth.signOut()
+              .then(() => {
+                toast.success('Wylogowano!', {
+                  position: "top-center",
+                  autoClose: QuickAlertTime,
+                  hideProgressBar: true,
+                  closeOnClick: true,
+                  pauseOnHover: false,
+                  draggable: true,
+                  progress: undefined,
+                  theme: "dark",
+                })
+                handleClose();
+              })
+          }}>Wyloguj</button>
         </Modal>
       ) : (
         <>
-          {section == "login" ? (
+          {section === "login" && (
             <Modal
               opened={opened}
-              onClose={close}
+              onClose={handleClose}
               size={"lg"}
               title="Logowanie"
               classNames={{ inner: "modalInner" }}
             >
-              
               <TextInput type="text" placeholder="Email" className="authInput"
                 onChange={(e) => setEmail(e.target.value)} />
               <PasswordInput type="password" placeholder="Hasło" className="authInput"
@@ -130,7 +162,7 @@ function LoginComponent({ userPhotoURL }: LoginComponentProps) {
                 <Button className="registerButton" color="dark"
                   onClick={() => setSection("register")}>Rejestracja</Button>
                 <Button className="loginButton" color="blue" onClick={() => handleLogin()}>Zaloguj się</Button>
-                <Button color="dark" onClick={() => setResetPasswordModal(true)}>
+                <Button color="dark" onClick={() => setSection("resetPassword")}>
                   Zapomniałem hasła
                 </Button>
                 {/* <Button color="dark"
@@ -138,13 +170,15 @@ function LoginComponent({ userPhotoURL }: LoginComponentProps) {
                 >
                   Zapomniałem hasła
                 </Button> */}
-                <Auth />
+                <Auth onClose={() => handleClose()}/>
               </div>
             </Modal>
-          ) : (
+          )}
+
+          {section === "register" && (
             <Modal
               opened={opened}
-              onClose={close}
+              onClose={handleClose}
               size={"lg"}
               title="Rejestracja"
               classNames={{ inner: "modalInner" }}
@@ -158,24 +192,15 @@ function LoginComponent({ userPhotoURL }: LoginComponentProps) {
               <div className="area_button">
                 <Button className="registerButton" color="dark" onClick={() => setSection("login")}>Logowanie</Button>
                 <Button className="loginButton" onClick={() => handleRegister()}>Zarejestruj się</Button>
-                <Auth />
+                <Auth onClose={() => handleClose()}/>
               </div>
             </Modal>
-            
-            
+          )}
 
-          )
-          
-          
-          }
-          {resetPasswordModal && (
-          
+          {section === "resetPassword" && (
             <Modal
-              opened={resetPasswordModal}
-              onClose={() => {
-                setResetPasswordModal(false);
-                setResetPasswordEmail(""); 
-              }}
+              opened={opened}
+              onClose={handleClose}
               size={"lg"}
               title="Zresetuj hasło"
               classNames={{ inner: "modalInner" }}
@@ -185,23 +210,15 @@ function LoginComponent({ userPhotoURL }: LoginComponentProps) {
               <Button
                 color="blue"
                 onClick={() => {
-                 
-                  
                   resetPassword();
-                  setResetPasswordModal(false);
-                  
                 }}
-
               >
                 Zresetuj hasło
               </Button>
-              
             </Modal>
           )}
-
         </>
-      )
-      }
+      )}
     </>
   );
 }

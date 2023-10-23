@@ -4,11 +4,89 @@ import BasicPieChart from './components/BasicPieChart'
 import {MantineProvider, Text} from "@mantine/core";
 import HistoryComponent from "./components/HistoryComponent.tsx";
 import ExpenseAddingForm from './components/ExpenseAddingForm.tsx';
-import {ToastContainer} from "react-toastify";
+import {toast, ToastContainer} from "react-toastify";
 import 'react-toastify/dist/ReactToastify.css';
+import {auth, db} from "./config/firebase.tsx";
+import {collection, query, where} from "firebase/firestore";
+import {getDocs} from "@firebase/firestore";
+import {useEffect, useState} from "react";
+import {DefaultAlertTime} from "./config/globals.tsx";
+
+type Expense = {
+  id: string;
+  category: string;
+  creationDate: Date;
+  description?: string;
+  type: boolean;
+  user: string;
+  value: number;
+}
 
 function App() {
   const colorScheme = 'dark';
+  const [loggedIn, setLoggedIn] = useState<boolean>(false);
+  const [data, setData] = useState<Array<Expense>>([]);
+  const [reload, setReload] = useState<boolean>(true);
+
+  const fetchData = async () => {
+    try {
+      // pobierz wszystkie dokumenty z kolekcji 'usersData' z katalogu danego użytkownika
+      const uid = auth.currentUser?.uid || null;
+
+      if(uid) {
+        const q = query(collection(db, 'usersData'), where('user', '==', uid));
+        const querySnapshot = await getDocs(q);
+
+        const fetchedData : Array<Expense> = new Array<Expense>();
+
+        if (querySnapshot) {
+          querySnapshot.forEach((doc) => {
+            const docData = doc.data();
+            fetchedData.push({
+              id: doc.id,
+              category: docData.category,
+              creationDate: docData.creationDate,
+              description: docData.description,
+              type: docData.type,
+              user: docData.user,
+              value: docData.value,
+            });
+          });
+        }
+        setData(fetchedData);
+      }
+      setReload(false);
+    } catch (error) {
+      toast.error('Wystąpił błąd podczas pobierania danych!', {
+        position: "top-center",
+        autoClose: DefaultAlertTime,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: false,
+        draggable: true,
+        progress: undefined,
+        theme: "dark",
+      })
+    }
+  }
+
+  const onUpdate = () => {
+    setReload(true);
+  }
+
+  useEffect(() => {
+    auth.onAuthStateChanged((user) => {
+      if (reload) {
+        fetchData().then();
+      }
+
+      if(user) {
+        setLoggedIn(true);
+      } else {
+        setLoggedIn(false);
+      }
+    });
+  }, [reload, data]);
 
   return (
     <MantineProvider theme={{colorScheme: colorScheme}}>
@@ -34,11 +112,11 @@ function App() {
           >
             Witaj w PocketPal!
           </Text>
-          <BasicPieChart/>
+          <BasicPieChart data={data}/>
         </div>
-        <HistoryComponent/>
+        <HistoryComponent data={data}/>
       </div>
-      <ExpenseAddingForm/>
+      { loggedIn ? <ExpenseAddingForm onUpdate={onUpdate}/> : <></>}
     </MantineProvider>
   )
 }

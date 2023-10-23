@@ -78,12 +78,11 @@ export function CustomNavbar() {
                 <LoginComponent userPhotoURL={userPhotoURL} />
               </div>
             </div>
-            <Routes></Routes>
           </Router>
         </nav>
       ) : (
         <nav className="navbar">
-          <Router>
+          {/*<Router>*/}
             <div className="logoContainer">
               <img src={logo} alt="PocketPal logo" className="logo" />
               <Text size={'xl'}>PocketPal</Text>
@@ -147,8 +146,7 @@ export function CustomNavbar() {
                 </Menu.Dropdown>
               </Menu>
             </div>
-            <Routes></Routes>
-          </Router>
+          {/*</Router>*/}
         </nav>
       )}
       {showLoginBox && (

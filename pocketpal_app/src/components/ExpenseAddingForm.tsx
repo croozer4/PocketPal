@@ -8,7 +8,7 @@ import "../styles/ExpenseAddingFormStyles.css";
 import {toast} from "react-toastify";
 import {QuickAlertTime} from "../config/globals.tsx";
 
-function ExpenseAddingForm() {
+function ExpenseAddingForm({onUpdate}: {onUpdate: () => void}) {
   const [opened, {open, close}] = useDisclosure(false);
 
   const [InputValue, setInputValue] = useState<number>(); // Ustaw początkową wartość na 0
@@ -69,6 +69,8 @@ function ExpenseAddingForm() {
     setInputCreationDate(null);
     setInputType(false);
     setInputDescription("");
+
+    onUpdate();
   };
 
   return (
