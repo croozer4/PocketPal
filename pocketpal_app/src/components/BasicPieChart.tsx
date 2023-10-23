@@ -130,7 +130,10 @@ function BasicPieChart() {
     <div style={{ height: "400px", width: "400px"}}>
       <h5 style={{ marginBottom:0}}>Podsumowanie</h5>
       <ResponsivePie
-        data={categories}
+        data={
+          //jeżeli kategoria ma wartość 0, to nie wyświetlaj jej w wykresie
+          categories.filter((item) => item.value !== 0)
+        }
         margin={{ top: 40, right: 100, bottom: 80, left: 100 }}
         innerRadius={0.5}
         padAngle={0.7}
