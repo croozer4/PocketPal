@@ -5,6 +5,7 @@ import {auth, db} from "../config/firebase.tsx";
 import {collection, query, where} from "firebase/firestore";
 import {toast} from "react-toastify";
 import {DefaultAlertTime} from "../config/globals.tsx";
+import {forEach} from "react-bootstrap/ElementChildren";
 
 type Expense = {
   id: string;
@@ -18,36 +19,32 @@ type Expense = {
 
 function BasicPieChart() {
   const [data, setData] = useState<Expense[]>();
+  const [pieChartData, setPieChartData] = useState<number[]>();
 
-  const categories = [
+
+  let categories = [
     {
-      "id": "hack",
-      "label": "hack",
-      "value": 13,
+      "id": "Jedzenie",
+      "label": "Jedzenie",
+      "value": pieChartData ? pieChartData[0] : 0,
       "color": "hsl(262, 70%, 50%)"
     },
     {
-      "id": "haskell",
-      "label": "haskell",
-      "value": 213,
+      "id": "Rozrywka",
+      "label": "Rozrywka",
+      "value": pieChartData ? pieChartData[1] : 0,
       "color": "hsl(100, 70%, 50%)"
     },
     {
-      "id": "php",
-      "label": "php",
-      "value": 208,
-      "color": "hsl(41, 70%, 50%)"
-    },
-    {
-      "id": "python",
-      "label": "python",
-      "value": 24,
+      "id": "Transport",
+      "label": "Transport",
+      "value": pieChartData ? pieChartData[2] : 0,
       "color": "hsl(93, 70%, 50%)"
     },
     {
-      "id": "java",
-      "label": "java",
-      "value": 45,
+      "id": "Inne",
+      "label": "Inne",
+      "value": pieChartData ? pieChartData[3] : 0,
       "color": "hsl(314, 70%, 50%)"
     }
   ];
@@ -65,7 +62,7 @@ function BasicPieChart() {
 
         const fetchedData : Expense[] = [];
 
-        if(querySnapshot) {
+        if (querySnapshot) {
           querySnapshot.forEach((doc) => {
             const docData = doc.data();
             fetchedData.push({
@@ -80,6 +77,26 @@ function BasicPieChart() {
           });
           setData(fetchedData);
           console.log(fetchedData);
+
+          const overallValue = fetchedData.reduce((a, b) => a + b.value, 0);
+          let pieChartDataTemp: number[] = [0, 0, 0, 0];
+
+          fetchedData.forEach((item) => {
+            console.log(item.category);
+            if (item.category === "jedzenie") {
+              pieChartDataTemp[0] += item.value;
+            } else if (item.category === "rozrywka") {
+              pieChartDataTemp[1] += item.value;
+            } else if (item.category === "transport") {
+              pieChartDataTemp[2] += item.value;
+            } else {
+              pieChartDataTemp[3] += item.value;
+            }
+          });
+
+          setPieChartData(pieChartDataTemp);
+
+          console.log(pieChartDataTemp);
         }
         setReload(true);
       }
