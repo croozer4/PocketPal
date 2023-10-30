@@ -6,7 +6,7 @@ import {DefaultAlertTime, QuickAlertTime} from "../config/globals.tsx";
 // import { IconGoogle } from '@tabler/icons-react';
 
 
-const AuthComponent = ({onClose}) => {
+const AuthComponent = ({onClose}: {onClose: () => void}) => {
   const login = () => {
     signInWithPopup(auth, provider)
       .then(() => {

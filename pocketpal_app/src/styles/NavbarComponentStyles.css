@@ -119,3 +119,20 @@
     background-color: #808080;
 }
 
+.profile-button {
+    border-radius: 50%;
+    width: 100%;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    margin: 2px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 10px;
+}
+
+.profile-button img {
+    border-radius: 50%;
+}

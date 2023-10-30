@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import Auth from "./AuthenticationComponent.tsx"
 import { auth } from "../config/firebase";
-import { PasswordInput, TextInput, Button, Modal, UnstyledButton } from "@mantine/core";
+import {PasswordInput, TextInput, Button, Modal, UnstyledButton, Menu, Text} from "@mantine/core";
 import "../styles/LoginComponentStyles.css";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { sendPasswordResetEmail } from "firebase/auth";
@@ -13,6 +13,8 @@ import { faUser } from "@fortawesome/free-solid-svg-icons";
 import { DefaultAlertTime, QuickAlertTime  } from "../config/globals.tsx";
 import { toast } from "react-toastify";
 import { updateProfile } from "firebase/auth";
+import {AiOutlineMenu} from "react-icons/ai";
+import {IconHistory, IconLogout, IconSettings, IconUsers} from "@tabler/icons-react";
 
 
 interface LoginComponentProps {
@@ -45,8 +47,6 @@ function LoginComponent({ userPhotoURL }: LoginComponentProps) {
         console.error(errorCode, errorMessage);
       });
   }
-
- 
 
   const handleRegister = () => {
     if (password !== repeatPassword) {
@@ -84,9 +84,6 @@ function LoginComponent({ userPhotoURL }: LoginComponentProps) {
       );
     }
   }
-
-        
-  
 
   useEffect(() => {
     auth.onAuthStateChanged((user) => {
@@ -135,13 +132,61 @@ function LoginComponent({ userPhotoURL }: LoginComponentProps) {
 
   return (
     <>
-      <UnstyledButton className="login-button" onClick={open}>
-        {userPhotoURL ? (
-          <img src={userPhotoURL} alt="User Profile" className="user-avatar" />
-        ) : (
-          <FontAwesomeIcon icon={faUser} />
-        )}
-      </UnstyledButton>
+      <Menu
+        width={200}
+        position="bottom-end"
+        transitionProps={{transition: 'pop-top-right'}}
+        offset={20}
+        classNames={{
+          dropdown: 'dropdownMenu',
+          item: 'dropdownItem',
+        }}
+      >
+        <Menu.Target>
+          <UnstyledButton className="login-button">
+            <AiOutlineMenu size={40}/>
+          </UnstyledButton>
+        </Menu.Target>
+        <Menu.Dropdown>
+          <Menu.Label>Profil</Menu.Label>
+
+            {/*{userPhotoURL ? (*/}
+            {/*  <img src={userPhotoURL} alt="User Profile" className="user-avatar" />*/}
+            {/*) : (*/}
+            {/*  <FontAwesomeIcon icon={faUser} />*/}
+            {/*)}*/}
+
+          <Menu.Item>
+            <UnstyledButton className="profile-button" onClick={open}>
+              {userPhotoURL ? (
+                <div className="loginMenuButton">
+                  <img src={userPhotoURL} alt="User Profile" className="user-avatar" />
+                  <Text size={"sm"} style={{width: "100%"}}>{auth.currentUser?.displayName}</Text>
+                </div>
+              ) : (
+                <div className="loginMenuButton">
+                  <FontAwesomeIcon icon={faUser}/>
+                  <Text size={"sm"} style={{width: "100%"}}>Zaloguj się</Text>
+                </div>
+              )}
+            </UnstyledButton>
+          </Menu.Item>
+
+          {loggedIn ? (
+            <>
+              <Menu.Divider/>
+              <Menu.Item
+                color={"red"}
+                icon={<IconLogout/>}
+                onClick={() => setTimeout(() => auth.signOut(), 200)}
+              >
+                Wyloguj
+              </Menu.Item>
+            </>
+            ) : "" }
+        </Menu.Dropdown>
+      </Menu>
+
       {loggedIn ? (
         <Modal
           opened={opened}
@@ -180,7 +225,7 @@ function LoginComponent({ userPhotoURL }: LoginComponentProps) {
               title="Logowanie"
               classNames={{ inner: "modalInner" }}
             >
-              
+
               <TextInput type="text" placeholder="Email" className="authInput"
                 onChange={(e) => setEmail(e.target.value)} />
               <PasswordInput type="password" placeholder="Hasło" className="authInput"
