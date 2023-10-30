@@ -17,7 +17,7 @@ type Expense = {
 function BasicPieChart({data}: { data: Array<Expense> }) {
   const [pieChartData, setPieChartData] = useState<number[]>([0, 0, 0, 0]);
 
-  let categories = [
+  const categories = [
     {
       "id": "Jedzenie",
       "label": "Jedzenie",
@@ -28,13 +28,19 @@ function BasicPieChart({data}: { data: Array<Expense> }) {
       "id": "Rozrywka",
       "label": "Rozrywka",
       "value": pieChartData ? pieChartData[1] : 0,
-      "color": "hsl(100, 70%, 50%)"
+      "color": "hsl(64,91%,44%)"
     },
     {
       "id": "Transport",
       "label": "Transport",
       "value": pieChartData ? pieChartData[2] : 0,
-      "color": "hsl(93, 70%, 50%)"
+      "color": "hsl(166,70%,50%)"
+    },
+    {
+      "id": "Opłaty",
+      "label": "Opłaty",
+      "value": pieChartData ? pieChartData[3] : 0,
+      "color": "hsl(93,100%,46%)"
     },
     {
       "id": "Inne",
@@ -49,12 +55,14 @@ function BasicPieChart({data}: { data: Array<Expense> }) {
       try {
         const pieChartDataTemp: number[] = [0, 0, 0, 0];
         for (const item of data) {
-          if (item.category === "jedzenie") {
+          if (item.category === "Jedzenie") {
             pieChartDataTemp[0] += item.value;
-          } else if (item.category === "rozrywka") {
+          } else if (item.category === "Rozrywka") {
             pieChartDataTemp[1] += item.value;
-          } else if (item.category === "transport") {
+          } else if (item.category === "Transport") {
             pieChartDataTemp[2] += item.value;
+          } else if (item.category === "Opłaty") {
+            pieChartDataTemp[3] += item.value;
           } else {
             pieChartDataTemp[3] += item.value;
           }
@@ -79,7 +87,7 @@ function BasicPieChart({data}: { data: Array<Expense> }) {
   }, [data]);
 
   return (
-    <div style={{height: "400px", width: "400px"}}>
+    <div style={{height: "400px", width: "400px", zIndex: 1}}>
       <h5 style={{marginBottom: 0}}>Podsumowanie</h5>
       <ResponsivePie
         data={
@@ -155,6 +163,12 @@ function BasicPieChart({data}: { data: Array<Expense> }) {
           {
             match: {
               id: 'Transport'
+            },
+            id: 'dots'
+          },
+          {
+            match: {
+              id: 'Opłaty'
             },
             id: 'dots'
           },
