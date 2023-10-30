@@ -51,10 +51,12 @@ function ExpenseAddingForm({ onUpdate }: { onUpdate: () => void }) {
             return;
         }
 
+        const creationDate = InputCreationDate || new Date();
+
         await addDoc(collection(projectFirestore, "usersData"), {
             description: InputDescription,
             category: InputCategory,
-            creationDate: InputCreationDate,
+            creationDate,
             type: InputType,
             user: auth.currentUser.uid,
             value: InputValue,

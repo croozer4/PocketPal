@@ -1,0 +1,9 @@
+.mantine-Accordion-content{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 20px;
+    background: #1f2c34;
+}
