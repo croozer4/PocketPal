@@ -17,10 +17,8 @@ import {getFirestore, collection, addDoc} from "firebase/firestore";
 import {AiOutlineMenu} from "react-icons/ai";
 import {IconLogout} from "@tabler/icons-react";
 
-
 interface LoginComponentProps {
   userPhotoURL: string;
-
 }
 
 function LoginComponent({userPhotoURL}: LoginComponentProps) {
@@ -33,8 +31,6 @@ function LoginComponent({userPhotoURL}: LoginComponentProps) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [repeatPassword, setRepeatPassword] = useState("");
-
-  const [resetPasswordEmail, setResetPasswordEmail] = useState("");
 
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -126,7 +122,6 @@ function LoginComponent({userPhotoURL}: LoginComponentProps) {
     setEmail("");
     setPassword("");
     setRepeatPassword("");
-    setResetPasswordEmail("");
 
     setTimeout(() => {
       setSection("login");
@@ -152,29 +147,19 @@ function LoginComponent({userPhotoURL}: LoginComponentProps) {
         </Menu.Target>
         <Menu.Dropdown>
           <Menu.Label>Profil</Menu.Label>
-
-          {/*{userPhotoURL ? (*/}
-          {/*  <img src={userPhotoURL} alt="User Profile" className="user-avatar" />*/}
-          {/*) : (*/}
-          {/*  <FontAwesomeIcon icon={faUser} />*/}
-          {/*)}*/}
-
-          <Menu.Item>
-            <UnstyledButton className="profile-button" onClick={open}>
-              {userPhotoURL ? (
-                <div className="loginMenuButton">
-                  <img src={userPhotoURL} alt="User Profile" className="user-avatar"/>
-                  <Text size={"sm"} style={{width: "100%"}}>{auth.currentUser?.displayName}</Text>
-                </div>
-              ) : (
-                <div className="loginMenuButton">
-                  <FontAwesomeIcon icon={faUser}/>
-                  <Text size={"sm"} style={{width: "100%"}}>Zaloguj się</Text>
-                </div>
-              )}
-            </UnstyledButton>
+          <Menu.Item onClick={open}>
+            {userPhotoURL ? (
+              <div className="accountDetails">
+                <img src={userPhotoURL} alt="User Profile" className="user-avatar" />
+                <Text>{auth.currentUser?.displayName}</Text>
+              </div>
+            ) : (
+              <div className="loginMenuButton">
+                <FontAwesomeIcon icon={faUser}/>
+                <Text size={"sm"} style={{width: "100%"}}>Zaloguj się</Text>
+              </div>
+            )}
           </Menu.Item>
-
           {loggedIn ? (
             <>
               <Menu.Divider/>
@@ -200,23 +185,6 @@ function LoginComponent({userPhotoURL}: LoginComponentProps) {
           <h4>Użytkownik zalogowany</h4>
           <img src={userPhotoURL} alt="User Profile" className="userAvatarAuth"/>
           <p>{auth.currentUser?.displayName}</p>
-          <button onClick={() => {
-            auth.signOut()
-              .then(() => {
-                toast.success('Wylogowano!', {
-                  position: "top-center",
-                  autoClose: QuickAlertTime,
-                  hideProgressBar: true,
-                  closeOnClick: true,
-                  pauseOnHover: false,
-                  draggable: true,
-                  progress: undefined,
-                  theme: "dark",
-                })
-                handleClose();
-              })
-          }}>Wyloguj
-          </button>
         </Modal>
       ) : (
         <>
@@ -240,11 +208,6 @@ function LoginComponent({userPhotoURL}: LoginComponentProps) {
                 <Button color="dark" onClick={() => setSection("resetPassword")}>
                   Zapomniałem hasła
                 </Button>
-                {/* <Button color="dark"
-                        onClick={() => resetPassword()}
-                >
-                  Zapomniałem hasła
-                </Button> */}
                 <Auth onClose={() => handleClose()}/>
               </div>
             </Modal>

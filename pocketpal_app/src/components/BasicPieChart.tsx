@@ -1,9 +1,9 @@
 import {ResponsivePie} from '@nivo/pie';
 import {useEffect, useState} from "react";
-import {auth} from "../config/firebase.tsx";
 import {toast} from "react-toastify";
 import {DefaultAlertTime} from "../config/globals.tsx";
 import { Timestamp } from 'firebase/firestore';
+import {auth} from "../config/firebase.tsx";
 
 type Expense = {
   id: string;
@@ -16,7 +16,7 @@ type Expense = {
 }
 
 function BasicPieChart({data}: { data: Array<Expense> }) {
-  const [pieChartData, setPieChartData] = useState<number[]>([0, 0, 0, 0]);
+  const [pieChartData, setPieChartData] = useState<number[]>([0, 0, 0, 0, 0]);
 
   const categories = [
     {
@@ -63,9 +63,9 @@ function BasicPieChart({data}: { data: Array<Expense> }) {
           } else if (item.category === "Transport") {
             pieChartDataTemp[2] += item.value;
           } else if (item.category === "Opłaty") {
-            pieChartDataTemp[4] += item.value;
-          } else {
             pieChartDataTemp[3] += item.value;
+          } else {
+            pieChartDataTemp[4] += item.value;
           }
           setPieChartData(pieChartDataTemp);
         }
@@ -84,7 +84,11 @@ function BasicPieChart({data}: { data: Array<Expense> }) {
       }
     }
 
-    fetchData().then();
+    auth.onAuthStateChanged((user) => {
+      if (user) {
+        fetchData().then();
+      }
+    });
   }, [data]);
 
   return (

@@ -13,9 +13,6 @@ import {useEffect, useState} from "react";
 import {DefaultAlertTime} from "./config/globals.tsx";
 import { Timestamp } from 'firebase/firestore';
 
-
-
-
 type Expense = {
   id: string;
   category: string;
