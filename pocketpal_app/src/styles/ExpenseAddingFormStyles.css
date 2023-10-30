@@ -5,6 +5,13 @@
     left: 0;
 }
 
+.mantine-Modal-body form{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+}
+
 .modalButton {
     position: fixed;
     bottom: 20px;
@@ -16,4 +23,13 @@
 
 .modalButton:hover {
     transform: scale(1.1) translateY(-5px) translateX(-5px);
+}
+
+.modal-section-calendar{
+    background-color: red;
+}
+
+.modal-section-inputs{
+    background-color: blue;
+
 }
