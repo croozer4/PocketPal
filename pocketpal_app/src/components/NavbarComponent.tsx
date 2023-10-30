@@ -48,11 +48,6 @@ export function CustomNavbar() {
             {isMobile ? (
               <>
                 <div className="nav_button">
-                  <Link to="/history">
-                    <Text>Historia</Text>
-                  </Link>
-                </div>
-                <div className="nav_button">
                   <Link to="/family">
                     <Text>Rodzina</Text>
                   </Link>

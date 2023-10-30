@@ -2,13 +2,13 @@ import { auth, provider } from "../config/firebase";
 import { signInWithPopup } from "firebase/auth";
 import { toast } from "react-toastify";
 import { DefaultAlertTime, QuickAlertTime } from "../config/globals.tsx";
-import { getFirestore, collection, addDoc } from "firebase/firestore";
+import { getFirestore, collection } from "firebase/firestore";
 import { doc, getDoc, setDoc } from "firebase/firestore";
-//import Google Icon from tabler icons;
-// import { IconGoogle } from '@tabler/icons-react';
+import { IconBrandGoogleFilled } from "@tabler/icons-react";
+import {UnstyledButton} from "@mantine/core";
 
 
-const AuthComponent = ({ onClose }) => {
+const AuthComponent = ({ onClose }: { onClose: () => void }) => {
   const login = async () => {
     try {
       // Logowanie za pomocą konta Google
@@ -57,12 +57,11 @@ const AuthComponent = ({ onClose }) => {
         draggable: true,
         progress: undefined,
         theme: "dark",
-        
       });
     }
   };
 
-  return <button onClick={login}>Google</button>;
+  return <UnstyledButton onClick={login}><IconBrandGoogleFilled/></UnstyledButton>;
 };
 
 export default AuthComponent;

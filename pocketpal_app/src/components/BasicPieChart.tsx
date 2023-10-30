@@ -1,9 +1,9 @@
-import {ResponsivePie} from '@nivo/pie';
-import {useEffect, useState} from "react";
-import {toast} from "react-toastify";
-import {DefaultAlertTime} from "../config/globals.tsx";
+import React, { useEffect, useState } from "react";
+import { toast } from "react-toastify";
+import { DefaultAlertTime } from "../config/globals.tsx";
 import { Timestamp } from 'firebase/firestore';
-import {auth} from "../config/firebase.tsx";
+import { auth } from "../config/firebase.tsx";
+import { ResponsivePie } from '@nivo/pie';
 
 type Expense = {
   id: string;
@@ -15,8 +15,9 @@ type Expense = {
   value: number;
 }
 
-function BasicPieChart({data}: { data: Array<Expense> }) {
+function BasicPieChart({ data }: { data: Array<Expense> }) {
   const [pieChartData, setPieChartData] = useState<number[]>([0, 0, 0, 0, 0]);
+  const [shouldGenerateRandomData, setShouldGenerateRandomData] = useState(true);
 
   const categories = [
     {
@@ -51,8 +52,16 @@ function BasicPieChart({data}: { data: Array<Expense> }) {
     }
   ];
 
+  const generateRandomData = () => {
+    const randomData = [];
+    for (let i = 0; i < 5; i++) {
+      randomData.push(Math.floor(Math.random() * 1000)); // Losowe liczby
+    }
+    return randomData;
+  };
+
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchData = (): boolean => {
       try {
         const pieChartDataTemp: number[] = [0, 0, 0, 0, 0];
         for (const item of data) {
@@ -69,6 +78,7 @@ function BasicPieChart({data}: { data: Array<Expense> }) {
           }
           setPieChartData(pieChartDataTemp);
         }
+        return data.length !== 0;
       } catch (error) {
         console.error(error);
         toast.error('Nie udało się pobrać danych!', {
@@ -81,26 +91,48 @@ function BasicPieChart({data}: { data: Array<Expense> }) {
           progress: undefined,
           theme: "dark",
         });
+
+        return false;
       }
     }
 
+    const updateRandomData = () => {
+      if (shouldGenerateRandomData) {
+        // Generuj nowe dane losowe co 3 sekundy tylko jeśli użytkownik nie jest zalogowany
+        const randomData = generateRandomData();
+        setPieChartData(randomData);
+      }
+    };
+
+    // Rozpocznij generowanie danych losowych co 3 sekundy
+    const intervalId = setInterval(updateRandomData, 3000);
+
     auth.onAuthStateChanged((user) => {
       if (user) {
-        fetchData().then();
+        fetchData();
+        // Użytkownik jest zalogowany, więc nie generuj więcej danych losowych
+        setShouldGenerateRandomData(false);
+      } else {
+        setShouldGenerateRandomData(true);
+        // Jeśli użytkownik nie jest zalogowany, generuj dane losowe
+        updateRandomData();
       }
     });
+
+    // Zatrzymaj interval po odmontowaniu komponentu
+    return () => {
+      clearInterval(intervalId);
+    };
   }, [data]);
 
   return (
-    <div style={{height: "400px", width: "400px", zIndex: 1}}>
-      <h5 style={{marginBottom: 0}}>Podsumowanie</h5>
+    <div style={{ height: "400px", width: "400px", zIndex: 1 }}>
+      <h5 style={{ marginBottom: 0 }}>Podsumowanie</h5>
       <ResponsivePie
-        data={
-          categories.filter((item) => item.value !== 0)
-        }
-        margin={{top: 40, right: 100, bottom: 80, left: 100}}
-        tooltip={({datum}) => (
-          <div style={{color: datum.color, padding: "3px 6px", borderRadius: "3px", backgroundColor: "#333333"}}>
+        data={categories.filter((item) => item.value !== 0)}
+        margin={{ top: 40, right: 100, bottom: 80, left: 100 }}
+        tooltip={({ datum }) => (
+          <div style={{ color: datum.color, padding: "3px 6px", borderRadius: "3px", backgroundColor: "#333333" }}>
             {datum.id}: {datum.value} zł
           </div>
         )}
@@ -121,7 +153,7 @@ function BasicPieChart({data}: { data: Array<Expense> }) {
         arcLinkLabelsSkipAngle={10}
         arcLinkLabelsTextColor="#FFFFFF"
         arcLinkLabelsThickness={2}
-        arcLinkLabelsColor={{from: 'color'}}
+        arcLinkLabelsColor={{ from: 'color' }}
         arcLabelsSkipAngle={10}
         arcLabelsTextColor={{
           from: 'color',

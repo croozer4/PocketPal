@@ -79,6 +79,12 @@
     left: 0;
 }
 
+.modalBody {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
 .modalButton {
     position: fixed;
     bottom: 20px;

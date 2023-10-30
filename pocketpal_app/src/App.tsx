@@ -116,7 +116,7 @@ function App() {
           </Text>
           <BasicPieChart data={data}/>
         </div>
-        <HistoryComponent data={data} fetchData={fetchData}/>
+        {(data.length !== 0 && loggedIn) ? <HistoryComponent data={data} fetchData={fetchData}/> : <></>}
       </div>
       { loggedIn ? <ExpenseAddingForm onUpdate={onUpdate}/> : <></>}
     </MantineProvider>

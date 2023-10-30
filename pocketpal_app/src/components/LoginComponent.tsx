@@ -1,7 +1,7 @@
 import {useEffect, useState} from "react";
 import Auth from "./AuthenticationComponent.tsx"
 import {auth} from "../config/firebase";
-import {PasswordInput, TextInput, Button, Modal, UnstyledButton, Menu, Text} from "@mantine/core";
+import {PasswordInput, TextInput, Button, Modal, UnstyledButton, Menu, Text, Divider} from "@mantine/core";
 import "../styles/LoginComponentStyles.css";
 import {signInWithEmailAndPassword} from "firebase/auth";
 import {sendPasswordResetEmail} from "firebase/auth";
@@ -15,13 +15,16 @@ import {toast} from "react-toastify";
 import {updateProfile} from "firebase/auth";
 import {getFirestore, collection, addDoc} from "firebase/firestore";
 import {AiOutlineMenu} from "react-icons/ai";
-import {IconLogout} from "@tabler/icons-react";
+import {IconLogout, IconUsers} from "@tabler/icons-react";
+import {Link} from "react-router-dom";
 
 interface LoginComponentProps {
   userPhotoURL: string;
 }
 
 function LoginComponent({userPhotoURL}: LoginComponentProps) {
+  const [isMobile, setIsMobile] = useState(window.innerWidth >= 768);
+
   const [opened, {open, close}] = useDisclosure(false);
 
   const [loggedIn, setLoggedIn] = useState(false);
@@ -96,6 +99,20 @@ function LoginComponent({userPhotoURL}: LoginComponentProps) {
     });
   });
 
+  useEffect(() => {
+    setIsMobile(window.innerWidth >= 768);
+
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+
+    window.addEventListener('resize', handleResize);
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []);
+
   // funkcja do resetowania hasła
   const resetPassword = () => {
     sendPasswordResetEmail(auth, email)
@@ -162,6 +179,16 @@ function LoginComponent({userPhotoURL}: LoginComponentProps) {
           </Menu.Item>
           {loggedIn ? (
             <>
+              {isMobile ?
+                <Menu.Item
+                  color={"blue"}
+                  icon={<IconUsers/>}
+                >
+                  <Link to="/family">
+                    <Text>Rodzina</Text>
+                  </Link>
+                </Menu.Item>
+              : ""}
               <Menu.Divider/>
               <Menu.Item
                 color={"red"}
@@ -180,7 +207,7 @@ function LoginComponent({userPhotoURL}: LoginComponentProps) {
           onClose={handleClose}
           size={"lg"}
           title="Logowanie"
-          classNames={{inner: "modalInner"}}
+          classNames={{ inner: "modalInner", content: "modalContent", header: "modalHeader", body: "modalBody" }}
         >
           <h4>Użytkownik zalogowany</h4>
           <img src={userPhotoURL} alt="User Profile" className="userAvatarAuth"/>
@@ -192,23 +219,24 @@ function LoginComponent({userPhotoURL}: LoginComponentProps) {
             <Modal
               opened={opened}
               onClose={handleClose}
-              size={"lg"}
+              size={"md"}
               title="Logowanie"
-              classNames={{inner: "modalInner"}}
+              classNames={{ inner: "modalInner", content: "modalContent", header: "modalHeader", body: "modalBody" }}
             >
+              <Auth onClose={() => handleClose()}/>
+              <Divider my="xs" size="sm" label="Albo użyj emailu i hasła" labelPosition="center" variant={"dashed"} style={{width: "100%"}}/>
               <TextInput type="text" placeholder="Email" className="authInput"
                          onChange={(e) => setEmail(e.target.value)}/>
-              <PasswordInput type="password" placeholder="Hasło" className="authInput"
+              <PasswordInput placeholder="Hasło" className="authInput"
                              onChange={(e) => setPassword(e.target.value)}/>
 
               <div className="area_button">
+                <Button className="loginButton" color="blue" onClick={() => handleLogin()}>Zaloguj się</Button>
                 <Button className="registerButton" color="dark"
                         onClick={() => setSection("register")}>Rejestracja</Button>
-                <Button className="loginButton" color="blue" onClick={() => handleLogin()}>Zaloguj się</Button>
                 <Button color="dark" onClick={() => setSection("resetPassword")}>
                   Zapomniałem hasła
                 </Button>
-                <Auth onClose={() => handleClose()}/>
               </div>
             </Modal>
           )}
@@ -219,7 +247,7 @@ function LoginComponent({userPhotoURL}: LoginComponentProps) {
               onClose={handleClose}
               size={"lg"}
               title="Rejestracja"
-              classNames={{inner: "modalInner"}}
+              classNames={{ inner: "modalInner", content: "modalContent", header: "modalHeader", body: "modalBody" }}
             >
               <TextInput
                 type="text" placeholder="Imię" className="authInput" onChange={(e) => setFirstName(e.target.value)}/>
@@ -228,9 +256,9 @@ function LoginComponent({userPhotoURL}: LoginComponentProps) {
                 onChange={(e) => setLastName(e.target.value)}/>
               <TextInput type="text" placeholder="Email" className="authInput"
                          onChange={(e) => setEmail(e.target.value)}/>
-              <PasswordInput type="password" placeholder="Hasło" className="authInput"
+              <PasswordInput placeholder="Hasło" className="authInput"
                              onChange={(e) => setPassword(e.target.value)}/>
-              <PasswordInput type="password" placeholder="Powtórz hasło" className="authInput"
+              <PasswordInput placeholder="Powtórz hasło" className="authInput"
                              onChange={(e) => setRepeatPassword(e.target.value)}/>
               <div className="area_button">
                 <Button className="registerButton" color="dark" onClick={() => setSection("login")}>Logowanie</Button>
@@ -246,7 +274,7 @@ function LoginComponent({userPhotoURL}: LoginComponentProps) {
               onClose={handleClose}
               size={"lg"}
               title="Zresetuj hasło"
-              classNames={{inner: "modalInner"}}
+              classNames={{ inner: "modalInner", content: "modalContent", header: "modalHeader", body: "modalBody" }}
             >
               <TextInput type="text" placeholder="Email" className="authInput"
                          onChange={(e) => setEmail(e.target.value)}/>
