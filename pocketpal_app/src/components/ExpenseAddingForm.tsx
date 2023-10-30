@@ -97,9 +97,8 @@ function ExpenseAddingForm({ onUpdate }: { onUpdate: () => void }) {
                 size={"lg"}
                 title="Dodaj wydatek"
                 withinPortal={false}
-                classNames={{ inner: "modalInner" }}
+                classNames={{ inner: "modalInner", content: "modalContent", header: "modalHeader" }}
                 centered
-                styles={{ root: { width: "100% - 2vw" } }}
             >
                 <form>
                     <div className="modal-container-sections">
@@ -124,7 +123,7 @@ function ExpenseAddingForm({ onUpdate }: { onUpdate: () => void }) {
                                 }}
                                 placeholder="Wpisz wartość wydatku"
                                 data-autofocus
-                                styles={{ input: { marginTop: "7px"}}}
+                                styles={{ input: { marginTop: "7px" } }}
                             />
 
                             {/* Wprowadzanie kategorii wydatku */}
@@ -142,7 +141,7 @@ function ExpenseAddingForm({ onUpdate }: { onUpdate: () => void }) {
                                 onChange={(value: string) =>
                                     setInputCategory(value)
                                 }
-                                styles={{ input: { marginTop: "7px"}}}
+                                styles={{ input: { marginTop: "7px" } }}
                             />
 
                             {/* Wprowadzanie opisu wydatku */}
@@ -152,7 +151,7 @@ function ExpenseAddingForm({ onUpdate }: { onUpdate: () => void }) {
                                 onChange={(e) =>
                                     setInputDescription(e.target.value)
                                 }
-                                styles={{ input: { marginTop: "7px"}}}
+                                styles={{ input: { marginTop: "7px" } }}
                             />
 
                             {/* Wprowadzanie rodzaju wydatku (czy stały?) */}

@@ -3,9 +3,19 @@
     padding-right: unset;
     right: 0;
     left: 0;
+    max-width: calc(100% - 15vw);
+    margin: auto;
 }
 
-.mantine-Modal-body form{
+.modalContent {
+    border-radius: 20px;
+}
+
+.modalHeader {
+    padding: 20px 25px;
+}
+
+.mantine-Modal-body form {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -25,7 +35,7 @@
     transform: scale(1.1) translateY(-5px) translateX(-5px);
 }
 
-.modal-section-calendar{
+.modal-section-calendar {
     /* background-color: red; */
     display: flex;
     flex-direction: column;
@@ -33,30 +43,26 @@
     justify-content: center;
     min-width: 260px;
     flex: 1;
-
 }
 
-.modal-section-inputs{
+.modal-section-inputs {
     /* background-color: blue; */
     display: flex;
     flex-direction: column;
     gap: 10px;
     min-width: 260px;
     flex: 1;
-
-
-
 }
 
-.modal-container-sections{
+.modal-container-sections {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
     width: 100%;
     flex-wrap: wrap;
-    gap:20px
+    gap: 20px;
 }
 
-.modal-switch{
+.modal-switch {
     margin-top: 10px;
 }
