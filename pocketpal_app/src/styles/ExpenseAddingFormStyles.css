@@ -7,7 +7,7 @@
 
 .mantine-Modal-body form{
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
 }
@@ -26,10 +26,37 @@
 }
 
 .modal-section-calendar{
-    background-color: red;
+    /* background-color: red; */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-width: 260px;
+    flex: 1;
+
 }
 
 .modal-section-inputs{
-    background-color: blue;
+    /* background-color: blue; */
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    min-width: 260px;
+    flex: 1;
 
+
+
+}
+
+.modal-container-sections{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    width: 100%;
+    flex-wrap: wrap;
+    gap:20px
+}
+
+.modal-switch{
+    margin-top: 10px;
 }

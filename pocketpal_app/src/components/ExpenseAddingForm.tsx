@@ -123,6 +123,7 @@ function ExpenseAddingForm({ onUpdate }: { onUpdate: () => void }) {
                                 }}
                                 placeholder="Wpisz wartość wydatku"
                                 data-autofocus
+                                styles={{ input: { marginTop: "7px"}}}
                             />
 
                             {/* Wprowadzanie kategorii wydatku */}
@@ -140,13 +141,7 @@ function ExpenseAddingForm({ onUpdate }: { onUpdate: () => void }) {
                                 onChange={(value: string) =>
                                     setInputCategory(value)
                                 }
-                            />
-
-                            {/* Wprowadzanie rodzaju wydatku (czy stały?) */}
-                            <Switch
-                                label="Czy jest to wydatek stały?"
-                                defaultChecked={false}
-                                onChange={(e) => setInputType(e.target.checked)}
+                                styles={{ input: { marginTop: "7px"}}}
                             />
 
                             {/* Wprowadzanie opisu wydatku */}
@@ -156,10 +151,19 @@ function ExpenseAddingForm({ onUpdate }: { onUpdate: () => void }) {
                                 onChange={(e) =>
                                     setInputDescription(e.target.value)
                                 }
+                                styles={{ input: { marginTop: "7px"}}}
+                            />
+
+                            {/* Wprowadzanie rodzaju wydatku (czy stały?) */}
+                            <Switch
+                                className="modal-switch"
+                                label="Czy jest to wydatek stały?"
+                                defaultChecked={false}
+                                onChange={(e) => setInputType(e.target.checked)}
                             />
                         </div>
                     </div>
-
+                    <br />
                     <div className="modal-container-submit">
                         {/* Przycisk zatwierdzenia */}
                         <Button type="submit" onClick={handleSubmit}>
