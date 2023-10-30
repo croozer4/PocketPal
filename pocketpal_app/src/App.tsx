@@ -11,11 +11,15 @@ import {collection, query, where} from "firebase/firestore";
 import {getDocs} from "@firebase/firestore";
 import {useEffect, useState} from "react";
 import {DefaultAlertTime} from "./config/globals.tsx";
+import { Timestamp } from 'firebase/firestore';
+
+
+
 
 type Expense = {
   id: string;
   category: string;
-  creationDate: Date;
+  creationDate: Timestamp;
   description?: string;
   type: boolean;
   user: string;

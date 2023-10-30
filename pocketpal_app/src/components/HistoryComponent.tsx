@@ -5,11 +5,12 @@ import { deleteDoc, doc } from "@firebase/firestore";
 import { toast } from "react-toastify";
 import { QuickAlertTime } from "../config/globals.tsx";
 import "../styles/HistoryComponentStyles.css";
+import { Timestamp } from '@firebase/firestore-types';
 
 type Expense = {
   id: string;
   category: string;
-  creationDate: Date;
+  creationDate: Timestamp;
   description?: string;
   type: boolean;
   user: string;
@@ -51,7 +52,10 @@ const deleteExpense = async (id: string) => {
 
 const PeekDetails = ({ fetchData, ...item }: Expense & { fetchData: () => void }) => {
   // Formatowanie daty przy użyciu date-fns
-  const dateFormatted = format(Number(item.creationDate), "dd/MM/yyyy HH:mm:ss");
+  const timestamp = item.creationDate.toMillis(); // Konwersja na timestamp w milisekundach
+  const dateFormatted = format(timestamp, "dd/MM/yyyy");
+  console.log(item.creationDate); // Obiekt Firestore Timestamp
+  console.log(dateFormatted); // Sformatowana data
 
   const handleDeleteExpense = async (id: string) => {
     try {

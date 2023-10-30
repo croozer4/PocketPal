@@ -3,11 +3,12 @@ import {useEffect, useState} from "react";
 import {auth} from "../config/firebase.tsx";
 import {toast} from "react-toastify";
 import {DefaultAlertTime} from "../config/globals.tsx";
+import { Timestamp } from 'firebase/firestore';
 
 type Expense = {
   id: string;
   category: string;
-  creationDate: Date;
+  creationDate: Timestamp;
   description?: string;
   type: boolean;
   user: string;
