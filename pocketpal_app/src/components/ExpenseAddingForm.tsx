@@ -51,7 +51,7 @@ function ExpenseAddingForm({ onUpdate }: { onUpdate: () => void }) {
             return;
         }
 
-        const docRef = await addDoc(collection(projectFirestore, "usersData"), {
+        await addDoc(collection(projectFirestore, "usersData"), {
             description: InputDescription,
             category: InputCategory,
             creationDate: InputCreationDate,
@@ -99,6 +99,7 @@ function ExpenseAddingForm({ onUpdate }: { onUpdate: () => void }) {
                 withinPortal={false}
                 classNames={{ inner: "modalInner" }}
                 centered
+                styles={{ root: { width: "100% - 2vw" } }}
             >
                 <form>
                     <div className="modal-container-sections">
