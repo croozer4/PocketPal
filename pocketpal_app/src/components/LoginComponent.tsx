@@ -10,11 +10,14 @@ import { useDisclosure } from "@mantine/hooks";
 import "../styles/LoginComponentStyles.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faUser } from "@fortawesome/free-solid-svg-icons";
-import {DefaultAlertTime, QuickAlertTime} from "../config/globals.tsx";
-import {toast} from "react-toastify";
+import { DefaultAlertTime, QuickAlertTime  } from "../config/globals.tsx";
+import { toast } from "react-toastify";
+import { updateProfile } from "firebase/auth";
+
 
 interface LoginComponentProps {
   userPhotoURL: string;
+
 }
 
 function LoginComponent({ userPhotoURL }: LoginComponentProps) {
@@ -30,6 +33,9 @@ function LoginComponent({ userPhotoURL }: LoginComponentProps) {
 
   const [resetPasswordEmail, setResetPasswordEmail] = useState("");
 
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+
 
   const handleLogin = () => {
     signInWithEmailAndPassword(auth, email, password)
@@ -40,15 +46,10 @@ function LoginComponent({ userPhotoURL }: LoginComponentProps) {
       });
   }
 
+ 
+
   const handleRegister = () => {
-    if(password !== repeatPassword) {
-      createUserWithEmailAndPassword(auth, email, password)
-        .catch((error) => {
-          const errorCode = error.code;
-          const errorMessage = error.message;
-          console.error(errorCode, errorMessage);
-        });
-    } else {
+    if (password !== repeatPassword) {
       toast.error('Hasła nie są takie same!', {
         position: "top-center",
         autoClose: QuickAlertTime,
@@ -58,9 +59,34 @@ function LoginComponent({ userPhotoURL }: LoginComponentProps) {
         draggable: true,
         progress: undefined,
         theme: "dark",
-      })
+      });
+    } else {
+      createUserWithEmailAndPassword(auth, email, password).then((userCredential) => {
+        // Signed in 
+        const userData = userCredential.user;
+        console.log("User registered");
+        updateProfile(userData, {
+          displayName: firstName + " " + lastName,
+        }).then(() => {
+          // Profile updated!
+          // ...
+          console.log("User profile updated");
+        }).catch((error) => {
+          // An error occurred
+          // ...
+          console.error("Error while updating user profile");
+        });
+      }).catch((error) => {
+        const errorCode = error.code;
+        const errorMessage = error.message;
+        console.error(errorCode, errorMessage);
+      }
+      );
     }
   }
+
+        
+  
 
   useEffect(() => {
     auth.onAuthStateChanged((user) => {
@@ -126,6 +152,7 @@ function LoginComponent({ userPhotoURL }: LoginComponentProps) {
         >
           <h4>Użytkownik zalogowany</h4>
           <img src={userPhotoURL} alt="User Profile" className="userAvatarAuth" />
+          <p>{auth.currentUser?.displayName}</p>
           <button onClick={() => {
             auth.signOut()
               .then(() => {
@@ -153,6 +180,7 @@ function LoginComponent({ userPhotoURL }: LoginComponentProps) {
               title="Logowanie"
               classNames={{ inner: "modalInner" }}
             >
+              
               <TextInput type="text" placeholder="Email" className="authInput"
                 onChange={(e) => setEmail(e.target.value)} />
               <PasswordInput type="password" placeholder="Hasło" className="authInput"
@@ -170,7 +198,7 @@ function LoginComponent({ userPhotoURL }: LoginComponentProps) {
                 >
                   Zapomniałem hasła
                 </Button> */}
-                <Auth onClose={() => handleClose()}/>
+                <Auth onClose={() => handleClose()} />
               </div>
             </Modal>
           )}
@@ -183,6 +211,11 @@ function LoginComponent({ userPhotoURL }: LoginComponentProps) {
               title="Rejestracja"
               classNames={{ inner: "modalInner" }}
             >
+              <TextInput
+                type="text" placeholder="Imię" className="authInput" onChange={(e) => setFirstName(e.target.value)}/>
+              <TextInput
+                type="text" placeholder="Nazwisko" className="authInput"
+                onChange={(e) => setLastName(e.target.value)}/>
               <TextInput type="text" placeholder="Email" className="authInput"
                 onChange={(e) => setEmail(e.target.value)} />
               <PasswordInput type="password" placeholder="Hasło" className="authInput"
@@ -192,7 +225,7 @@ function LoginComponent({ userPhotoURL }: LoginComponentProps) {
               <div className="area_button">
                 <Button className="registerButton" color="dark" onClick={() => setSection("login")}>Logowanie</Button>
                 <Button className="loginButton" onClick={() => handleRegister()}>Zarejestruj się</Button>
-                <Auth onClose={() => handleClose()}/>
+                <Auth onClose={() => handleClose()} />
               </div>
             </Modal>
           )}
