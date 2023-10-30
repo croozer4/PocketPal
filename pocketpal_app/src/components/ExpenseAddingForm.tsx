@@ -97,9 +97,8 @@ function ExpenseAddingForm({ onUpdate }: { onUpdate: () => void }) {
                 size={"lg"}
                 title="Dodaj wydatek"
                 withinPortal={false}
-                classNames={{ inner: "modalInner" }}
+                classNames={{ inner: "modalInner", content: "modalContent", header: "modalHeader" }}
                 centered
-                styles={{ root: { width: "100% - 2vw" } }}
             >
                 <form>
                     <div className="modal-container-sections">

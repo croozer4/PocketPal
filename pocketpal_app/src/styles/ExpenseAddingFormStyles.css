@@ -3,8 +3,16 @@
     padding-right: unset;
     right: 0;
     left: 0;
-    max-width: calc(100vw - 20px);
+    max-width: calc(100% - 15vw);
     margin: auto;
+}
+
+.modalContent {
+    border-radius: 20px;
+}
+
+.modalHeader {
+    padding: 20px 25px;
 }
 
 .mantine-Modal-body form {
