@@ -38,23 +38,23 @@ function BasicPieChart({data}: { data: Array<Expense> }) {
       "color": "hsl(166,70%,50%)"
     },
     {
-      "id": "Opłaty",
-      "label": "Opłaty",
-      "value": pieChartData ? pieChartData[3] : 0,
-      "color": "hsl(93,100%,46%)"
-    },
-    {
       "id": "Inne",
       "label": "Inne",
       "value": pieChartData ? pieChartData[3] : 0,
       "color": "hsl(314, 70%, 50%)"
+    },
+    {
+      "id": "Opłaty",
+      "label": "Opłaty",
+      "value": pieChartData ? pieChartData[4] : 0,
+      "color": "hsl(93,100%,46%)"
     }
   ];
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const pieChartDataTemp: number[] = [0, 0, 0, 0];
+        const pieChartDataTemp: number[] = [0, 0, 0, 0, 0];
         for (const item of data) {
           if (item.category === "Jedzenie") {
             pieChartDataTemp[0] += item.value;
@@ -63,7 +63,7 @@ function BasicPieChart({data}: { data: Array<Expense> }) {
           } else if (item.category === "Transport") {
             pieChartDataTemp[2] += item.value;
           } else if (item.category === "Opłaty") {
-            pieChartDataTemp[3] += item.value;
+            pieChartDataTemp[4] += item.value;
           } else {
             pieChartDataTemp[3] += item.value;
           }
