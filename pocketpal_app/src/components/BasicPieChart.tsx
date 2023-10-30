@@ -17,7 +17,7 @@ type Expense = {
 function BasicPieChart({data}: { data: Array<Expense> }) {
   const [pieChartData, setPieChartData] = useState<number[]>([0, 0, 0, 0]);
 
-  let categories = [
+  const categories = [
     {
       "id": "Jedzenie",
       "label": "Jedzenie",
@@ -49,11 +49,11 @@ function BasicPieChart({data}: { data: Array<Expense> }) {
       try {
         const pieChartDataTemp: number[] = [0, 0, 0, 0];
         for (const item of data) {
-          if (item.category === "jedzenie") {
+          if (item.category === "Jedzenie") {
             pieChartDataTemp[0] += item.value;
-          } else if (item.category === "rozrywka") {
+          } else if (item.category === "Rozrywka") {
             pieChartDataTemp[1] += item.value;
-          } else if (item.category === "transport") {
+          } else if (item.category === "Transport") {
             pieChartDataTemp[2] += item.value;
           } else {
             pieChartDataTemp[3] += item.value;
@@ -79,7 +79,7 @@ function BasicPieChart({data}: { data: Array<Expense> }) {
   }, [data]);
 
   return (
-    <div style={{height: "400px", width: "400px"}}>
+    <div style={{height: "400px", width: "400px", zIndex: 1}}>
       <h5 style={{marginBottom: 0}}>Podsumowanie</h5>
       <ResponsivePie
         data={
