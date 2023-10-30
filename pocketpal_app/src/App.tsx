@@ -82,6 +82,7 @@ function App() {
 
       if(user) {
         setLoggedIn(true);
+        console.log(user);
       } else {
         setLoggedIn(false);
       }
@@ -114,7 +115,7 @@ function App() {
           </Text>
           <BasicPieChart data={data}/>
         </div>
-        <HistoryComponent data={data}/>
+        <HistoryComponent data={data} fetchData={fetchData}/>
       </div>
       { loggedIn ? <ExpenseAddingForm onUpdate={onUpdate}/> : <></>}
     </MantineProvider>
