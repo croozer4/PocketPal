@@ -13,6 +13,8 @@ import { faUser } from "@fortawesome/free-solid-svg-icons";
 import { DefaultAlertTime, QuickAlertTime  } from "../config/globals.tsx";
 import { toast } from "react-toastify";
 import { updateProfile } from "firebase/auth";
+import { getFirestore, collection, addDoc } from "firebase/firestore";
+
 
 
 interface LoginComponentProps {
@@ -36,6 +38,8 @@ function LoginComponent({ userPhotoURL }: LoginComponentProps) {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
 
+  const db = getFirestore();
+  const usersCollection = collection(db, "users");
 
   const handleLogin = () => {
     signInWithEmailAndPassword(auth, email, password)
@@ -61,19 +65,22 @@ function LoginComponent({ userPhotoURL }: LoginComponentProps) {
         theme: "dark",
       });
     } else {
-      createUserWithEmailAndPassword(auth, email, password).then((userCredential) => {
-        // Signed in 
+      createUserWithEmailAndPassword(auth, email, password).then(async(userCredential) => {
         const userData = userCredential.user;
         console.log("User registered");
+        const userDocData = {
+          displayName: firstName + " " + lastName,
+          email: email,
+          // inne dane użytkownika, które chcesz zapisywać
+        };
+        const docRef = await addDoc(usersCollection, userDocData);
         updateProfile(userData, {
           displayName: firstName + " " + lastName,
         }).then(() => {
-          // Profile updated!
-          // ...
+          
           console.log("User profile updated");
         }).catch((error) => {
-          // An error occurred
-          // ...
+         
           console.error("Error while updating user profile");
         });
       }).catch((error) => {
