@@ -4,6 +4,7 @@ import { auth, db } from "../config/firebase.tsx";
 import { deleteDoc, doc } from "@firebase/firestore";
 import { toast } from "react-toastify";
 import { QuickAlertTime } from "../config/globals.tsx";
+import "../styles/HistoryComponentStyles.css";
 
 type Expense = {
   id: string;
@@ -75,7 +76,7 @@ const PeekDetails = ({ fetchData, ...item }: Expense & { fetchData: () => void }
     <Accordion.Item key={item.id} value={item.id}>
       <Accordion.Control>{item.category} | {item.value}zł ({dateFormatted})</Accordion.Control>
       <Accordion.Panel>
-        {item.description}
+        <div className='description-container'>{item.description}</div>
         <Button variant="filled" color="red" style={{ marginTop: "10px" }} onClick={() => handleDeleteExpense(item.id)}>Usuń</Button>
       </Accordion.Panel>
     </Accordion.Item>
