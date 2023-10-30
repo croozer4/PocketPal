@@ -28,13 +28,19 @@ function BasicPieChart({data}: { data: Array<Expense> }) {
       "id": "Rozrywka",
       "label": "Rozrywka",
       "value": pieChartData ? pieChartData[1] : 0,
-      "color": "hsl(100, 70%, 50%)"
+      "color": "hsl(64,91%,44%)"
     },
     {
       "id": "Transport",
       "label": "Transport",
       "value": pieChartData ? pieChartData[2] : 0,
-      "color": "hsl(93, 70%, 50%)"
+      "color": "hsl(166,70%,50%)"
+    },
+    {
+      "id": "Opłaty",
+      "label": "Opłaty",
+      "value": pieChartData ? pieChartData[3] : 0,
+      "color": "hsl(93,100%,46%)"
     },
     {
       "id": "Inne",
@@ -55,6 +61,8 @@ function BasicPieChart({data}: { data: Array<Expense> }) {
             pieChartDataTemp[1] += item.value;
           } else if (item.category === "Transport") {
             pieChartDataTemp[2] += item.value;
+          } else if (item.category === "Opłaty") {
+            pieChartDataTemp[3] += item.value;
           } else {
             pieChartDataTemp[3] += item.value;
           }
@@ -155,6 +163,12 @@ function BasicPieChart({data}: { data: Array<Expense> }) {
           {
             match: {
               id: 'Transport'
+            },
+            id: 'dots'
+          },
+          {
+            match: {
+              id: 'Opłaty'
             },
             id: 'dots'
           },
