@@ -9,7 +9,7 @@ import {createUserWithEmailAndPassword} from "firebase/auth";
 import {useDisclosure} from "@mantine/hooks";
 import "../styles/LoginComponentStyles.css";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {faUser} from "@fortawesome/free-solid-svg-icons";
+import {faUser, faUserPlus} from "@fortawesome/free-solid-svg-icons";
 import {DefaultAlertTime, QuickAlertTime} from "../config/globals.tsx";
 import {toast} from "react-toastify";
 import {updateProfile} from "firebase/auth";
@@ -270,23 +270,46 @@ function LoginComponent({userPhotoURL}: LoginComponentProps) {
         </Menu.Target>
         <Menu.Dropdown>
           <Menu.Label>Profil</Menu.Label>
-          <Menu.Item onClick={open}>
+
             {loggedIn ? (
-              <div className="accountDetails">
-                {userPhotoURL ?
-                    <img src={userPhotoURL} alt="User Profile" className="user-avatar" />
-                  :
-                    <FontAwesomeIcon icon={faUser} className="user-avatar-icon"/>
-                }
-                <Text>{auth.currentUser?.displayName}</Text>
-              </div>
+              <Menu.Item onClick={open}>
+                <div className="accountDetails">
+                  {userPhotoURL ?
+                      <img src={userPhotoURL} alt="User Profile" className="user-avatar" />
+                    :
+                      <FontAwesomeIcon icon={faUser} className="user-avatar-icon"/>
+                  }
+                  <Text>{auth.currentUser?.displayName}</Text>
+                </div>
+              </Menu.Item>
             ) : (
-              <div className="loginMenuButton">
-                <FontAwesomeIcon icon={faUser}/>
-                <Text size={"sm"} style={{width: "100%"}}>Zaloguj się</Text>
-              </div>
-            )}
-          </Menu.Item>
+              <>
+                <Menu.Item onClick={() => {
+                  setSection("login");
+                  setTimeout(() => {
+                    open();
+                  }, 1);
+                }}>
+                  <div className="loginMenuButton">
+                    <FontAwesomeIcon icon={faUser}/>
+                    <Text size={"sm"} style={{width: "100%"}}>Zaloguj się</Text>
+                  </div>
+                </Menu.Item>
+                <Menu.Item
+                  onClick={() => {
+                    setSection("register");
+                    setTimeout(() => {
+                      open();
+                    }, 1);
+                  }}>
+                  <div className="loginMenuButton">
+                    <FontAwesomeIcon icon={faUserPlus} style={{height:"23px", width: "29.5px"}}/>
+                    <Text size={"sm"} style={{width: "100%"}}>Zarejestruj się</Text>
+                  </div>
+                </Menu.Item>
+              </>
+              )}
+
           {loggedIn ? (
             <>
               {isMobile ?
@@ -346,8 +369,6 @@ function LoginComponent({userPhotoURL}: LoginComponentProps) {
 
               <div className="area_button">
                 <Button className="loginButton" color="blue" onClick={() => handleLogin()}>Zaloguj się</Button>
-                <Button className="registerButton" color="dark"
-                        onClick={() => setSection("register")}>Rejestracja</Button>
                 <Button color="dark" onClick={() => setSection("resetPassword")}>
                   Zapomniałem hasła
                 </Button>
@@ -376,7 +397,6 @@ function LoginComponent({userPhotoURL}: LoginComponentProps) {
               <PasswordInput required  placeholder="Powtórz hasło" className="authInput"
                              onChange={(e) => setRepeatPassword(e.target.value)}/>
               <div className="area_button">
-                <Button className="registerButton" color="dark" onClick={() => setSection("login")}>Logowanie</Button>
                 <Button className="loginButton" onClick={() => handleRegister()}>Zarejestruj się</Button>
                 <Auth onClose={() => handleClose()}/>
               </div>
