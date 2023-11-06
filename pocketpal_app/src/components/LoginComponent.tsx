@@ -237,7 +237,6 @@ function LoginComponent({userPhotoURL}: LoginComponentProps) {
   }
 
   const validateEmail = (email: string) => {
-    // eslint-disable-next-line no-useless-escape
     const re = /\S+@\S+\.\S+/;
     return re.test(email);
   }
@@ -253,9 +252,6 @@ function LoginComponent({userPhotoURL}: LoginComponentProps) {
     const re = /^[a-zA-Z]+$/;
     return re.test(name);
   }
-
-  
-
 
   return (
     <>
@@ -277,7 +273,7 @@ function LoginComponent({userPhotoURL}: LoginComponentProps) {
         <Menu.Dropdown>
           <Menu.Label>Profil</Menu.Label>
           <Menu.Item onClick={open}>
-            {userPhotoURL ? (
+            {loggedIn ? (
               <div className="accountDetails">
                 <img src={userPhotoURL} alt="User Profile" className="user-avatar" />
                 <Text>{auth.currentUser?.displayName}</Text>
