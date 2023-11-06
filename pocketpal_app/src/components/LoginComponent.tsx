@@ -275,7 +275,11 @@ function LoginComponent({userPhotoURL}: LoginComponentProps) {
           <Menu.Item onClick={open}>
             {loggedIn ? (
               <div className="accountDetails">
-                <img src={userPhotoURL} alt="User Profile" className="user-avatar" />
+                {userPhotoURL ?
+                    <img src={userPhotoURL} alt="User Profile" className="user-avatar" />
+                  :
+                    <FontAwesomeIcon icon={faUser} className="user-avatar"/>
+                }
                 <Text>{auth.currentUser?.displayName}</Text>
               </div>
             ) : (
