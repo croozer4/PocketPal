@@ -9,7 +9,7 @@
     margin-top: 40px;
     display: flex;
     flex-direction: row;
-    justify-content: center;
+    justify-content: end;
     align-items: center;
     flex-wrap: wrap;
     gap: 50px;
@@ -20,7 +20,51 @@
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    min-width: 30vw;
+    min-width: 45vw;
+    position: fixed;
+    /* background-color: red !important; */
+    top:calc(50% - 250px);
+    left: 10px ;
+    /* background-color: red; */
+
+}
+
+.pie-chart{
+    width: 45vw !important;
+    /* background-color: blue; */
+}
+
+@media (max-width: 768px) {
+    .interface {
+        flex-direction: column;
+    }
+
+    .overview {
+        position: relative;
+        top: 0;
+        left: 0;
+        margin: 0;
+        width: 100%;
+        /* background-color: red; */
+    }
+
+    .pie-chart{
+        width: 100% !important;
+        /* background-color: blue; */
+    }
+
+    .history-list{
+        width: 100% !important;
+        /* background-color: green; */
+    }
+}
+
+.random-data{
+    position: relative;
+}
+
+.interface-random-data{
+    justify-content: center;
 }
 
 @media (prefers-reduced-motion: no-preference) {

@@ -119,11 +119,14 @@ function BasicPieChart({ data }: { data: Array<Expense> }) {
 
         // usuń z .pie-chart klasę .random-data
         document.querySelector(".overview")?.classList.remove("random-data");
+        document.querySelector(".interface")?.classList.remove("interface-random-data");
 
       } else {
         setShouldGenerateRandomData(true);
         // dodaj do .pie-chart klasę .random-data
         document.querySelector(".overview")?.classList.add("random-data");
+        document.querySelector(".interface")?.classList.add("interface-random-data");
+
 
         // Jeśli użytkownik nie jest zalogowany, generuj dane losowe
         updateRandomData();
