@@ -7,7 +7,6 @@ import { doc, getDoc, setDoc } from "firebase/firestore";
 import { IconBrandGoogleFilled } from "@tabler/icons-react";
 import {UnstyledButton} from "@mantine/core";
 
-
 const AuthComponent = ({ onClose }: { onClose: () => void }) => {
   const login = async () => {
     try {
@@ -16,22 +15,36 @@ const AuthComponent = ({ onClose }: { onClose: () => void }) => {
       const db = getFirestore();
       const usersCollection = collection(db, "users");
 
-      const result = await signInWithPopup(auth, provider);
-      const user = result.user;
+
+      let userData = {
+        displayName: "",
+        email: "",
+        uid: "",
+        photoUrl: "",
+      };
+      await signInWithPopup(auth, provider).then((user) => {
+        onClose();
+        userData = {
+          displayName: user.user.displayName || "",
+          email: user.user.email || "",
+          uid: user.user.uid || "",
+          photoUrl: user.user.photoURL || "",
+        };
+      });
 
       // Sprawdzamy, czy użytkownik już istnieje w kolekcji "users" na podstawie jego UID
-      const userRef = doc(usersCollection, user.uid);
+      const userRef = doc(usersCollection, userData.uid);
       const userDoc = await getDoc(userRef);
 
       // Jeśli użytkownik nie istnieje w kolekcji, to go dodajemy
       if (!userDoc.exists()) {
-        const userData = {
-          displayName: user.displayName,
-          email: user.email,
-          // inne dane użytkownika, które chcesz zapisywać
+        const userDataUpload = {
+          displayName: userData.displayName,
+          email: userData.email,
+          photoUrl: userData.photoUrl,
         };
 
-        await setDoc(userRef, userData);
+        await setDoc(userRef, userDataUpload);
       }
 
       toast.success("Zalogowano pomyślnie!", {
@@ -44,8 +57,6 @@ const AuthComponent = ({ onClose }: { onClose: () => void }) => {
         progress: undefined,
         theme: "dark",
       });
-
-      onClose();
     } catch (error) {
       console.error(error);
       toast.error("Wystąpił błąd podczas logowania!", {

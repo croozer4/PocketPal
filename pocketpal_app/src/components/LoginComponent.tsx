@@ -398,7 +398,7 @@ function LoginComponent({userPhotoURL}: LoginComponentProps) {
                              onChange={(e) => setRepeatPassword(e.target.value)}/>
               <div className="area_button">
                 <Button className="loginButton" onClick={() => handleRegister()}>Zarejestruj się</Button>
-                <Auth onClose={() => handleClose()}/>
+                <Auth onClose={() => close()}/>
               </div>
             </Modal>
           )}
