@@ -57,10 +57,9 @@ function LoginComponent({userPhotoURL}: LoginComponentProps) {
       return;
     }
 
-
-
-    signInWithEmailAndPassword(auth, email, password)
-      .catch((error) => {
+    signInWithEmailAndPassword(auth, email, password).then(() => {
+      close();
+    }).catch((error) => {
         const errorCode = error.code;
         const errorMessage = error.message;
         console.error(errorCode, errorMessage);
@@ -68,7 +67,6 @@ function LoginComponent({userPhotoURL}: LoginComponentProps) {
   }
 
   const handleRegister = () => {
-
     if (!validateName(firstName)) {
       toast.error('Niepoprawne imię!', {
         position: "top-center",
@@ -323,7 +321,7 @@ function LoginComponent({userPhotoURL}: LoginComponentProps) {
         >
           <h4>Użytkownik zalogowany</h4>
           {userPhotoURL ?
-            <img src={userPhotoURL} alt="User Profile" className="user-avatar" />
+            <img src={userPhotoURL} alt="User Profile" className="user-avatar-settings" />
             :
             <FontAwesomeIcon icon={faUser} className="user-avatar-icon"/>
           }

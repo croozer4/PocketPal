@@ -9,6 +9,7 @@ import {Text} from '@mantine/core';
 export function CustomNavbar() {
   const [userPhotoURL, setUserPhotoURL] = useState('');
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+  const [loggedIn, setLoggedIn] = useState(false);
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
@@ -36,6 +37,16 @@ export function CustomNavbar() {
     };
   }, []);
 
+  useEffect(() => {
+    auth.onAuthStateChanged((user) => {
+      if (user) {
+        setLoggedIn(true);
+      } else {
+        setLoggedIn(false);
+      }
+    });
+  });
+
   return (
     <>
       <nav className="navbar">
@@ -48,9 +59,11 @@ export function CustomNavbar() {
             {isMobile ? (
               <>
                 <div className="nav_button">
-                  <Link to="/family">
-                    <Text>Rodzina</Text>
-                  </Link>
+                  {loggedIn ? (
+                    <Link to="/family">
+                      <Text>Rodzina</Text>
+                    </Link>
+                  ) : ""}
                 </div>
               </>
             ) : ""}
