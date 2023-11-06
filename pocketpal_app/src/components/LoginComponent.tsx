@@ -42,6 +42,23 @@ function LoginComponent({userPhotoURL}: LoginComponentProps) {
   const usersCollection = collection(db, "users");
 
   const handleLogin = () => {
+
+    if (!validateEmail(email)) {
+      toast.error('Niepoprawny email!', {
+        position: "top-center",
+        autoClose: QuickAlertTime,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: false,
+        draggable: true,
+        progress: undefined,
+        theme: "dark",
+      });
+      return;
+    }
+
+
+
     signInWithEmailAndPassword(auth, email, password)
       .catch((error) => {
         const errorCode = error.code;
@@ -51,6 +68,65 @@ function LoginComponent({userPhotoURL}: LoginComponentProps) {
   }
 
   const handleRegister = () => {
+
+    if (!validateName(firstName)) {
+      toast.error('Niepoprawne imię!', {
+        position: "top-center",
+        autoClose: QuickAlertTime,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: false,
+        draggable: true,
+        progress: undefined,
+        theme: "dark",
+      });
+      return;
+    }
+
+    if (!validateName(lastName)) {
+      toast.error('Niepoprawne nazwisko!', {
+        position: "top-center",
+        autoClose: QuickAlertTime,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: false,
+        draggable: true,
+        progress: undefined,
+        theme: "dark",
+      });
+      return;
+    }
+
+    if (!validateEmail(email)) {
+      toast.error('Niepoprawny email!', {
+        position: "top-center",
+        autoClose: QuickAlertTime,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: false,
+        draggable: true,
+        progress: undefined,
+        theme: "dark",
+      });
+      return;
+    }
+
+    if (!validatePassword(password)) {
+      toast.error('Hasło musi zawierać co najmniej 8 znaków, jedną małą literę, jedną dużą literę, jedną cyfrę i jeden znak specjalny!', {
+        position: "top-center",
+        autoClose: QuickAlertTime,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: false,
+        draggable: true,
+        progress: undefined,
+        theme: "dark",
+      });
+      return;
+    }
+
+   
+
     if (password !== repeatPassword) {
       toast.error('Hasła nie są takie same!', {
         position: "top-center",
@@ -115,6 +191,21 @@ function LoginComponent({userPhotoURL}: LoginComponentProps) {
 
   // funkcja do resetowania hasła
   const resetPassword = () => {
+
+    if (!validateEmail(email)) {
+      toast.error('Niepoprawny email!', {
+        position: "top-center",
+        autoClose: QuickAlertTime,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: false,
+        draggable: true,
+        progress: undefined,
+        theme: "dark",
+      });
+      return;
+    }
+
     sendPasswordResetEmail(auth, email)
       .then(() => {
         toast.info('Wysłano link do zresetowania hasła!', {
@@ -144,6 +235,27 @@ function LoginComponent({userPhotoURL}: LoginComponentProps) {
       setSection("login");
     }, 200);
   }
+
+  const validateEmail = (email: string) => {
+    // eslint-disable-next-line no-useless-escape
+    const re = /\S+@\S+\.\S+/;
+    return re.test(email);
+  }
+
+  const validatePassword = (password: string) => {
+    // eslint-disable-next-line no-useless-escape
+    const re = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=!])([0-9a-zA-Z@#$%^&+=!]){8,}$/;
+    return re.test(password);
+  }
+
+  const validateName = (name: string) => {
+    // eslint-disable-next-line no-useless-escape
+    const re = /^[a-zA-Z]+$/;
+    return re.test(name);
+  }
+
+  
+
 
   return (
     <>
@@ -225,9 +337,9 @@ function LoginComponent({userPhotoURL}: LoginComponentProps) {
             >
               <Auth onClose={() => handleClose()}/>
               <Divider my="xs" size="sm" label="Albo użyj emailu i hasła" labelPosition="center" variant={"dashed"} style={{width: "100%"}}/>
-              <TextInput type="text" placeholder="Email" className="authInput"
+              <TextInput required type="text" placeholder="Email" className="authInput"
                          onChange={(e) => setEmail(e.target.value)}/>
-              <PasswordInput placeholder="Hasło" className="authInput"
+              <PasswordInput required placeholder="Hasło" className="authInput"
                              onChange={(e) => setPassword(e.target.value)}/>
 
               <div className="area_button">
@@ -250,15 +362,16 @@ function LoginComponent({userPhotoURL}: LoginComponentProps) {
               classNames={{ inner: "modalInner", content: "modalContent", header: "modalHeader", body: "modalBody" }}
             >
               <TextInput
-                type="text" placeholder="Imię" className="authInput" onChange={(e) => setFirstName(e.target.value)}/>
+              
+                type="text" required placeholder="Imię" className="authInput" onChange={(e) => setFirstName(e.target.value)}/>
               <TextInput
-                type="text" placeholder="Nazwisko" className="authInput"
+                type="text" required placeholder="Nazwisko" className="authInput"
                 onChange={(e) => setLastName(e.target.value)}/>
-              <TextInput type="text" placeholder="Email" className="authInput"
+              <TextInput type="text" required placeholder="Email" className="authInput"
                          onChange={(e) => setEmail(e.target.value)}/>
-              <PasswordInput placeholder="Hasło" className="authInput"
+              <PasswordInput required placeholder="Hasło" className="authInput"
                              onChange={(e) => setPassword(e.target.value)}/>
-              <PasswordInput placeholder="Powtórz hasło" className="authInput"
+              <PasswordInput required  placeholder="Powtórz hasło" className="authInput"
                              onChange={(e) => setRepeatPassword(e.target.value)}/>
               <div className="area_button">
                 <Button className="registerButton" color="dark" onClick={() => setSection("login")}>Logowanie</Button>
@@ -276,7 +389,7 @@ function LoginComponent({userPhotoURL}: LoginComponentProps) {
               title="Zresetuj hasło"
               classNames={{ inner: "modalInner", content: "modalContent", header: "modalHeader", body: "modalBody" }}
             >
-              <TextInput type="text" placeholder="Email" className="authInput"
+              <TextInput required type="text" placeholder="Email" className="authInput"
                          onChange={(e) => setEmail(e.target.value)}/>
               <Button
                 color="blue"
