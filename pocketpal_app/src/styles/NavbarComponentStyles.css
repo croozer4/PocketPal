@@ -74,9 +74,17 @@
 }
 
 .user-avatar {
-    border-radius: 50%; /* Zaokrąglenie obrazka do kształtu okręgu */
-    width: 100%; /* Dostosuj rozmiar obrazka według potrzeb */
+    border-radius: 50%;
+    width: 100%;
     height: 100%;
+}
+
+.user-avatar-icon {
+    border-radius: 50%;
+    width: 100px;
+    height: 100px;
+    padding: 25px;
+    background-color: #181818;
 }
 
 .overlay {

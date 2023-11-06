@@ -278,7 +278,7 @@ function LoginComponent({userPhotoURL}: LoginComponentProps) {
                 {userPhotoURL ?
                     <img src={userPhotoURL} alt="User Profile" className="user-avatar" />
                   :
-                    <FontAwesomeIcon icon={faUser} className="user-avatar"/>
+                    <FontAwesomeIcon icon={faUser} className="user-avatar-icon"/>
                 }
                 <Text>{auth.currentUser?.displayName}</Text>
               </div>
@@ -322,7 +322,11 @@ function LoginComponent({userPhotoURL}: LoginComponentProps) {
           classNames={{ inner: "modalInner", content: "modalContent", header: "modalHeader", body: "modalBody" }}
         >
           <h4>Użytkownik zalogowany</h4>
-          <img src={userPhotoURL} alt="User Profile" className="userAvatarAuth"/>
+          {userPhotoURL ?
+            <img src={userPhotoURL} alt="User Profile" className="user-avatar" />
+            :
+            <FontAwesomeIcon icon={faUser} className="user-avatar-icon"/>
+          }
           <p>{auth.currentUser?.displayName}</p>
         </Modal>
       ) : (
