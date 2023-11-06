@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { DefaultAlertTime } from "../config/globals.tsx";
-import { Timestamp } from 'firebase/firestore';
+import { Timestamp, doc } from 'firebase/firestore';
 import { auth } from "../config/firebase.tsx";
 import { ResponsivePie } from '@nivo/pie';
 
@@ -98,9 +98,13 @@ function BasicPieChart({ data }: { data: Array<Expense> }) {
 
     const updateRandomData = () => {
       if (shouldGenerateRandomData) {
+        
         // Generuj nowe dane losowe co 3 sekundy tylko jeśli użytkownik nie jest zalogowany
         const randomData = generateRandomData();
         setPieChartData(randomData);
+      }
+      else{
+
       }
     };
 
@@ -112,8 +116,15 @@ function BasicPieChart({ data }: { data: Array<Expense> }) {
         fetchData();
         // Użytkownik jest zalogowany, więc nie generuj więcej danych losowych
         setShouldGenerateRandomData(false);
+
+        // usuń z .pie-chart klasę .random-data
+        document.querySelector(".overview")?.classList.remove("random-data");
+
       } else {
         setShouldGenerateRandomData(true);
+        // dodaj do .pie-chart klasę .random-data
+        document.querySelector(".overview")?.classList.add("random-data");
+
         // Jeśli użytkownik nie jest zalogowany, generuj dane losowe
         updateRandomData();
       }
@@ -126,7 +137,7 @@ function BasicPieChart({ data }: { data: Array<Expense> }) {
   }, [data]);
 
   return (
-    <div style={{ height: "400px", width: "400px", zIndex: 1 }}>
+    <div style={{ height: "400px", width: "400px", zIndex: 1 }} className="pie-chart">
       <h5 style={{ marginBottom: 0 }}>Podsumowanie</h5>
       <ResponsivePie
         data={categories.filter((item) => item.value !== 0)}
