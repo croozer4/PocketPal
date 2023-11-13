@@ -98,13 +98,6 @@ const MainPage = () => {
             <MantineProvider theme={{ colorScheme: colorScheme }}>
                 <div className="interface">
                     <div className="overview">
-                        <Text
-                            size="xl"
-                            weight={700}
-                            style={{ marginBottom: "1rem" }}
-                        >
-                            Witaj w PocketPal!
-                        </Text>
                         <BasicPieChart data={data} />
                     </div>
                     {data && data.length !== 0 && loggedIn &&

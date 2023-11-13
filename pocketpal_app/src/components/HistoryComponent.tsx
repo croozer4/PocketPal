@@ -55,8 +55,8 @@ const PeekDetails = ({ fetchData, ...item }: Expense & { fetchData: () => void }
   // Formatowanie daty przy użyciu date-fns
   const timestamp = item.creationDate.toMillis(); // Konwersja na timestamp w milisekundach
   const dateFormatted = format(timestamp, "dd/MM/yyyy");
-  console.log(item.creationDate); // Obiekt Firestore Timestamp
-  console.log(dateFormatted); // Sformatowana data
+  // console.log(item.creationDate); // Obiekt Firestore Timestamp
+  // console.log(dateFormatted); // Sformatowana data
 
   const handleDeleteExpense = async (id: string) => {
     try {

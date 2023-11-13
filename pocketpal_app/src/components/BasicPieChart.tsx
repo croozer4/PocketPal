@@ -4,6 +4,7 @@ import { DefaultAlertTime } from "../config/globals.tsx";
 import { Timestamp } from 'firebase/firestore';
 import { auth } from "../config/firebase.tsx";
 import { ResponsivePie } from '@nivo/pie';
+import {Text} from "@mantine/core";
 
 type Expense = {
   id: string;
@@ -160,7 +161,24 @@ function BasicPieChart({ data }: { data: Array<Expense> }) {
 
   return (
     <div style={{ height: "400px", width: "400px", zIndex: 1 }} className="pie-chart">
-      <h5 style={{ marginBottom: 0 }}>Podsumowanie</h5>
+      {pieChartData.length !== 0 &&
+        <>
+          <Text
+            size="xl"
+            weight={700}
+            style={{ marginBottom: "1rem" }}
+          >
+            Witaj w PocketPal!
+          </Text>
+          <Text
+            size="md"
+            weight={500}
+            style={{ marginBottom: "1rem" }}
+          >
+            Podsumowanie wydatków
+          </Text>
+        </>
+      }
       <ResponsivePie
         data={categories.filter((item) => item.value !== 0)}
         margin={{ top: 40, right: 100, bottom: 80, left: 100 }}
