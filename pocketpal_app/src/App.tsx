@@ -18,18 +18,9 @@ import { AnimatedRoutes } from "./pages/AnimatedRoutes";
 import * as ReactDOM from "react-dom/client";
 import { createBrowserRouter, RouterProvider, Router, BrowserRouter } from "react-router-dom";
 
-type Expense = {
-    id: string;
-    category: string;
-    creationDate: Timestamp;
-    description?: string;
-    type: boolean;
-    user: string;
-    value: number;
-};
-
 function App() {
     const colorScheme = "dark";
+<<<<<<< Updated upstream
     const [loggedIn, setLoggedIn] = useState<boolean>(false);
     const [data, setData] = useState<Array<Expense>>([]);
     const [reload, setReload] = useState<boolean>(true);
@@ -97,6 +88,8 @@ function App() {
             }
         });
     }, [reload, data]);
+=======
+>>>>>>> Stashed changes
 
     return (
             <BrowserRouter >
@@ -118,20 +111,6 @@ function App() {
                 <div className="content">
                     <AnimatedRoutes />
                 </div>
-            {/* <div className="interface">
-        <div className="overview">
-        <Text
-        size="xl"
-        weight={700}
-        style={{marginBottom: "1rem"}}
-        >
-        Witaj w PocketPal!
-        </Text>
-        <BasicPieChart data={data}/>
-        </div>
-        {(data.length !== 0 && loggedIn) ? <HistoryComponent data={data} fetchData={fetchData}/> : <></>}
-        </div>
-      { loggedIn ? <ExpenseAddingForm onUpdate={onUpdate}/> : <></>} */}
         </MantineProvider>
       </BrowserRouter>
     );
