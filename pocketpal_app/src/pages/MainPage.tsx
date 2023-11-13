@@ -35,17 +35,6 @@ const MainPage = () => {
     const [selectedMonth, setSelectedMonth] = useState<number>(new Date().getMonth() + 1); // Current month
     const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear()); // Current year
 
-    // const handleMonthChange = (event: React.ChangeEvent<{ value: unknown }>) => {
-    //     setSelectedMonth(event.target.value as number);
-    // };
-
-    // const handleYearChange = (event: React.ChangeEvent<{ value: unknown }>) => {
-    //     setSelectedYear(event.target.value as number);
-    // };
-
-    // const monthOptions = Array.from({ length: 12 }, (_, index) => index + 1);
-    // const yearOptions = Array.from({ length: new Date().getFullYear() - 2010 + 1 }, (_, index) => 2010 + index);
-
     const fetchData = async () => {
         try {
             const uid = auth.currentUser?.uid || null;
