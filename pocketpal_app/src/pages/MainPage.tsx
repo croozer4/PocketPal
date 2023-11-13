@@ -49,15 +49,15 @@ const MainPage = () => {
     const fetchData = async () => {
         try {
             const uid = auth.currentUser?.uid || null;
-
+    
             if (uid) {
                 const q = query(
                     collection(db, "usersData"),
                     where("user", "==", uid),
                 );
-
+    
                 const querySnapshot = await getDocs(q);
-
+    
                 const fetchedData = querySnapshot.docs.map((doc) => {
                     const docData = doc.data();
                     return {
@@ -70,7 +70,7 @@ const MainPage = () => {
                         value: docData.value,
                     };
                 });
-
+    
                 // Filtruj dane na podstawie wybranego miesiąca i roku
                 const filteredData = fetchedData.filter(item => {
                     const itemDate = new Date(item.creationDate.toMillis());
@@ -79,11 +79,12 @@ const MainPage = () => {
                         itemDate.getMonth() + 1 === selectedMonth
                     );
                 });
-
+    
                 setData(filteredData);
             }
-
+    
             setReload(false);
+    
         } catch (error) {
             console.error(error);
             toast.error("Wystąpił błąd podczas pobierania danych!", {
@@ -97,19 +98,20 @@ const MainPage = () => {
                 theme: "dark",
             });
         }
-    };
+    }
 
 
 
     const onUpdate = () => {
-        setReload(true);
+        // setReload(true); // Comment this line
+        fetchData(); // Fetch data directly on update
     };
 
     useEffect(() => {
         auth.onAuthStateChanged((user) => {
-            if (reload) {
+            // if (reload) { // Comment this condition
                 fetchData().then();
-            }
+            // }
     
             if (user) {
                 setLoggedIn(true);
@@ -119,11 +121,10 @@ const MainPage = () => {
             }
         });
     }, [reload, data, selectedMonth, selectedYear]);
-
-
-
-
-
+    
+    useEffect(() => {
+        fetchData();
+    }, [selectedMonth, selectedYear]);
 
 
     return (
@@ -136,8 +137,13 @@ const MainPage = () => {
                             selected={new Date(selectedYear, selectedMonth - 1)}
                             onChange={(date: any) => {
                                 console.log('Selected Date:', date);
+                                
                                 setSelectedMonth(date.getMonth() + 1);
                                 setSelectedYear(date.getFullYear());
+
+                                setData([]);
+                                fetchData();
+                                
                             }}
                             dateFormat="MM/yyyy"
                             showMonthYearPicker
