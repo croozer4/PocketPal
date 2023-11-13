@@ -1,6 +1,6 @@
 import "./App.css";
 import CustomNavbar from "./components/NavbarComponent";
-import { MantineProvider, Text } from "@mantine/core";
+import { MantineProvider } from "@mantine/core";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
