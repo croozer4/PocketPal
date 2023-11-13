@@ -1,8 +1,0 @@
-.family-adding-form{
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 10px !important;
-    width: 100%;
-    /* background-color: red !important; */
-}

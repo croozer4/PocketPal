@@ -3,7 +3,6 @@ import { useState } from "react";
 import { Button } from "@mantine/core";
 import { MantineProvider, Text } from "@mantine/core";
 import FamilyAddingForm  from "../components/FamilyAddingForm.tsx";
-import DisplayUserFamilies from "../components/DisplayUserFamilies.tsx";
 
 const FamilyPage = () => {
 
@@ -23,8 +22,6 @@ const FamilyPage = () => {
 
 
                     <Button>Dodaj do rodziny</Button>
-
-                    <DisplayUserFamilies />
                 </div>
             </MantineProvider>
         </div>
