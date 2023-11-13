@@ -160,7 +160,7 @@ function BasicPieChart({ data }: { data: Array<Expense> }) {
   }, [data]);
 
   return (
-    <div style={{ height: "400px", width: "400px", zIndex: 1 }} className="pie-chart">
+    <div style={{ height: "400px", zIndex: 1 }} className="pie-chart">
       {pieChartData.length !== 0 &&
         <>
           <Text
@@ -273,12 +273,12 @@ function BasicPieChart({ data }: { data: Array<Expense> }) {
             direction: 'row',
             justify: false,
             translateX: 0,
-            translateY: 56,
-            itemsSpacing: 0,
-            itemWidth: 80,
+            translateY: 60,
+            itemsSpacing: 5,
+            itemWidth: 60,
             itemHeight: 18,
             itemTextColor: '#EEEEEE',
-            itemDirection: 'left-to-right',
+            itemDirection: "top-to-bottom",
             itemOpacity: 1,
             symbolSize: 18,
             symbolShape: 'circle',

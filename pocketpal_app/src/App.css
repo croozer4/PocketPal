@@ -25,6 +25,7 @@
     /* background-color: red !important; */
     top: calc(50% - 250px);
     left: 10px;
+    padding-bottom: 30px;
     /* background-color: red; */
 }
 
@@ -103,7 +104,6 @@
 
 .authInput {
     width: 100%;
-    min-width: 400px;
     margin: 0.5rem 0;
     border-radius: 8px;
     position: relative;
@@ -137,6 +137,7 @@
     flex-direction: row;
     justify-content: center;
     align-items: center;
+    margin: 10px 0 5px;
     gap: 1rem;
 }
 .Reg_form {

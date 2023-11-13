@@ -23,7 +23,7 @@ interface LoginComponentProps {
 }
 
 function LoginComponent({userPhotoURL}: LoginComponentProps) {
-  const [isMobile, setIsMobile] = useState(window.innerWidth >= 768);
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
 
   const [opened, {open, close}] = useDisclosure(false);
 
@@ -60,10 +60,10 @@ function LoginComponent({userPhotoURL}: LoginComponentProps) {
     signInWithEmailAndPassword(auth, email, password).then(() => {
       close();
     }).catch((error) => {
-        const errorCode = error.code;
-        const errorMessage = error.message;
-        console.error(errorCode, errorMessage);
-      });
+      const errorCode = error.code;
+      const errorMessage = error.message;
+      console.error(errorCode, errorMessage);
+    });
   }
 
   const handleRegister = () => {
@@ -123,7 +123,6 @@ function LoginComponent({userPhotoURL}: LoginComponentProps) {
       return;
     }
 
-   
 
     if (password !== repeatPassword) {
       toast.error('Hasła nie są takie same!', {
@@ -174,7 +173,7 @@ function LoginComponent({userPhotoURL}: LoginComponentProps) {
   });
 
   useEffect(() => {
-    setIsMobile(window.innerWidth >= 768);
+    setIsMobile(window.innerWidth <= 768);
 
     const handleResize = () => {
       setIsMobile(window.innerWidth <= 768);
@@ -269,59 +268,66 @@ function LoginComponent({userPhotoURL}: LoginComponentProps) {
           </UnstyledButton>
         </Menu.Target>
         <Menu.Dropdown>
-          <Menu.Label>Profil</Menu.Label>
-
-            {loggedIn ? (
+          {!loggedIn &&
+              <Menu.Label>Menu</Menu.Label>
+          }
+          {loggedIn ? (
+            <>
+              <Menu.Label>Profil</Menu.Label>
               <Menu.Item onClick={open}>
                 <div className="accountDetails">
                   {userPhotoURL ?
-                      <img src={userPhotoURL} alt="User Profile" className="user-avatar" />
+                    <img src={userPhotoURL} alt="User Profile" className="user-avatar"/>
                     :
-                      <FontAwesomeIcon icon={faUser} className="user-avatar-icon"/>
+                    <FontAwesomeIcon icon={faUser} className="user-avatar-icon"/>
                   }
                   <Text>{auth.currentUser?.displayName}</Text>
                 </div>
               </Menu.Item>
-            ) : (
-              <>
-                <Menu.Item onClick={() => {
-                  setSection("login");
+            </>
+          ) : (
+            <>
+              <Menu.Item onClick={() => {
+                setSection("login");
+                setTimeout(() => {
+                  open();
+                }, 1);
+              }}>
+                <div className="loginMenuButton">
+                  <FontAwesomeIcon icon={faUser}/>
+                  <Text size={"sm"} style={{width: "100%"}}>Zaloguj się</Text>
+                </div>
+              </Menu.Item>
+              <Menu.Item
+                onClick={() => {
+                  setSection("register");
                   setTimeout(() => {
                     open();
                   }, 1);
                 }}>
-                  <div className="loginMenuButton">
-                    <FontAwesomeIcon icon={faUser}/>
-                    <Text size={"sm"} style={{width: "100%"}}>Zaloguj się</Text>
-                  </div>
-                </Menu.Item>
-                <Menu.Item
-                  onClick={() => {
-                    setSection("register");
-                    setTimeout(() => {
-                      open();
-                    }, 1);
-                  }}>
-                  <div className="loginMenuButton">
-                    <FontAwesomeIcon icon={faUserPlus} style={{height:"23px", width: "29.5px"}}/>
-                    <Text size={"sm"} style={{width: "100%"}}>Zarejestruj się</Text>
-                  </div>
-                </Menu.Item>
-              </>
-              )}
+                <div className="loginMenuButton">
+                  <FontAwesomeIcon icon={faUserPlus} style={{height: "23px", width: "29.5px"}}/>
+                  <Text size={"sm"} style={{width: "100%"}}>Zarejestruj się</Text>
+                </div>
+              </Menu.Item>
+            </>
+          )}
 
           {loggedIn ? (
             <>
-              {isMobile ?
-                <Menu.Item
-                  color={"blue"}
-                  icon={<IconUsers/>}
-                >
-                  <Link to="/family">
-                    <Text>Rodzina</Text>
-                  </Link>
-                </Menu.Item>
-              : ""}
+              {isMobile ? (
+                  <>
+                    <Menu.Divider/>
+                    <Menu.Item
+                      color={"blue"}
+                      icon={<IconUsers/>}
+                    >
+                      <Link to="/family">
+                        <Text>Rodzina</Text>
+                      </Link>
+                    </Menu.Item>
+                  </>
+                ) : ""}
               <Menu.Divider/>
               <Menu.Item
                 color={"red"}
@@ -340,11 +346,11 @@ function LoginComponent({userPhotoURL}: LoginComponentProps) {
           onClose={handleClose}
           size={"lg"}
           title="Logowanie"
-          classNames={{ inner: "modalInner", content: "modalContent", header: "modalHeader", body: "modalBody" }}
+          classNames={{inner: "modalInner", content: "modalContent", header: "modalHeader", body: "modalBody"}}
         >
           <h4>Użytkownik zalogowany</h4>
           {userPhotoURL ?
-            <img src={userPhotoURL} alt="User Profile" className="user-avatar-settings" />
+            <img src={userPhotoURL} alt="User Profile" className="user-avatar-settings"/>
             :
             <FontAwesomeIcon icon={faUser} className="user-avatar-icon"/>
           }
@@ -358,10 +364,11 @@ function LoginComponent({userPhotoURL}: LoginComponentProps) {
               onClose={handleClose}
               size={"md"}
               title="Logowanie"
-              classNames={{ inner: "modalInner", content: "modalContent", header: "modalHeader", body: "modalBody" }}
+              classNames={{inner: "modalInner", content: "modalContent", header: "modalHeader", body: "modalBody"}}
             >
               <Auth onClose={() => handleClose()}/>
-              <Divider my="xs" size="sm" label="Albo użyj emailu i hasła" labelPosition="center" variant={"dashed"} style={{width: "100%"}}/>
+              <Divider my="xs" size="sm" label="Albo użyj emailu i hasła" labelPosition="center" variant={"dashed"}
+                       style={{width: "100%"}}/>
               <TextInput required type="text" placeholder="Email" className="authInput"
                          onChange={(e) => setEmail(e.target.value)}/>
               <PasswordInput required placeholder="Hasło" className="authInput"
@@ -382,11 +389,12 @@ function LoginComponent({userPhotoURL}: LoginComponentProps) {
               onClose={handleClose}
               size={"lg"}
               title="Rejestracja"
-              classNames={{ inner: "modalInner", content: "modalContent", header: "modalHeader", body: "modalBody" }}
+              classNames={{inner: "modalInner", content: "modalContent", header: "modalHeader", body: "modalBody"}}
             >
               <TextInput
-              
-                type="text" required placeholder="Imię" className="authInput" onChange={(e) => setFirstName(e.target.value)}/>
+
+                type="text" required placeholder="Imię" className="authInput"
+                onChange={(e) => setFirstName(e.target.value)}/>
               <TextInput
                 type="text" required placeholder="Nazwisko" className="authInput"
                 onChange={(e) => setLastName(e.target.value)}/>
@@ -394,7 +402,7 @@ function LoginComponent({userPhotoURL}: LoginComponentProps) {
                          onChange={(e) => setEmail(e.target.value)}/>
               <PasswordInput required placeholder="Hasło" className="authInput"
                              onChange={(e) => setPassword(e.target.value)}/>
-              <PasswordInput required  placeholder="Powtórz hasło" className="authInput"
+              <PasswordInput required placeholder="Powtórz hasło" className="authInput"
                              onChange={(e) => setRepeatPassword(e.target.value)}/>
               <div className="area_button">
                 <Button className="loginButton" onClick={() => handleRegister()}>Zarejestruj się</Button>
@@ -409,7 +417,7 @@ function LoginComponent({userPhotoURL}: LoginComponentProps) {
               onClose={handleClose}
               size={"lg"}
               title="Zresetuj hasło"
-              classNames={{ inner: "modalInner", content: "modalContent", header: "modalHeader", body: "modalBody" }}
+              classNames={{inner: "modalInner", content: "modalContent", header: "modalHeader", body: "modalBody"}}
             >
               <TextInput required type="text" placeholder="Email" className="authInput"
                          onChange={(e) => setEmail(e.target.value)}/>
