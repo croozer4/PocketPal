@@ -13,6 +13,9 @@ import { useEffect, useState } from "react";
 import { DefaultAlertTime } from "../config/globals.tsx";
 import { Timestamp } from "firebase/firestore";
 
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+
 type Expense = {
     id: string;
     category: string;
@@ -29,38 +32,60 @@ const MainPage = () => {
     const [data, setData] = useState<Array<Expense>>([]);
     const [reload, setReload] = useState<boolean>(true);
 
+    const [selectedMonth, setSelectedMonth] = useState<number>(new Date().getMonth() + 1); // Current month
+    const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear()); // Current year
+
+    // const handleMonthChange = (event: React.ChangeEvent<{ value: unknown }>) => {
+    //     setSelectedMonth(event.target.value as number);
+    // };
+
+    // const handleYearChange = (event: React.ChangeEvent<{ value: unknown }>) => {
+    //     setSelectedYear(event.target.value as number);
+    // };
+
+    // const monthOptions = Array.from({ length: 12 }, (_, index) => index + 1);
+    // const yearOptions = Array.from({ length: new Date().getFullYear() - 2010 + 1 }, (_, index) => 2010 + index);
+
     const fetchData = async () => {
         try {
-            // pobierz wszystkie dokumenty z kolekcji 'usersData' z katalogu danego użytkownika
             const uid = auth.currentUser?.uid || null;
 
             if (uid) {
                 const q = query(
                     collection(db, "usersData"),
-                    where("user", "==", uid)
+                    where("user", "==", uid),
                 );
+
                 const querySnapshot = await getDocs(q);
 
-                const fetchedData: Array<Expense> = new Array<Expense>();
+                const fetchedData = querySnapshot.docs.map((doc) => {
+                    const docData = doc.data();
+                    return {
+                        id: doc.id,
+                        category: docData.category,
+                        creationDate: docData.creationDate,
+                        description: docData.description,
+                        type: docData.type,
+                        user: docData.user,
+                        value: docData.value,
+                    };
+                });
 
-                if (querySnapshot) {
-                    querySnapshot.forEach((doc) => {
-                        const docData = doc.data();
-                        fetchedData.push({
-                            id: doc.id,
-                            category: docData.category,
-                            creationDate: docData.creationDate,
-                            description: docData.description,
-                            type: docData.type,
-                            user: docData.user,
-                            value: docData.value,
-                        });
-                    });
-                }
-                setData(fetchedData);
+                // Filtruj dane na podstawie wybranego miesiąca i roku
+                const filteredData = fetchedData.filter(item => {
+                    const itemDate = new Date(item.creationDate.toMillis());
+                    return (
+                        itemDate.getFullYear() === selectedYear &&
+                        itemDate.getMonth() + 1 === selectedMonth
+                    );
+                });
+
+                setData(filteredData);
             }
+
             setReload(false);
         } catch (error) {
+            console.error(error);
             toast.error("Wystąpił błąd podczas pobierania danych!", {
                 position: "top-center",
                 autoClose: DefaultAlertTime,
@@ -74,6 +99,8 @@ const MainPage = () => {
         }
     };
 
+
+
     const onUpdate = () => {
         setReload(true);
     };
@@ -83,7 +110,7 @@ const MainPage = () => {
             if (reload) {
                 fetchData().then();
             }
-
+    
             if (user) {
                 setLoggedIn(true);
                 console.log(user);
@@ -91,11 +118,34 @@ const MainPage = () => {
                 setLoggedIn(false);
             }
         });
-    }, [reload, data]);
+    }, [reload, data, selectedMonth, selectedYear]);
+
+
+
+
+
+
 
     return (
         <div className="main-page">
             <MantineProvider theme={{ colorScheme: colorScheme }}>
+                {loggedIn ? (
+                    <div className="MonthPicker">
+                        <label htmlFor="month">Select Month: </label>
+                        <DatePicker
+                            selected={new Date(selectedYear, selectedMonth - 1)}
+                            onChange={(date: any) => {
+                                console.log('Selected Date:', date);
+                                setSelectedMonth(date.getMonth() + 1);
+                                setSelectedYear(date.getFullYear());
+                            }}
+                            dateFormat="MM/yyyy"
+                            showMonthYearPicker
+                        />
+                    </div>
+                ) : (
+                    <></>
+                )}
                 <div className="interface">
                     <div className="overview">
                         <Text
