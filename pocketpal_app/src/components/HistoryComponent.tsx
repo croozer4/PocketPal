@@ -6,6 +6,7 @@ import { toast } from "react-toastify";
 import { QuickAlertTime } from "../config/globals.tsx";
 import "../styles/HistoryComponentStyles.css";
 import { Timestamp } from '@firebase/firestore-types';
+import { useEffect } from 'react';
 
 type Expense = {
   id: string;

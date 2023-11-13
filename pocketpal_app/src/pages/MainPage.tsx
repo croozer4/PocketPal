@@ -1,22 +1,17 @@
-import "./App.css";
-import CustomNavbar from "./components/NavbarComponent";
-import BasicPieChart from "./components/BasicPieChart";
+import "../App.css";
+import CustomNavbar from "../components/NavbarComponent";
+import BasicPieChart from "../components/BasicPieChart";
 import { MantineProvider, Text } from "@mantine/core";
-import HistoryComponent from "./components/HistoryComponent.tsx";
-import ExpenseAddingForm from "./components/ExpenseAddingForm.tsx";
+import HistoryComponent from "../components/HistoryComponent.tsx";
+import ExpenseAddingForm from "../components/ExpenseAddingForm.tsx";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { auth, db } from "./config/firebase.tsx";
+import { auth, db } from "../config/firebase.tsx";
 import { collection, query, where } from "firebase/firestore";
 import { getDocs } from "@firebase/firestore";
 import { useEffect, useState } from "react";
-import { DefaultAlertTime } from "./config/globals.tsx";
+import { DefaultAlertTime } from "../config/globals.tsx";
 import { Timestamp } from "firebase/firestore";
-
-import { AnimatedRoutes } from "./pages/AnimatedRoutes";
-
-import * as ReactDOM from "react-dom/client";
-import { createBrowserRouter, RouterProvider, Router, BrowserRouter } from "react-router-dom";
 
 type Expense = {
     id: string;
@@ -28,7 +23,7 @@ type Expense = {
     value: number;
 };
 
-function App() {
+const MainPage = () => {
     const colorScheme = "dark";
     const [loggedIn, setLoggedIn] = useState<boolean>(false);
     const [data, setData] = useState<Array<Expense>>([]);
@@ -99,42 +94,29 @@ function App() {
     }, [reload, data]);
 
     return (
-            <BrowserRouter >
-        <MantineProvider theme={{ colorScheme: colorScheme }}>
-                <ToastContainer
-                    position="top-center"
-                    autoClose={5000}
-                    hideProgressBar
-                    newestOnTop
-                    closeOnClick={true}
-                    rtl={false}
-                    pauseOnFocusLoss
-                    draggable
-                    pauseOnHover={false}
-                    theme={colorScheme}
-                />
-                <CustomNavbar />
-
-                <div className="content">
-                    <AnimatedRoutes />
+        <div className="main-page">
+            <MantineProvider theme={{ colorScheme: colorScheme }}>
+                <div className="interface">
+                    <div className="overview">
+                        <Text
+                            size="xl"
+                            weight={700}
+                            style={{ marginBottom: "1rem" }}
+                        >
+                            Witaj w PocketPal!
+                        </Text>
+                        <BasicPieChart data={data} />
+                    </div>
+                    {data.length !== 0 && loggedIn ? (
+                        <HistoryComponent data={data} fetchData={fetchData} />
+                    ) : (
+                        <></>
+                    )}
                 </div>
-            {/* <div className="interface">
-        <div className="overview">
-        <Text
-        size="xl"
-        weight={700}
-        style={{marginBottom: "1rem"}}
-        >
-        Witaj w PocketPal!
-        </Text>
-        <BasicPieChart data={data}/>
+                {loggedIn ? <ExpenseAddingForm onUpdate={onUpdate} /> : <></>}
+            </MantineProvider>
         </div>
-        {(data.length !== 0 && loggedIn) ? <HistoryComponent data={data} fetchData={fetchData}/> : <></>}
-        </div>
-      { loggedIn ? <ExpenseAddingForm onUpdate={onUpdate}/> : <></>} */}
-        </MantineProvider>
-      </BrowserRouter>
     );
-}
+};
 
-export default App;
+export default MainPage;

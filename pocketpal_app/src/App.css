@@ -23,13 +23,12 @@
     min-width: 45vw;
     position: fixed;
     /* background-color: red !important; */
-    top:calc(50% - 250px);
-    left: 10px ;
+    top: calc(50% - 250px);
+    left: 10px;
     /* background-color: red; */
-
 }
 
-.pie-chart{
+.pie-chart {
     width: 45vw !important;
     /* background-color: blue; */
 }
@@ -48,22 +47,22 @@
         /* background-color: red; */
     }
 
-    .pie-chart{
+    .pie-chart {
         width: 100% !important;
         /* background-color: blue; */
     }
 
-    .history-list{
+    .history-list {
         width: 100% !important;
         /* background-color: green; */
     }
 }
 
-.random-data{
+.random-data {
     position: relative;
 }
 
-.interface-random-data{
+.interface-random-data {
     justify-content: center;
 }
 
@@ -93,17 +92,16 @@
     color: #fff; /* Zmień kolor tekstu na biały */
 }
 
-.authForm{
+.authForm {
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
 
-    
     min-width: 30vw;
 }
 
-.authInput{
+.authInput {
     width: 100%;
     min-width: 400px;
     margin: 0.5rem 0;
@@ -111,18 +109,17 @@
     position: relative;
 }
 
-.auth_log{
+.auth_log {
     position: relative;
     top: -65px;
-    
-    
+
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
     min-width: 30vw;
 }
-.close-button{
+.close-button {
     position: relative;
     top: -65px;
     left: 45%;
@@ -134,16 +131,15 @@
     padding: 0.6em 1.2em;
     cursor: pointer;
     transition: background-color 0.25s;
-    
 }
-.area_button{
+.area_button {
     display: flex;
     flex-direction: row;
     justify-content: center;
     align-items: center;
     gap: 1rem;
 }
-.Reg_form{
+.Reg_form {
     display: flex;
     flex-direction: column;
     justify-content: center;

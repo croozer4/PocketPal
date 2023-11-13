@@ -103,9 +103,6 @@ function BasicPieChart({ data }: { data: Array<Expense> }) {
         const randomData = generateRandomData();
         setPieChartData(randomData);
       }
-      else{
-
-      }
     };
 
     // Rozpocznij generowanie danych losowych co 3 sekundy
