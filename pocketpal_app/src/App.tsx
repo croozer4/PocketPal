@@ -91,7 +91,7 @@ function App() {
 
             if (user) {
                 setLoggedIn(true);
-                console.log(user);
+                // console.log(user);
             } else {
                 setLoggedIn(false);
             }

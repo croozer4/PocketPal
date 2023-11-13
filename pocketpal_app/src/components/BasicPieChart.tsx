@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { DefaultAlertTime } from "../config/globals.tsx";
-import { Timestamp, doc } from 'firebase/firestore';
+import { Timestamp } from 'firebase/firestore';
 import { auth } from "../config/firebase.tsx";
 import { ResponsivePie } from '@nivo/pie';
 
@@ -111,19 +111,23 @@ function BasicPieChart({ data }: { data: Array<Expense> }) {
     auth.onAuthStateChanged((user) => {
       if (user) {
         fetchData();
-        // Użytkownik jest zalogowany, więc nie generuj więcej danych losowych
-        setShouldGenerateRandomData(false);
 
-        // usuń z .pie-chart klasę .random-data
-        document.querySelector(".overview")?.classList.remove("random-data");
-        document.querySelector(".interface")?.classList.remove("interface-random-data");
+        setShouldGenerateRandomData(true);
+        updateRandomData();
 
+        if(data.length !== 0) {
+          setShouldGenerateRandomData(false);
+          document.querySelector(".overview")?.classList.remove("random-data");
+          document.querySelector(".interface")?.classList.remove("interface-random-data");
+        } else {
+          document.querySelector(".overview")?.classList.add("random-data");
+          document.querySelector(".interface")?.classList.add("interface-random-data");
+        }
       } else {
         setShouldGenerateRandomData(true);
         // dodaj do .pie-chart klasę .random-data
         document.querySelector(".overview")?.classList.add("random-data");
         document.querySelector(".interface")?.classList.add("interface-random-data");
-
 
         // Jeśli użytkownik nie jest zalogowany, generuj dane losowe
         updateRandomData();
@@ -134,6 +138,24 @@ function BasicPieChart({ data }: { data: Array<Expense> }) {
     return () => {
       clearInterval(intervalId);
     };
+  }, [data, shouldGenerateRandomData]);
+
+  useEffect(() => {
+    if (auth.currentUser) {
+      if(data.length !== 0) {
+        setShouldGenerateRandomData(false);
+        document.querySelector(".overview")?.classList.remove("random-data");
+        document.querySelector(".interface")?.classList.remove("interface-random-data");
+      } else {
+        document.querySelector(".overview")?.classList.add("random-data");
+        document.querySelector(".interface")?.classList.add("interface-random-data");
+      }
+    } else {
+      setShouldGenerateRandomData(true);
+      // dodaj do .pie-chart klasę .random-data
+      document.querySelector(".overview")?.classList.add("random-data");
+      document.querySelector(".interface")?.classList.add("interface-random-data");
+    }
   }, [data]);
 
   return (

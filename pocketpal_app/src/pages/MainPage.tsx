@@ -86,7 +86,7 @@ const MainPage = () => {
 
             if (user) {
                 setLoggedIn(true);
-                console.log(user);
+                // console.log(user);
             } else {
                 setLoggedIn(false);
             }
@@ -107,13 +107,11 @@ const MainPage = () => {
                         </Text>
                         <BasicPieChart data={data} />
                     </div>
-                    {data.length !== 0 && loggedIn ? (
+                    {data && data.length !== 0 && loggedIn &&
                         <HistoryComponent data={data} fetchData={fetchData} />
-                    ) : (
-                        <></>
-                    )}
+                    }
                 </div>
-                {loggedIn ? <ExpenseAddingForm onUpdate={onUpdate} /> : <></>}
+                {loggedIn && <ExpenseAddingForm onUpdate={onUpdate} />}
             </MantineProvider>
         </div>
     );
