@@ -168,7 +168,7 @@ function BasicPieChart({ data }: { data: Array<Expense> }) {
             weight={700}
             style={{ marginBottom: "1rem" }}
           >
-            Witaj w PocketPal!
+            
           </Text>
           <Text
             size="md"

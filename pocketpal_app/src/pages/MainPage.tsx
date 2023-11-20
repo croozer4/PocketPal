@@ -168,6 +168,7 @@ const MainPage = () => {
                             >
                                 
                             </Text>
+                            Witaj w PocketPal!
                             <BasicPieChart data={data} />
                         </div>
                     )}
