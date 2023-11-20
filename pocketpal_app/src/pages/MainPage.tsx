@@ -208,6 +208,7 @@ const MainPage = () => {
                                     >
                                         Brak danych do wyświetlenia
                                     </Text>
+                                    <BasicPieChart data={data} />
                                 </div>
                             )}
                         </div>
