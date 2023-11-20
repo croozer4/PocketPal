@@ -27,7 +27,35 @@
     left: 10px;
     padding-bottom: 30px;
     /* background-color: red; */
-    z-index: 5;
+    z-index: 1;
+}
+
+.react-datepicker-popper {
+    z-index: 10 !important;
+}
+
+.react-datepicker__header {
+    background-color: #3f3f3f !important;
+    color: #ffffff !important;
+    border: 0 !important;
+}
+
+.react-datepicker__month-text:hover {
+    background-color: #696969 !important;
+    color: #ffffff !important;
+    border: 0 !important;
+}
+
+.react-datepicker__triangle, .react-datepicker__triangle::after, .react-datepicker__triangle::before {
+    background-color: #3f3f3f !important;
+    color: #ffffff !important;
+    border: 0 !important;
+}
+
+.react-datepicker {
+    border: 0 !important;
+    background-color: #2f2f2f !important;
+    color: #ffffff !important;
 }
 
 .pie-chart {
@@ -199,7 +227,7 @@
     border-radius: 8px;
     border: 1px solid #333;
     outline: none;
-    
+    z-index: 10;
     text-align: center;
 }
 

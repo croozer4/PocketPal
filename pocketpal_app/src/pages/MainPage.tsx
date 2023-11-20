@@ -115,7 +115,7 @@ const MainPage = () => {
             <MantineProvider theme={{ colorScheme: colorScheme }}>
                 {loggedIn ? (
                     <div className="MonthPicker">
-                        <label htmlFor="month">Select Month: </label>
+                        <label id="month">Select Month: </label>
                         <DatePicker className="MonthPicker__input"
                             selected={new Date(selectedYear, selectedMonth - 1)}
                             onChange={(date: any) => {
@@ -126,6 +126,7 @@ const MainPage = () => {
                             }}
                             dateFormat="MM/yyyy"
                             showMonthYearPicker
+                            id="month"
                         />
                     </div>
                 ) : (
