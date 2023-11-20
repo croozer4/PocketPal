@@ -21,6 +21,8 @@ import "../styles/FamilyPageStyle.css";
 import JoinFamilyForm from "../components/JoinFamilyForm.tsx";
 import LeaveFamilyForm from "../components/LeaveFamilyForm.tsx";
 import RemoveFamilyForm from "../components/RemoveFamilyForm.tsx";
+import PeekMembersForm from "../components/PeekMembersButton.tsx";
+import { on } from "events";
 
 interface Family {
     id: string;
@@ -116,6 +118,7 @@ const FamilyPage = () => {
                             )}
                             {userFamily && (
                                 <>
+                                    <PeekMembersForm onUpdate={onUpdate} familyId={userFamily.id}/>
                                     {isAdmin && (
                                         <RemoveFamilyForm
                                             onUpdate={onUpdate}

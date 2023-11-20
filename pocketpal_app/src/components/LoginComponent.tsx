@@ -139,6 +139,7 @@ function LoginComponent({userPhotoURL}: LoginComponentProps) {
     } else {
       createUserWithEmailAndPassword(auth, email, password).then(async (userCredential) => {
         const userDocData = {
+          id: userCredential.user.uid,
           displayName: firstName + " " + lastName,
           email: email,
         };
