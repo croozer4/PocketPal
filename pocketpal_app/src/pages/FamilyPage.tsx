@@ -18,9 +18,14 @@ import {
 import { IconPhoto, IconDownload, IconArrowRight } from "@tabler/icons-react";
 
 import "../styles/FamilyPageStyle.css";
+import JoinFamilyForm from "../components/JoinFamilyForm.tsx";
 
 interface Family {
     name: string;
+    admins: string[];
+    createdBy: string;
+    inviteCode: string;
+    members: string[];
     // Dodaj inne właściwości, jeśli istnieją
 }
 
@@ -81,11 +86,12 @@ const FamilyPage = () => {
                 <div className="interface">
                     <div className="family-page-header">
                         <DisplayUserFamilies />
+                        <p>Invite Code: {userFamily?.inviteCode}</p>
                         <div className="family-buttons">
                             {!userFamily && (
                                 <>
                                     <FamilyAddingForm onUpdate={onUpdate} />
-                                    <Button>Dołącz do rodziny</Button>
+                                    <JoinFamilyForm onUpdate={onUpdate} />
                                 </>
                             )}
                             {userFamily && (
