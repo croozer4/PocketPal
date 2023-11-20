@@ -1,20 +1,23 @@
-import "../App.css";
-import CustomNavbar from "../components/NavbarComponent";
-import BasicPieChart from "../components/BasicPieChart";
-import { MantineProvider, Text } from "@mantine/core";
-import HistoryComponent from "../components/HistoryComponent.tsx";
-import ExpenseAddingForm from "../components/ExpenseAddingForm.tsx";
-import { toast, ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+import React, { useState, useEffect } from 'react';
+import { MantineProvider, Text, Button } from "@mantine/core";
+import { toast } from "react-toastify";
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
+import { render } from 'react-dom';
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 import { auth, db } from "../config/firebase.tsx";
 import { collection, query, where } from "firebase/firestore";
 import { getDocs } from "@firebase/firestore";
-import { useEffect, useState } from "react";
 import { DefaultAlertTime } from "../config/globals.tsx";
-import { Timestamp } from "firebase/firestore";
+import BasicPieChart from "../components/BasicPieChart";
+import HistoryComponent from "../components/HistoryComponent.tsx";
+import ExpenseAddingForm from "../components/ExpenseAddingForm.tsx";
+import { Timestamp } from "@firebase/firestore";
+import html2canvas from 'html2canvas';
 
-import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
+
+import "../App.css";
 
 type Expense = {
     id: string;
@@ -38,15 +41,15 @@ const MainPage = () => {
     const fetchData = async () => {
         try {
             const uid = auth.currentUser?.uid || null;
-    
+
             if (uid) {
                 const q = query(
                     collection(db, "usersData"),
                     where("user", "==", uid),
                 );
-    
+
                 const querySnapshot = await getDocs(q);
-    
+
                 const fetchedData = querySnapshot.docs.map((doc) => {
                     const docData = doc.data();
                     return {
@@ -59,7 +62,7 @@ const MainPage = () => {
                         value: docData.value,
                     };
                 });
-    
+
                 // Filtruj dane na podstawie wybranego miesiąca i roku
                 const filteredData = fetchedData.filter(item => {
                     const itemDate = new Date(item.creationDate.toMillis());
@@ -68,12 +71,12 @@ const MainPage = () => {
                         itemDate.getMonth() + 1 === selectedMonth
                     );
                 });
-    
+
                 setData(filteredData);
             }
-    
+
             setReload(false);
-    
+
         } catch (error) {
             console.error(error);
             toast.error("Wystąpił błąd podczas pobierania danych!", {
@@ -93,6 +96,60 @@ const MainPage = () => {
         fetchData(); // Fetch data directly on update
     };
 
+    const generatePDF = async () => {
+        try {
+            const pdf = new jsPDF();
+
+            // Dodaj tytuł do raportu
+            pdf.text(`Raport wydatków - ${selectedMonth}/${selectedYear}`, 14, 10);
+
+            // Poczekaj na zakończenie renderowania wykresu
+            const chartContainer = document.getElementById('chart-container');
+
+            //zmienie koloru arcLinkLabelsTextColor="#FFFFFF"
+
+            
+
+
+            const chartCanvas = await html2canvas(chartContainer!);
+
+            const chartImage = chartCanvas.toDataURL('image/png');
+
+            // Dodaj obraz z wykresem do raportu
+            pdf.addImage(chartImage, 'PNG', 30, 50, 150, 150);
+
+            // Przygotuj dane do tabeli
+            const tableData = data.map(item => [
+                item.category,
+                item.description || '-',
+                item.value.toFixed(2),
+            ]);
+
+            // Dodaj nagłówki do tabeli
+            const tableHeaders = ['Kategoria', 'Opis', 'Wartosci'];
+            (pdf as any).autoTable({
+                startY: 20,
+                head: [tableHeaders],
+                body: tableData,
+            });
+
+            // Zapisz PDF
+            pdf.save(`raport-${selectedMonth}-${selectedYear}.pdf`);
+        } catch (error) {
+            console.error(error);
+            toast.error("Wystąpił błąd podczas generowania raportu PDF!", {
+                position: "top-center",
+                autoClose: DefaultAlertTime,
+                hideProgressBar: true,
+                closeOnClick: true,
+                pauseOnHover: false,
+                draggable: true,
+                progress: undefined,
+                theme: "dark",
+            });
+        }
+    };
+
     useEffect(() => {
         auth.onAuthStateChanged((user) => {
             if (user) {
@@ -102,7 +159,7 @@ const MainPage = () => {
             }
         });
     }, [reload, data, selectedMonth, selectedYear]);
-    
+
     useEffect(() => {
         // Fetch data only when logged in
         if (loggedIn) {
@@ -120,7 +177,7 @@ const MainPage = () => {
                             selected={new Date(selectedYear, selectedMonth - 1)}
                             onChange={(date: any) => {
                                 console.log('Selected Date:', date);
-                                
+
                                 setSelectedMonth(date.getMonth() + 1);
                                 setSelectedYear(date.getFullYear());
                             }}
@@ -131,31 +188,25 @@ const MainPage = () => {
                 ) : (
                     <></>
                 )}
-                 <div className="interface">
+                <div className="interface">
                     {loggedIn ? (
                         <div className="overview">
                             {data.length !== 0 ? (
                                 <>
+                                    <div id="chart-container">
+                                        <BasicPieChart data={data} />
+                                    </div>
+
+                                </>
+                            ) : (
+                                <div className="no-data-message">
                                     <Text
                                         size="xl"
                                         weight={700}
                                         style={{ marginBottom: "1rem" }}
                                     >
-                                        
+                                        Brak danych do wyświetlenia
                                     </Text>
-                                    <BasicPieChart data={data} />
-                                </>
-                            ) : (
-                                <div className="no-data-message">
-                                    <Text
-                                size="xl"
-                                weight={700}
-                                style={{ marginBottom: "1rem" }}
-                            >
-                            Brak danych do wyświetlenia
-                            </Text>
-                            <BasicPieChart data={data} />
-
                                 </div>
                             )}
                         </div>
@@ -168,12 +219,15 @@ const MainPage = () => {
                             >
                                 Witaj w PocketPal!
                             </Text>
-                            
+
                             <BasicPieChart data={data} />
                         </div>
                     )}
                     {data.length !== 0 && loggedIn ? (
-                        <HistoryComponent data={data} fetchData={fetchData} />
+                        <div>
+                            <HistoryComponent data={data} fetchData={fetchData} />
+                            <Button className='raport_button' onClick={generatePDF}>Generuj raport PDF</Button>
+                        </div>
                     ) : (
                         <></>
                     )}
