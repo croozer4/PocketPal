@@ -19,8 +19,11 @@ import { IconPhoto, IconDownload, IconArrowRight } from "@tabler/icons-react";
 
 import "../styles/FamilyPageStyle.css";
 import JoinFamilyForm from "../components/JoinFamilyForm.tsx";
+import LeaveFamilyForm from "../components/LeaveFamilyForm.tsx";
+import RemoveFamilyForm from "../components/RemoveFamilyForm.tsx";
 
 interface Family {
+    id: string;
     name: string;
     admins: string[];
     createdBy: string;
@@ -32,10 +35,27 @@ interface Family {
 const FamilyPage = () => {
     const [reload, setReload] = useState<boolean>(true);
     const [userFamily, setUserFamily] = useState<Family | null>(null);
+    const [isAdmin, setIsAdmin] = useState<boolean>(false);
 
     const onUpdate = () => {
+        console.log("onUpdate");
         setReload(true);
+        window.location.reload();
     };
+
+    useEffect(() => {
+        if (auth.currentUser && userFamily?.createdBy) {
+          if (userFamily.createdBy === auth.currentUser.uid) {
+            setIsAdmin(true);
+            console.log("Admin");
+          } else {
+            console.log("Not Admin");
+          }
+          console.log(userFamily.createdBy);
+          console.log(auth.currentUser.uid);
+        }
+      }, [userFamily, auth.currentUser]);
+      
 
     const getFamily = async () => {
         const userId = await auth.currentUser?.uid;
@@ -96,8 +116,18 @@ const FamilyPage = () => {
                             )}
                             {userFamily && (
                                 <>
-                                    <Button color="red">Usuń rodzinę</Button>
-                                    <Button color="red">Opuść rodzinę</Button>
+                                    {isAdmin && (
+                                        <RemoveFamilyForm
+                                            onUpdate={onUpdate}
+                                            familyId={userFamily.id}
+                                        />
+                                    )}
+                                    {!isAdmin && (
+                                        <LeaveFamilyForm
+                                            onUpdate={onUpdate}
+                                            familyId={userFamily.id}
+                                        />
+                                    )}
                                 </>
                             )}
                         </div>

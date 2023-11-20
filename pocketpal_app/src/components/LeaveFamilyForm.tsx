@@ -26,7 +26,7 @@ import { useState } from "react";
 
 // import "../styles/FamilyAddingFormStyles.css";
 
-function JoinFamilyForm({ onUpdate }: { onUpdate: () => void }) {
+function LeaveFamilyForm({ onUpdate, familyId }: { onUpdate: () => void, familyId: string }) {
     const [opened, { open, close }] = useDisclosure(false);
     const [familyName, setFamilyName] = useState<string>("");
     const [inviteCode, setInviteCode] = useState<string>("");
@@ -37,7 +37,7 @@ function JoinFamilyForm({ onUpdate }: { onUpdate: () => void }) {
 
         const q = query(
             collection(db, "family"),
-            where("inviteCode", "==", inviteCode)
+            where("id", "==", familyId)
         );
 
         const querySnapshot = await getDocs(q);
@@ -49,7 +49,7 @@ function JoinFamilyForm({ onUpdate }: { onUpdate: () => void }) {
             const familyRef = doc(db, "family", familyId);
 
             await updateDoc(familyRef, {
-                members: [...familyData.members, auth.currentUser?.uid],
+                members: familyData.members.filter((member: string) => member !== auth.currentUser?.uid),
             });
 
             onUpdate();
@@ -58,20 +58,21 @@ function JoinFamilyForm({ onUpdate }: { onUpdate: () => void }) {
             console.log("Brak rodziny dla podanego kodu.");
         }
 
+        
         onUpdate();
         close();
     };
 
     return (
         <>
-            <Button onClick={open} className="add-family-button">
-                Dołącz do rodziny
+            <Button onClick={open} className="add-family-button" color="red">
+                Opuść rodzinę
             </Button>
             <Modal
                 opened={opened}
                 onClose={close}
                 size={"sm"}
-                title="Dołącz do rodziny"
+                title="Opuść rodzinę"
                 withinPortal={false}
                 classNames={{
                     inner: "modalInner",
@@ -82,14 +83,10 @@ function JoinFamilyForm({ onUpdate }: { onUpdate: () => void }) {
             >
                 <form>
                     <div className="family-adding-form">
-                        <TextInput
-                            // label="Nazwa rodziny"
-                            placeholder="Wpisz kod dostępu do rodziny"
-                            onChange={(e) => setInviteCode(e.currentTarget.value)}
-                            styles={{ root: { width: "100%" } }}
-                        />
 
-                        <Button type="submit" onClick={handleSubmit}>Dołącz</Button>
+                        <p>Czy na pewno chcesz <b>opuścić rodzinę?</b></p>
+
+                        <Button type="submit" onClick={handleSubmit} color="red">Opuść</Button>
                     </div>
                 </form>
             </Modal>
@@ -97,4 +94,4 @@ function JoinFamilyForm({ onUpdate }: { onUpdate: () => void }) {
     );
 }
 
-export default JoinFamilyForm;
+export default LeaveFamilyForm;

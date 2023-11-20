@@ -9,11 +9,14 @@ import {
 } from "@mantine/core";
 
 import { auth, projectFirestore } from "../config/firebase";
-import { collection, addDoc } from "firebase/firestore";
+import { collection, addDoc, doc } from "firebase/firestore";
 
-import { useState } from "react";
+import { useState, useId } from "react";
 
 import "../styles/FamilyAddingFormStyles.css";
+
+
+import {v4 as uuidv4} from 'uuid';
 
 function FamilyAddingForm({ onUpdate }: { onUpdate: () => void }) {
     const [opened, { open, close }] = useDisclosure(false);
@@ -25,6 +28,7 @@ function FamilyAddingForm({ onUpdate }: { onUpdate: () => void }) {
         event.preventDefault();
 
         await addDoc(collection(projectFirestore, "family"), {
+            id: uuidv4(),
             name: familyName,
             // wygeneruj losowy kod
             inviteCode: familyName + "-" + Math.random().toString(8).substring(2, 7),
@@ -37,6 +41,7 @@ function FamilyAddingForm({ onUpdate }: { onUpdate: () => void }) {
             
         });
 
+        onUpdate();
         close();
     }
 
