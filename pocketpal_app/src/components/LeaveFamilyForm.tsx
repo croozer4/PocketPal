@@ -59,7 +59,7 @@ function LeaveFamilyForm({ onUpdate, familyId }: { onUpdate: () => void, familyI
         }
 
         
-
+        onUpdate();
         close();
     };
 

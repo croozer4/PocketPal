@@ -23,6 +23,7 @@ import {
 
 import { auth, db } from "../config/firebase.tsx";
 import { useState } from "react";
+import { on } from "events";
 
 // import "../styles/FamilyAddingFormStyles.css";
 
@@ -58,6 +59,7 @@ function RemoveFamilyForm({ onUpdate, familyId }: { onUpdate: () => void, family
 
         
 
+        onUpdate();
         close();
     };
 

@@ -58,6 +58,7 @@ function JoinFamilyForm({ onUpdate }: { onUpdate: () => void }) {
             console.log("Brak rodziny dla podanego kodu.");
         }
 
+        onUpdate();
         close();
     };
 

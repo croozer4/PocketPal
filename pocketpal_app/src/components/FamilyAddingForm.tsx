@@ -41,6 +41,7 @@ function FamilyAddingForm({ onUpdate }: { onUpdate: () => void }) {
             
         });
 
+        onUpdate();
         close();
     }
 
