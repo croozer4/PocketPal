@@ -180,3 +180,39 @@
     background-color: #333;
     border: 0;
 }
+
+.MonthPicker{
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+    margin: 3rem 0;
+    z-index: 3;
+}
+
+.MonthPicker__input{
+    
+    padding: 0.5rem;
+    border-radius: 8px;
+    border: 1px solid #333;
+    outline: none;
+    
+    text-align: center;
+}
+
+.no-data-message {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin-top: 15vh;
+    height: 200px; /* Ustaw wysokość, aby komunikat był wyśrodkowany na ekranie */
+    z-index: -1;
+  }
+  
+  .no-data-message h1 {
+    font-size: 18px;
+    font-weight: 700;
+    color: #333; /* Kolor tekstu */
+  }

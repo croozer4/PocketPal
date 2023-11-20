@@ -13,6 +13,9 @@ import { useEffect, useState } from "react";
 import { DefaultAlertTime } from "../config/globals.tsx";
 import { Timestamp } from "firebase/firestore";
 
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+
 type Expense = {
     id: string;
     category: string;
@@ -29,38 +32,50 @@ const MainPage = () => {
     const [data, setData] = useState<Array<Expense>>([]);
     const [reload, setReload] = useState<boolean>(true);
 
+    const [selectedMonth, setSelectedMonth] = useState<number>(new Date().getMonth() + 1); // Current month
+    const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear()); // Current year
+
     const fetchData = async () => {
         try {
-            // pobierz wszystkie dokumenty z kolekcji 'usersData' z katalogu danego użytkownika
             const uid = auth.currentUser?.uid || null;
-
+    
             if (uid) {
                 const q = query(
                     collection(db, "usersData"),
-                    where("user", "==", uid)
+                    where("user", "==", uid),
                 );
+    
                 const querySnapshot = await getDocs(q);
-
-                const fetchedData: Array<Expense> = new Array<Expense>();
-
-                if (querySnapshot) {
-                    querySnapshot.forEach((doc) => {
-                        const docData = doc.data();
-                        fetchedData.push({
-                            id: doc.id,
-                            category: docData.category,
-                            creationDate: docData.creationDate,
-                            description: docData.description,
-                            type: docData.type,
-                            user: docData.user,
-                            value: docData.value,
-                        });
-                    });
-                }
-                setData(fetchedData);
+    
+                const fetchedData = querySnapshot.docs.map((doc) => {
+                    const docData = doc.data();
+                    return {
+                        id: doc.id,
+                        category: docData.category,
+                        creationDate: docData.creationDate,
+                        description: docData.description,
+                        type: docData.type,
+                        user: docData.user,
+                        value: docData.value,
+                    };
+                });
+    
+                // Filtruj dane na podstawie wybranego miesiąca i roku
+                const filteredData = fetchedData.filter(item => {
+                    const itemDate = new Date(item.creationDate.toMillis());
+                    return (
+                        itemDate.getFullYear() === selectedYear &&
+                        itemDate.getMonth() + 1 === selectedMonth
+                    );
+                });
+    
+                setData(filteredData);
             }
+    
             setReload(false);
+    
         } catch (error) {
+            console.error(error);
             toast.error("Wystąpił błąd podczas pobierania danych!", {
                 position: "top-center",
                 autoClose: DefaultAlertTime,
@@ -72,39 +87,97 @@ const MainPage = () => {
                 theme: "dark",
             });
         }
-    };
+    }
 
     const onUpdate = () => {
-        setReload(true);
+        fetchData(); // Fetch data directly on update
     };
 
     useEffect(() => {
         auth.onAuthStateChanged((user) => {
-            if (reload) {
-                fetchData().then();
-            }
-
             if (user) {
                 setLoggedIn(true);
-                // console.log(user);
             } else {
                 setLoggedIn(false);
             }
         });
-    }, [reload, data]);
+    }, [reload, data, selectedMonth, selectedYear]);
+    
+    useEffect(() => {
+        // Fetch data only when logged in
+        if (loggedIn) {
+            fetchData();
+        }
+    }, [selectedMonth, selectedYear, loggedIn]);
 
     return (
         <div className="main-page">
             <MantineProvider theme={{ colorScheme: colorScheme }}>
-                <div className="interface">
-                    <div className="overview">
-                        <BasicPieChart data={data} />
+                {loggedIn ? (
+                    <div className="MonthPicker">
+                        <label htmlFor="month">Select Month: </label>
+                        <DatePicker className="MonthPicker__input"
+                            selected={new Date(selectedYear, selectedMonth - 1)}
+                            onChange={(date: any) => {
+                                console.log('Selected Date:', date);
+                                
+                                setSelectedMonth(date.getMonth() + 1);
+                                setSelectedYear(date.getFullYear());
+                            }}
+                            dateFormat="MM/yyyy"
+                            showMonthYearPicker
+                        />
                     </div>
-                    {data && data.length !== 0 && loggedIn &&
+                ) : (
+                    <></>
+                )}
+                 <div className="interface">
+                    {loggedIn ? (
+                        <div className="overview">
+                            {data.length !== 0 ? (
+                                <>
+                                    <Text
+                                        size="xl"
+                                        weight={700}
+                                        style={{ marginBottom: "1rem" }}
+                                    >
+                                        
+                                    </Text>
+                                    <BasicPieChart data={data} />
+                                </>
+                            ) : (
+                                <div className="no-data-message">
+                                    <Text
+                                size="xl"
+                                weight={700}
+                                style={{ marginBottom: "1rem" }}
+                            >
+                            Brak danych do wyświetlenia
+                            </Text>
+                            <BasicPieChart data={data} />
+
+                                </div>
+                            )}
+                        </div>
+                    ) : (
+                        <div className="overview">
+                            <Text
+                                size="xl"
+                                weight={700}
+                                style={{ marginBottom: "1rem" }}
+                            >
+                                
+                            </Text>
+                            <BasicPieChart data={data} />
+                        </div>
+                    )}
+                    {data.length !== 0 && loggedIn ? (
                         <HistoryComponent data={data} fetchData={fetchData} />
-                    }
+                    ) : (
+                        <></>
+                    )}
                 </div>
-                {loggedIn && <ExpenseAddingForm onUpdate={onUpdate} />}
+                {loggedIn ? <ExpenseAddingForm onUpdate={onUpdate} /> : <></>}
             </MantineProvider>
         </div>
     );
