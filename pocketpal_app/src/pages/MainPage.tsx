@@ -166,9 +166,9 @@ const MainPage = () => {
                                 weight={700}
                                 style={{ marginBottom: "1rem" }}
                             >
-                                
+                                Witaj w PocketPal!
                             </Text>
-                            Witaj w PocketPal!
+                            
                             <BasicPieChart data={data} />
                         </div>
                     )}
