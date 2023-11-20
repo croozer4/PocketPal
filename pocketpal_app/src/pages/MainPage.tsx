@@ -116,7 +116,7 @@ const MainPage = () => {
             const chartImage = chartCanvas.toDataURL('image/png');
 
             // Dodaj obraz z wykresem do raportu
-            pdf.addImage(chartImage, 'PNG', 30, 50, 150, 150);
+            pdf.addImage(chartImage, 'PNG', 30, 30, 150, 150);
 
             // Przygotuj dane do tabeli
             const tableData = data.map(item => [
