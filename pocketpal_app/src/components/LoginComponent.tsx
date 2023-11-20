@@ -1,7 +1,7 @@
 import {useEffect, useState} from "react";
 import Auth from "./AuthenticationComponent.tsx"
 import {auth} from "../config/firebase";
-import {PasswordInput, TextInput, Button, Modal, UnstyledButton, Menu, Text, Divider} from "@mantine/core";
+import {PasswordInput, TextInput, Button, Modal, UnstyledButton, Menu, Text, Divider, NumberInput} from "@mantine/core";
 import "../styles/LoginComponentStyles.css";
 import {signInWithEmailAndPassword} from "firebase/auth";
 import {sendPasswordResetEmail} from "firebase/auth";
@@ -13,9 +13,9 @@ import {faUser, faUserPlus} from "@fortawesome/free-solid-svg-icons";
 import {DefaultAlertTime, QuickAlertTime} from "../config/globals.tsx";
 import {toast} from "react-toastify";
 import {updateProfile} from "firebase/auth";
-import {getFirestore, collection, addDoc} from "firebase/firestore";
+import {getFirestore, collection, addDoc, updateDoc, doc} from "firebase/firestore";
 import {AiOutlineMenu} from "react-icons/ai";
-import {IconLogout, IconUsers} from "@tabler/icons-react";
+import {IconArrowBack, IconArrowBigLeftLine, IconArrowLeft, IconLogout, IconUsers} from "@tabler/icons-react";
 import {Link} from "react-router-dom";
 
 interface LoginComponentProps {
@@ -38,11 +38,16 @@ function LoginComponent({userPhotoURL}: LoginComponentProps) {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
 
+  const [earnings, setEarnings] = useState(0);
+
   const db = getFirestore();
   const usersCollection = collection(db, "users");
 
-  const handleLogin = () => {
+  const handleBack = () => {
+    setSection("login");
+  }
 
+  const handleLogin = () => {
     if (!validateEmail(email)) {
       toast.error('Niepoprawny email!', {
         position: "top-center",
@@ -64,6 +69,57 @@ function LoginComponent({userPhotoURL}: LoginComponentProps) {
       const errorMessage = error.message;
       console.error(errorCode, errorMessage);
     });
+  }
+
+  const handleAddEarnings = async () => {
+    if (earnings <= 0) {
+      toast.error('Przychody muszą być większe od 0!', {
+        position: "top-center",
+        autoClose: QuickAlertTime,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: false,
+        draggable: true,
+        progress: undefined,
+        theme: "dark",
+      });
+
+      return;
+    }
+
+    const userDocData = {
+      earnings: earnings,
+    };
+
+    if(auth.currentUser) {
+      await updateDoc(doc(db, "users", auth.currentUser?.uid), userDocData)
+        .then(() => {
+          toast.success('Dodano przychody!', {
+            position: "top-center",
+            autoClose: DefaultAlertTime,
+            hideProgressBar: true,
+            closeOnClick: true,
+            pauseOnHover: false,
+            draggable: true,
+            progress: undefined,
+            theme: "dark",
+          });
+        })
+        .catch((error) => {
+          toast.error('Nie udało się dodać przychodów!', {
+            position: "top-center",
+            autoClose: DefaultAlertTime,
+            hideProgressBar: true,
+            closeOnClick: true,
+            pauseOnHover: false,
+            draggable: true,
+            progress: undefined,
+            theme: "dark",
+          });
+          console.error(error);
+        });
+      handleClose();
+    }
   }
 
   const handleRegister = () => {
@@ -316,18 +372,18 @@ function LoginComponent({userPhotoURL}: LoginComponentProps) {
           {loggedIn ? (
             <>
               {isMobile ? (
-                  <>
-                    <Menu.Divider/>
-                    <Menu.Item
-                      color={"blue"}
-                      icon={<IconUsers/>}
-                    >
-                      <Link to="/family">
-                        <Text>Rodzina</Text>
-                      </Link>
-                    </Menu.Item>
-                  </>
-                ) : ""}
+                <>
+                  <Menu.Divider/>
+                  <Menu.Item
+                    color={"blue"}
+                    icon={<IconUsers/>}
+                  >
+                    <Link to="/family">
+                      <Text>Rodzina</Text>
+                    </Link>
+                  </Menu.Item>
+                </>
+              ) : ""}
               <Menu.Divider/>
               <Menu.Item
                 color={"red"}
@@ -340,99 +396,132 @@ function LoginComponent({userPhotoURL}: LoginComponentProps) {
           ) : ""}
         </Menu.Dropdown>
       </Menu>
-      {loggedIn ? (
-        <Modal
-          opened={opened}
-          onClose={handleClose}
-          size={"lg"}
-          title="Logowanie"
-          classNames={{inner: "modalInner", content: "modalContent", header: "modalHeader", body: "modalBody"}}
-        >
-          <h4>Użytkownik zalogowany</h4>
-          {userPhotoURL ?
-            <img src={userPhotoURL} alt="User Profile" className="user-avatar-settings"/>
-            :
-            <FontAwesomeIcon icon={faUser} className="user-avatar-icon"/>
-          }
-          <p>{auth.currentUser?.displayName}</p>
-        </Modal>
-      ) : (
-        <>
-          {section === "login" && (
-            <Modal
-              opened={opened}
-              onClose={handleClose}
-              size={"md"}
-              title="Logowanie"
-              classNames={{inner: "modalInner", content: "modalContent", header: "modalHeader", body: "modalBody"}}
-            >
-              <Auth onClose={() => handleClose()}/>
-              <Divider my="xs" size="sm" label="Albo użyj emailu i hasła" labelPosition="center" variant={"dashed"}
-                       style={{width: "100%"}}/>
-              <TextInput required type="text" placeholder="Email" className="authInput"
-                         onChange={(e) => setEmail(e.target.value)}/>
-              <PasswordInput required placeholder="Hasło" className="authInput"
-                             onChange={(e) => setPassword(e.target.value)}/>
-
-              <div className="area_button">
-                <Button className="loginButton" color="blue" onClick={() => handleLogin()}>Zaloguj się</Button>
-                <Button color="dark" onClick={() => setSection("resetPassword")}>
-                  Zapomniałem hasła
-                </Button>
-              </div>
-            </Modal>
-          )}
-
-          {section === "register" && (
+      {loggedIn ?
+        (section !== "addEarnings" ? (
             <Modal
               opened={opened}
               onClose={handleClose}
               size={"lg"}
-              title="Rejestracja"
+              title="Profil"
               classNames={{inner: "modalInner", content: "modalContent", header: "modalHeader", body: "modalBody"}}
             >
-              <TextInput
-
-                type="text" required placeholder="Imię" className="authInput"
-                onChange={(e) => setFirstName(e.target.value)}/>
-              <TextInput
-                type="text" required placeholder="Nazwisko" className="authInput"
-                onChange={(e) => setLastName(e.target.value)}/>
-              <TextInput type="text" required placeholder="Email" className="authInput"
-                         onChange={(e) => setEmail(e.target.value)}/>
-              <PasswordInput required placeholder="Hasło" className="authInput"
-                             onChange={(e) => setPassword(e.target.value)}/>
-              <PasswordInput required placeholder="Powtórz hasło" className="authInput"
-                             onChange={(e) => setRepeatPassword(e.target.value)}/>
-              <div className="area_button">
-                <Button className="loginButton" onClick={() => handleRegister()}>Zarejestruj się</Button>
-                <Auth onClose={() => close()}/>
-              </div>
+              <h4>Użytkownik zalogowany</h4>
+              {userPhotoURL ?
+                <img src={userPhotoURL} alt="User Profile" className="user-avatar-settings"/>
+                :
+                <FontAwesomeIcon icon={faUser} className="user-avatar-icon"/>
+              }
+              <p>{auth.currentUser?.displayName}</p>
+              <Button color="blue" onClick={() => setSection("addEarnings")}>Dodaj swoje przychody</Button>
             </Modal>
-          )}
-
-          {section === "resetPassword" && (
+          ) : (
             <Modal
               opened={opened}
               onClose={handleClose}
-              size={"lg"}
-              title="Zresetuj hasło"
+              size={"sm"}
+              title={
+                <div style={{ display: "flex", flexDirection: "row", alignItems: "center"}}>
+                  <UnstyledButton
+                    color="blue"
+                    onClick={() => handleBack()}
+                    style={{marginRight: "1rem", display: "flex", alignItems: "center"}}
+                  >
+                    <IconArrowLeft/>
+                  </UnstyledButton>
+                  <Text size="lg">Dodaj swoje przychody</Text>
+                </div>
+              }
               classNames={{inner: "modalInner", content: "modalContent", header: "modalHeader", body: "modalBody"}}
             >
-              <TextInput required type="text" placeholder="Email" className="authInput"
-                         onChange={(e) => setEmail(e.target.value)}/>
-              <Button
-                color="blue"
-                onClick={() => {
-                  resetPassword();
-                }}
+              <div className="earningsInfo">
+                <NumberInput
+                  required
+                  placeholder="Podaj kwotę"
+                  className="authInput"
+                  onChange={(e) => setEarnings(Number(e))}
+                  rightSection={<Text size="sm">zł</Text>}
+                />
+                <Button color="blue" onClick={() => handleAddEarnings()}>Dodaj swoje przychody</Button>
+              </div>
+            </Modal>
+          )
+        ) : (
+          <>
+            {section === "login" && (
+              <Modal
+                opened={opened}
+                onClose={handleClose}
+                size={"md"}
+                title="Logowanie"
+                classNames={{inner: "modalInner", content: "modalContent", header: "modalHeader", body: "modalBody"}}
               >
-                Zresetuj hasło
-              </Button>
-            </Modal>
-          )}
-        </>
-      )}
+                <Auth onClose={() => handleClose()}/>
+                <Divider my="xs" size="sm" label="Albo użyj emailu i hasła" labelPosition="center" variant={"dashed"}
+                         style={{width: "100%"}}/>
+                <TextInput required type="text" placeholder="Email" className="authInput"
+                           onChange={(e) => setEmail(e.target.value)}/>
+                <PasswordInput required placeholder="Hasło" className="authInput"
+                               onChange={(e) => setPassword(e.target.value)}/>
+
+                <div className="area_button">
+                  <Button className="loginButton" color="blue" onClick={() => handleLogin()}>Zaloguj się</Button>
+                  <Button color="dark" onClick={() => setSection("resetPassword")}>
+                    Zapomniałem hasła
+                  </Button>
+                </div>
+              </Modal>
+            )}
+
+            {section === "register" && (
+              <Modal
+                opened={opened}
+                onClose={handleClose}
+                size={"lg"}
+                title="Rejestracja"
+                classNames={{inner: "modalInner", content: "modalContent", header: "modalHeader", body: "modalBody"}}
+              >
+                <TextInput
+
+                  type="text" required placeholder="Imię" className="authInput"
+                  onChange={(e) => setFirstName(e.target.value)}/>
+                <TextInput
+                  type="text" required placeholder="Nazwisko" className="authInput"
+                  onChange={(e) => setLastName(e.target.value)}/>
+                <TextInput type="text" required placeholder="Email" className="authInput"
+                           onChange={(e) => setEmail(e.target.value)}/>
+                <PasswordInput required placeholder="Hasło" className="authInput"
+                               onChange={(e) => setPassword(e.target.value)}/>
+                <PasswordInput required placeholder="Powtórz hasło" className="authInput"
+                               onChange={(e) => setRepeatPassword(e.target.value)}/>
+                <div className="area_button">
+                  <Button className="loginButton" onClick={() => handleRegister()}>Zarejestruj się</Button>
+                  <Auth onClose={() => close()}/>
+                </div>
+              </Modal>
+            )}
+
+            {section === "resetPassword" && (
+              <Modal
+                opened={opened}
+                onClose={handleClose}
+                size={"lg"}
+                title="Zresetuj hasło"
+                classNames={{inner: "modalInner", content: "modalContent", header: "modalHeader", body: "modalBody"}}
+              >
+                <TextInput required type="text" placeholder="Email" className="authInput"
+                           onChange={(e) => setEmail(e.target.value)}/>
+                <Button
+                  color="blue"
+                  onClick={() => {
+                    resetPassword();
+                  }}
+                >
+                  Zresetuj hasło
+                </Button>
+              </Modal>
+            )}
+          </>
+        )}
     </>
   );
 }
