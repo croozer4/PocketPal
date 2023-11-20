@@ -6,10 +6,11 @@
   <component name="ChangeListManager">
     <list default="true" id="48dae3d9-6259-46ea-8a80-270b114f56d1" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pocketpal_app/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/pocketpal_app/package-lock.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pocketpal_app/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/pocketpal_app/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pocketpal_app/src/App.css" beforeDir="false" afterPath="$PROJECT_DIR$/pocketpal_app/src/App.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pocketpal_app/src/components/BasicPieChart.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/pocketpal_app/src/components/BasicPieChart.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pocketpal_app/src/components/ExpenseAddingForm.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/pocketpal_app/src/components/ExpenseAddingForm.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/pocketpal_app/src/components/LoginComponent.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/pocketpal_app/src/components/LoginComponent.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pocketpal_app/src/styles/LoginComponentStyles.css" beforeDir="false" afterPath="$PROJECT_DIR$/pocketpal_app/src/styles/LoginComponentStyles.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pocketpal_app/src/components/NavbarComponent.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/pocketpal_app/src/components/NavbarComponent.tsx" afterDir="false" />
     </list>
     <list id="8be2b088-1ae8-48a2-938d-bcedee583f9e" name="Changes by Konrad" comment="" />
     <option name="SHOW_DIALOG" value="false" />
@@ -115,7 +116,7 @@
       <workItem from="1699905755637" duration="161000" />
       <workItem from="1700480987565" duration="63000" />
       <workItem from="1700481377219" duration="615000" />
-      <workItem from="1700482311766" duration="3312000" />
+      <workItem from="1700482311766" duration="6475000" />
     </task>
     <servers />
   </component>

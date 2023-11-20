@@ -20,6 +20,8 @@ function BasicPieChart({ data }: { data: Array<Expense> }) {
   const [pieChartData, setPieChartData] = useState<number[]>([0, 0, 0, 0, 0]);
   const [shouldGenerateRandomData, setShouldGenerateRandomData] = useState(true);
 
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+
   const categories = [
     {
       "id": "Jedzenie",
@@ -159,21 +161,26 @@ function BasicPieChart({ data }: { data: Array<Expense> }) {
     }
   }, [data]);
 
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+
+    window.addEventListener('resize', handleResize);
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []);
+
   return (
     <div style={{ height: "400px", zIndex: 1 }} className="pie-chart">
       {pieChartData.length !== 0 &&
         <>
           <Text
-            size="xl"
-            weight={700}
-            style={{ marginBottom: "1rem" }}
-          >
-            
-          </Text>
-          <Text
             size="md"
             weight={500}
-            style={{ marginBottom: "1rem" }}
+            style={{ marginBottom: "0.5rem" }}
           >
             Podsumowanie wydatków
           </Text>
@@ -181,7 +188,7 @@ function BasicPieChart({ data }: { data: Array<Expense> }) {
       }
       <ResponsivePie
         data={categories.filter((item) => item.value !== 0)}
-        margin={{ top: 40, right: 100, bottom: 80, left: 100 }}
+        margin={ isMobile ? { top: 20, right: 0, bottom: 80, left: 0 } : { top: 30, right: 95, bottom: 80, left: 95 }}
         tooltip={({ datum }) => (
           <div style={{ color: datum.color, padding: "3px 6px", borderRadius: "3px", backgroundColor: "#333333" }}>
             {datum.id}: {datum.value} zł
@@ -191,7 +198,7 @@ function BasicPieChart({ data }: { data: Array<Expense> }) {
         padAngle={0.7}
         cornerRadius={3}
         activeOuterRadiusOffset={8}
-        borderWidth={1}
+        borderWidth={0}
         borderColor={{
           from: 'color',
           modifiers: [
@@ -201,6 +208,7 @@ function BasicPieChart({ data }: { data: Array<Expense> }) {
             ]
           ]
         }}
+        enableArcLinkLabels={!isMobile}
         arcLinkLabelsSkipAngle={10}
         arcLinkLabelsTextColor="#FFFFFF"
         arcLinkLabelsThickness={2}
@@ -275,11 +283,12 @@ function BasicPieChart({ data }: { data: Array<Expense> }) {
             translateX: 0,
             translateY: 60,
             itemsSpacing: 5,
-            itemWidth: 60,
+            itemWidth: 50,
             itemHeight: 18,
             itemTextColor: '#EEEEEE',
             itemDirection: "top-to-bottom",
             itemOpacity: 1,
+            padding: isMobile ? 10 : 0,
             symbolSize: 18,
             symbolShape: 'circle',
             effects: [

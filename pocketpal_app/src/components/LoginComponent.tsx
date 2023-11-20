@@ -15,7 +15,7 @@ import {toast} from "react-toastify";
 import {updateProfile} from "firebase/auth";
 import {getFirestore, collection, addDoc, updateDoc, doc} from "firebase/firestore";
 import {AiOutlineMenu} from "react-icons/ai";
-import {IconArrowBack, IconArrowBigLeftLine, IconArrowLeft, IconLogout, IconUsers} from "@tabler/icons-react";
+import {IconArrowLeft, IconLogout, IconUsers} from "@tabler/icons-react";
 import {Link} from "react-router-dom";
 
 interface LoginComponentProps {

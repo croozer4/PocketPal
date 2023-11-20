@@ -1,6 +1,6 @@
 import { auth, projectFirestore } from "../config/firebase";
 import { collection, addDoc } from "firebase/firestore";
-import { useState } from "react";
+import React, {useEffect, useState} from "react";
 import {
     Select,
     NumberInput,
@@ -14,8 +14,10 @@ import { useDisclosure } from "@mantine/hooks";
 import "../styles/ExpenseAddingFormStyles.css";
 import { toast } from "react-toastify";
 import { QuickAlertTime } from "../config/globals.tsx";
+import {IconPlus} from "@tabler/icons-react";
 
 function ExpenseAddingForm({ onUpdate }: { onUpdate: () => void }) {
+    const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
     const [opened, { open, close }] = useDisclosure(false);
 
     const [InputValue, setInputValue] = useState<number>(); // Ustaw początkową wartość na 0
@@ -88,10 +90,23 @@ function ExpenseAddingForm({ onUpdate }: { onUpdate: () => void }) {
         onUpdate();
     };
 
+    useEffect(() => {
+        const handleResize = () => {
+            setIsMobile(window.innerWidth <= 768);
+        };
+
+        window.addEventListener('resize', handleResize);
+
+        return () => {
+            window.removeEventListener('resize', handleResize);
+        };
+    }, []);
+
     return (
         <>
-            <Button onClick={open} className={"modalButton"}>
-                Dodaj wydatek
+            <Button onClick={open} className={"modalButton"}
+            style={{ paddingLeft: isMobile ? "5px" : "20px", paddingRight: isMobile ? "5px" : "20px", borderRadius: isMobile ? "50%" : "0.25rem"}}>
+                { isMobile ? <IconPlus/> : "Dodaj wydatek"}
             </Button>
             <Modal
                 opened={opened}
