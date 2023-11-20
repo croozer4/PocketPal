@@ -1,41 +1,52 @@
-import React from "react";
-import { Accordion, Button, MantineProvider } from "@mantine/core";
+import React, { useState, useEffect } from "react";
+import { Accordion } from "@mantine/core";
 import { auth, db } from "../config/firebase.tsx";
-import { deleteDoc, doc, getDocs, where, query, collection, } from "@firebase/firestore";
+import { deleteDoc, doc, getDocs, where, query, collection, DocumentData } from "@firebase/firestore";
+
+import { Button } from "@mantine/core";
+interface Family {
+    name: string;
+    // Dodaj inne właściwości, jeśli istnieją
+}
 
 const DisplayUserFamilies = () => {
+    const [userFamily, setUserFamily] = useState<Family | null>(null);
 
-    const getFamilies = async () => {
-        const uid = auth.currentUser?.uid || null;
+    const getFamily = async () => {
+        const userId = auth.currentUser?.uid;
     
-        if (uid) {
-            const querySnapshot = await getDocs(
-                query(collection(db, "family"), where("members", "array-contains", uid))
-            );
+        if (userId) {
+            const q = query(collection(db, "family"), where("members", "array-contains", userId));
+            const querySnapshot = await getDocs(q);
     
-            querySnapshot.forEach((doc) => {
-                console.log(doc.id, " => ", doc.data());
-                // Tutaj możesz przetwarzać dane otrzymane z dokumentów rodziny
-            });
+            if (!querySnapshot.empty) {
+                const familyData = querySnapshot.docs[0].data() as Family;
+                setUserFamily(familyData);
+                // console.log(userFamily)
+            } else {
+                // Obsługa przypadku braku wyników
+                console.log("Brak rodziny dla bieżącego użytkownika.");
+            }
+        } else {
+            // Obsługa przypadku braku zalogowanego użytkownika
+            console.log("Brak zalogowanego użytkownika.");
         }
     }
+    
 
-    getFamilies();
+    useEffect(() => {
+        getFamily();
+    }, [auth.currentUser]);
 
     return (
         <div>
-            <h1>Display User Families</h1>
+            {userFamily && (
+                <p>Rodzina użytkownika: '{userFamily.name}'</p>
+            )}
 
-            {/* <Accordion.Item key={item.id} value={item.id}>
-                <Accordion.Control>
-                    {item.category} | {item.value}zł ({dateFormatted})
-                </Accordion.Control>
-                <Accordion.Panel></Accordion.Panel>
-            </Accordion.Item> */}
+            {/* <Button onClick={() => getFamily()}>Pobież dane rodziny</Button> */}
 
-            {/* lista rodzin */}
-
-            
+            {/* reszta komponentu */}
         </div>
     );
 };

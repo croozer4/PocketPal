@@ -64,6 +64,8 @@ function FamilyAddingForm({ onUpdate }: { onUpdate: () => void }) {
                             // label="Nazwa rodziny"
                             placeholder="Wpisz nazwę rodziny"
                             onChange={(e) => setFamilyName(e.currentTarget.value)}
+                            className="family-name-input"
+                            styles={{ root: { width: "100%" } }}
                         />
 
                         <Button type="submit" onClick={handleSubmit}>Stwórz</Button>
