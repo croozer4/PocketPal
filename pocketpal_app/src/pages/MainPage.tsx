@@ -104,19 +104,19 @@ const MainPage = () => {
             pdf.text(`Raport wydatków - ${selectedMonth}/${selectedYear}`, 14, 10);
 
             // Poczekaj na zakończenie renderowania wykresu
-            const chartContainer = document.getElementById('chart-container');
+            // const chartContainer = document.getElementById('chart-container');
 
             //zmienie koloru arcLinkLabelsTextColor="#FFFFFF"
 
             
 
 
-            const chartCanvas = await html2canvas(chartContainer!);
+            // const chartCanvas = await html2canvas(chartContainer!);
 
-            const chartImage = chartCanvas.toDataURL('image/png');
+            // const chartImage = chartCanvas.toDataURL('image/png');
 
             // Dodaj obraz z wykresem do raportu
-            pdf.addImage(chartImage, 'PNG', 30, 30, 150, 150);
+            // pdf.addImage(chartImage, 'PNG', 30, 30, 150, 150);
 
             // Przygotuj dane do tabeli
             const tableData = data.map(item => [
