@@ -1,6 +1,6 @@
 import { useDisclosure } from "@mantine/hooks";
 import { Modal, Button } from "@mantine/core";
-import { getDocs, where, query, collection } from "@firebase/firestore";
+import { getDocs, getDoc, where, query, collection, doc } from "@firebase/firestore";
 import { db } from "../config/firebase.tsx";
 import { useEffect, useState } from "react";
 
@@ -20,53 +20,52 @@ function PeekMembersForm({
 
     useEffect(() => {
         const getMembers = async () => {
-            // console.log("peek members getting names for " + familyId);
             const q = query(
                 collection(db, "family"),
                 where("id", "==", familyId)
             );
-
+    
             const querySnapshot = await getDocs(q);
-
+    
             if (!querySnapshot.empty) {
                 const familyData = querySnapshot.docs[0].data();
                 setMembers(familyData.members);
-
+    
                 const memberNamesPromises = familyData.members.map(
-                    async (member) => {
-                        const userQuery = query(
-                            collection(db, "users"),
-                            where("id", "==", member)
-                        );
-
-                        const userQuerySnapshot = await getDocs(userQuery);
-
-                        if (!userQuerySnapshot.empty) {
-                            const userData = userQuerySnapshot.docs[0].data();
-                            return userData.displayName;
-                        } else {
-                            console.log("Brak użytkownika dla podanego id.");
-                            return ""; // or handle the case when the user is not found
+                    async (member: any) => {
+                        const userQuery = doc(db, "users", member);
+    
+                        try {
+                            const userQuerySnapshot = await getDoc(userQuery);
+    
+                            if (userQuerySnapshot.exists()) {
+                                const userData = userQuerySnapshot.data();
+                                return userData.displayName;
+                            } else {
+                                console.log("Brak użytkownika dla podanego id.");
+                                return "";
+                            }
+                        } catch (error) {
+                            console.error("Błąd podczas pobierania danych użytkownika:", error);
+                            return "";
                         }
                     }
                 );
-
+    
                 const resolvedMemberNames = await Promise.all(
                     memberNamesPromises
                 );
-
-                // console.log("Members:", familyData.members);
-                // console.log("Member Names:", resolvedMemberNames);
-
+    
                 setMemberNames(resolvedMemberNames);
                 setMembersReady(true);
             } else {
                 console.log("Brak rodziny dla podanego kodu.");
             }
         };
-
+    
         getMembers();
     }, [familyId, opened]);
+    
 
     return (
         <>
