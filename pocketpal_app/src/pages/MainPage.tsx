@@ -18,6 +18,7 @@ import html2canvas from 'html2canvas';
 
 
 import "../App.css";
+import { display } from 'html2canvas/dist/types/css/property-descriptors/display';
 
 type Expense = {
     id: string;
@@ -27,6 +28,8 @@ type Expense = {
     type: boolean;
     user: string;
     value: number;
+    earnings?: number;
+    displayName?: string;
 };
 
 const MainPage = () => {
@@ -41,16 +44,30 @@ const MainPage = () => {
     const fetchData = async () => {
         try {
             const uid = auth.currentUser?.uid || null;
-
+    
             if (uid) {
-                const q = query(
+                // Zapytanie do kolekcji 'usersData' (wydatki)
+                const expensesQuery = query(
                     collection(db, "usersData"),
                     where("user", "==", uid),
                 );
-
-                const querySnapshot = await getDocs(q);
-
-                const fetchedData = querySnapshot.docs.map((doc) => {
+    
+                const expensesSnapshot = await getDocs(expensesQuery);
+    
+                // Zapytanie do kolekcji 'users' (dane użytkownika)
+                const userQuery = query(
+                    collection(db, "users"),
+                    where("email", "==", auth.currentUser?.email),
+                );
+    
+                const userSnapshot = await getDocs(userQuery);
+                const userData = userSnapshot.docs[0]?.data() || {};
+    
+                // Pobierz zarobki z danych użytkownika
+                const earnings = userData.earnings || 0;
+                const displayName = userData.displayName || "";
+    
+                const fetchedData = expensesSnapshot.docs.map((doc) => {
                     const docData = doc.data();
                     return {
                         id: doc.id,
@@ -60,9 +77,11 @@ const MainPage = () => {
                         type: docData.type,
                         user: docData.user,
                         value: docData.value,
+                        earnings: earnings,
+                        displayName: displayName,
                     };
                 });
-
+    
                 // Filtruj dane na podstawie wybranego miesiąca i roku
                 const filteredData = fetchedData.filter(item => {
                     const itemDate = new Date(item.creationDate.toMillis());
@@ -71,12 +90,12 @@ const MainPage = () => {
                         itemDate.getMonth() + 1 === selectedMonth
                     );
                 });
-
+    
                 setData(filteredData);
             }
-
+    
             setReload(false);
-
+    
         } catch (error) {
             console.error(error);
             toast.error("Wystąpił błąd podczas pobierania danych!", {
@@ -99,49 +118,65 @@ const MainPage = () => {
     const generatePDF = async () => {
         try {
             const pdf = new jsPDF();
-
-            // Dodaj tytuł do raportu
-            pdf.text(`Raport wydatków - ${selectedMonth}/${selectedYear}`, 14, 10);
-
-            // Poczekaj na zakończenie renderowania wykresu
-            // const chartContainer = document.getElementById('chart-container');
-
-            //zmienie koloru arcLinkLabelsTextColor="#FFFFFF"
+    
+            // Dodaj tytuł do raportu z diseplayName i datą
+            pdf.setFontSize(20);
+            pdf.text(`Raport dla ${data[0]?.displayName} z ${selectedMonth}/${selectedYear}`, 10, 10);
 
 
-
-
-            // const chartCanvas = await html2canvas(chartContainer!);
-
-            // const chartImage = chartCanvas.toDataURL('image/png');
-
-            // Dodaj obraz z wykresem do raportu
-            // pdf.addImage(chartImage, 'PNG', 30, 30, 150, 150);
-
-            // Przygotuj dane do tabeli
-            const tableData = data.map(item => [
+    
+            // Przygotuj dane do pierwszej tabeli (wydatki)
+            const expenseTableData = data.map(item => [
                 item.category,
                 item.description || '-',
                 item.value.toFixed(2),
             ]);
-
+    
             // Dodaj łączną sumę wydatków
             const totalExpense = data.reduce((sum, item) => sum + item.value, 0);
-            const totalRow = ['Suma', '', totalExpense.toFixed(2)];
-            tableData.push(totalRow);
-
-            
-
-            // Dodaj nagłówki do tabeli
-            const tableHeaders = ['Kategoria', 'Opis', 'Wartosci'];
+            const totalExpenseRow = ['Suma', '', totalExpense.toFixed(2)];
+            expenseTableData.push(totalExpenseRow);
+    
+            // Dodaj nagłówki do pierwszej tabeli
+            const expenseTableHeaders = ['Kategoria', 'Opis', 'Wartosci'];
             (pdf as any).autoTable({
                 startY: 20,
-                head: [tableHeaders],
-                body: tableData,
+                head: [expenseTableHeaders],
+                body: expenseTableData,
+            });
+    
+
+            // Dodaj odstęp między tabelami
+            pdf.addPage();
+
+            // Przygotuj dane do trzeciej tabeli (earnings)
+            const earningsTableData2: (string | number)[][] = [
+                [
+                    data[0]?.earnings ? data[0].earnings.toFixed(2) : '-',
+                    totalExpense.toFixed(2),
+                    (
+                        (data[0]?.earnings
+                            ? parseFloat(data[0].earnings.toFixed(2))
+                            : 0) - parseFloat(totalExpense.toFixed(2))
+                    ).toFixed(2),
+                ],
+            ];
+            
+
+            // Dodaj nagłówki do trzeciej tabeli
+            const earningsTableHeaders2 = ['Zarobki', 'Wydatki', 'Roznica'];
+            (pdf as any).autoTable({
+                startY: 20,
+                head: [earningsTableHeaders2],
+                body: earningsTableData2,
             });
 
 
 
+            
+
+
+    
             // Zapisz PDF
             pdf.save(`raport-${selectedMonth}-${selectedYear}.pdf`);
         } catch (error) {
