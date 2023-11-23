@@ -61,6 +61,7 @@
 .pie-chart {
     width: 45vw !important;
     /* background-color: blue; */
+    z-index: 2;
 }
 
 @media (max-width: 768px) {

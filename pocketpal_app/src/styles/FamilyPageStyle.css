@@ -3,19 +3,21 @@
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
-    padding: 10px;
+    padding: 0 10px;
     height: 60px;
     /* background-color: #1f2c34; */
     border-radius: 90px;
     /* border-bottom: 1px solid #1f2c34; */
-    width: calc(100vw - 30px);
+    width: calc(100vw - 35px);
     position: fixed;
-    top: 60px;
+    bottom: 10px;
     left: 10px;
-    background-color: #242424;
+    /* background-color: #242424; */
     /* background-color: red; */
     border-radius: 20px;
     flex-wrap: wrap;
+    z-index: 2;
+}
 
 .family-buttons{
     display: flex;

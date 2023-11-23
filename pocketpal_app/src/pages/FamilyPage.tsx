@@ -4,7 +4,7 @@ import { Button } from "@mantine/core";
 import { MantineProvider, Text } from "@mantine/core";
 import FamilyAddingForm from "../components/FamilyAddingForm.tsx";
 import DisplayUserFamilies from "../components/DisplayUserFamilies.tsx";
-import { auth, db } from "../config/firebase.tsx";
+import { auth, db, projectFirestore } from "../config/firebase.tsx";
 import {
     deleteDoc,
     doc,
@@ -14,6 +14,8 @@ import {
     query,
     collection,
     DocumentData,
+    addDoc,
+    updateDoc,
 } from "@firebase/firestore";
 
 import { IconPhoto, IconDownload, IconArrowRight } from "@tabler/icons-react";
@@ -32,7 +34,16 @@ import { DefaultAlertTime, QuickAlertTime } from "../config/globals.tsx";
 import { Timestamp } from "firebase/firestore";
 import HistoryComponent from "../components/HistoryComponent.tsx";
 
+import { Modal } from "@mantine/core";
+
 import BasicPieChart from "../components/BasicPieChart.tsx";
+import { TextInput } from "@mantine/core";
+import { v4 as uuidv4 } from "uuid";
+
+import "../styles/FamilyAddingFormStyles.css";
+import "../styles/PeekMembersStyle.css";
+
+import ExpenseAddingForm from "../components/ExpenseAddingForm.tsx";
 
 interface Family {
     id: string;
@@ -70,10 +81,160 @@ const FamilyPage = () => {
 
     const [familyData, setFamilyData] = useState<Array<Expense>>([]);
 
+    const [opened, { open, close }] = useDisclosure(false);
+    const [section, setSection] = useState<string>("overview");
+
+    const [familyName, setFamilyName] = useState<string>("");
+    const [inviteCode, setInviteCode] = useState<string>("");
+
+    // const [members, setMembers] = useState<string[]>([]);
+    const [memberNames, setMemberNames] = useState<string[]>([]);
+    const [membersReady, setMembersReady] = useState<boolean>(false);
+
     const onUpdate = () => {
         console.log("onUpdate");
         setReload(true);
         window.location.reload();
+    };
+
+    const handleOpenModal = (section: string) => {
+        setSection(section);
+        setTimeout(() => {
+            open();
+        }, 1);
+    };
+
+    useEffect(() => {
+        const getFamilyNames = async () => {
+            let memberNames: string[] = [];
+            for (const member of members) {
+                const q = doc(db, "users", member);
+                const querySnapshot = await getDoc(q);
+                if (querySnapshot.exists()) {
+                    const memberData = querySnapshot.data().displayName;
+                    memberNames.push(memberData);
+                } else {
+                    // Obsługa przypadku braku wyników
+                    console.log("Brak użytkownika dla podanego id.");
+                }
+            }
+            setMemberNames(memberNames);
+        };
+
+        if (members.length > 0) {
+            getFamilyNames();
+        }
+    }, [members]);
+
+    const handleAddFamily = async (event: React.FormEvent) => {
+        event.preventDefault();
+
+        await addDoc(collection(projectFirestore, "family"), {
+            id: uuidv4(),
+            name: familyName,
+            // wygeneruj losowy kod
+            inviteCode:
+                familyName + "-" + Math.random().toString(8).substring(2, 7),
+            // dodaj użytkownika, który stworzył rodzinę
+            createdBy: auth.currentUser?.uid,
+            // dodaj użytkownika, który stworzył rodzinę jako admin
+            admins: [auth.currentUser?.uid],
+            // dodaj użytkownika, który stworzył rodzinę jako członek
+            members: [auth.currentUser?.uid],
+        });
+
+        onUpdate();
+        close();
+    };
+
+    const handleJoinFamily = async (event: React.FormEvent) => {
+        event.preventDefault();
+
+        const q = query(
+            collection(db, "family"),
+            where("inviteCode", "==", inviteCode)
+        );
+
+        const querySnapshot = await getDocs(q);
+
+        if (!querySnapshot.empty) {
+            const familyData = querySnapshot.docs[0].data();
+            const familyId = querySnapshot.docs[0].id;
+
+            const familyRef = doc(db, "family", familyId);
+
+            await updateDoc(familyRef, {
+                members: [...familyData.members, auth.currentUser?.uid],
+            });
+
+            onUpdate();
+        } else {
+            // Obsługa przypadku braku wyników
+            console.log("Brak rodziny dla podanego kodu.");
+        }
+
+        onUpdate();
+        close();
+    };
+
+    const handleRemoveFamily = async (event: React.FormEvent) => {
+        event.preventDefault();
+
+        const q = query(
+            collection(db, "family"),
+            where("id", "==", userFamily?.id)
+        );
+
+        const querySnapshot = await getDocs(q);
+
+        if (!querySnapshot.empty) {
+            const familyData = querySnapshot.docs[0].data();
+            const familyId = querySnapshot.docs[0].id;
+
+            const familyRef = doc(db, "family", familyId);
+
+            await deleteDoc(familyRef);
+
+            onUpdate();
+        } else {
+            // Obsługa przypadku braku wyników
+            console.log("Brak rodziny dla podanego kodu.");
+        }
+
+        onUpdate();
+        close();
+    };
+
+    const handleLeaveFamily = async (event: React.FormEvent) => {
+        event.preventDefault();
+
+        const q = query(
+            collection(db, "family"),
+            where("id", "==", userFamily?.id)
+        );
+
+        const querySnapshot = await getDocs(q);
+
+        if (!querySnapshot.empty) {
+            const familyData = querySnapshot.docs[0].data();
+            const familyId = querySnapshot.docs[0].id;
+
+            const familyRef = doc(db, "family", familyId);
+
+            await updateDoc(familyRef, {
+                members: familyData.members.filter(
+                    (member: string) => member !== auth.currentUser?.uid
+                ),
+            });
+
+            onUpdate();
+        } else {
+            // Obsługa przypadku braku wyników
+            console.log("Brak rodziny dla podanego kodu.");
+        }
+
+        onUpdate();
+        close();
     };
 
     useEffect(() => {
@@ -299,7 +460,7 @@ const FamilyPage = () => {
             <MantineProvider theme={{ colorScheme: colorScheme }}>
                 <div className="interface">
                     <div className="family-page-header">
-                        <Menu shadow="md" width={200}>
+                        <Menu shadow="md" width={200} position="top-start">
                             <Menu.Target>
                                 <Button>
                                     Rodzina:{" "}
@@ -309,20 +470,76 @@ const FamilyPage = () => {
                                 </Button>
                             </Menu.Target>
 
-                            {userFamily && (
-                                <Menu.Dropdown>
-                                    <Menu.Label>
-                                        Kod: {userFamily?.inviteCode}
-                                    </Menu.Label>
-                                    <Menu.Item onClick={() => CopyInviteCode()}>
-                                        Kopiuj do schowka
+                            {/* {auth.currentUser && ( */}
+                            <Menu.Dropdown>
+                                {userFamily && (
+                                    <>
+                                        <Menu.Label>
+                                            Kod: {userFamily?.inviteCode}
+                                        </Menu.Label>
+                                        <Menu.Item
+                                            onClick={() => CopyInviteCode()}
+                                        >
+                                            Kopiuj do schowka
+                                        </Menu.Item>
+                                        <Menu.Divider />
+                                    </>
+                                )}
+                                {!userFamily && (
+                                    <>
+                                        <Menu.Item
+                                            onClick={() =>
+                                                handleOpenModal("addFamily")
+                                            }
+                                        >
+                                            Stwórz rodzinę
+                                        </Menu.Item>
+
+                                        <Menu.Item
+                                            onClick={() =>
+                                                handleOpenModal("joinFamily")
+                                            }
+                                        >
+                                            Dołącz do rodziny
+                                        </Menu.Item>
+                                    </>
+                                )}
+
+                                {userFamily && (
+                                    <Menu.Item
+                                        onClick={() =>
+                                            handleOpenModal("peekMembers")
+                                        }
+                                    >
+                                        Pokaż członków
                                     </Menu.Item>
-                                </Menu.Dropdown>
-                            )}
+                                )}
+
+                                {isAdmin && (
+                                    <Menu.Item
+                                        onClick={() =>
+                                            handleOpenModal("removeFamily")
+                                        }
+                                    >
+                                        Usuń rodzinę
+                                    </Menu.Item>
+                                )}
+
+                                {userFamily && !isAdmin && (
+                                    <Menu.Item
+                                        onClick={() =>
+                                            handleOpenModal("leaveFamily")
+                                        }
+                                    >
+                                        Opuść rodzinę
+                                    </Menu.Item>
+                                )}
+                            </Menu.Dropdown>
+                            {/* )} */}
                         </Menu>
 
                         <div className="family-buttons">
-                            {!userFamily && (
+                            {/* {!userFamily && (
                                 <>
                                     <FamilyAddingForm onUpdate={onUpdate} />
                                     <JoinFamilyForm onUpdate={onUpdate} />
@@ -347,7 +564,7 @@ const FamilyPage = () => {
                                         />
                                     )}
                                 </>
-                            )}
+                            )} */}
                         </div>
                     </div>
                     {loggedIn ? (
@@ -402,6 +619,171 @@ const FamilyPage = () => {
                         <></>
                     )}
                 </div>
+
+                {section === "addFamily" && (
+                    <Modal
+                        opened={opened}
+                        onClose={close}
+                        size={"sm"}
+                        title="Stwórz rodzinę"
+                        withinPortal={false}
+                        classNames={{
+                            inner: "modalInner",
+                            content: "modalContent",
+                            header: "modalHeader",
+                        }}
+                        centered
+                    >
+                        <form>
+                            <div className="family-adding-form">
+                                <TextInput
+                                    // label="Nazwa rodziny"
+                                    placeholder="Wpisz nazwę rodziny"
+                                    onChange={(e) =>
+                                        setFamilyName(e.currentTarget.value)
+                                    }
+                                    className="family-name-input"
+                                    styles={{ root: { width: "100%" } }}
+                                />
+
+                                <Button type="submit" onClick={handleAddFamily}>
+                                    Stwórz
+                                </Button>
+                            </div>
+                        </form>
+                    </Modal>
+                )}
+
+                {section === "joinFamily" && (
+                    <Modal
+                        opened={opened}
+                        onClose={close}
+                        size={"sm"}
+                        title="Dołącz do rodziny"
+                        withinPortal={false}
+                        classNames={{
+                            inner: "modalInner",
+                            content: "modalContent",
+                            header: "modalHeader",
+                        }}
+                        centered
+                    >
+                        <form>
+                            <div className="family-adding-form">
+                                <TextInput
+                                    // label="Nazwa rodziny"
+                                    placeholder="Wpisz kod dostępu do rodziny"
+                                    onChange={(e) =>
+                                        setInviteCode(e.currentTarget.value)
+                                    }
+                                    styles={{ root: { width: "100%" } }}
+                                />
+
+                                <Button
+                                    type="submit"
+                                    onClick={handleJoinFamily}
+                                >
+                                    Dołącz
+                                </Button>
+                            </div>
+                        </form>
+                    </Modal>
+                )}
+
+                {section === "peekMembers" && (
+                    <Modal
+                        opened={opened}
+                        onClose={close}
+                        size={"sm"}
+                        title="Członkowie rodziny"
+                        withinPortal={false}
+                        classNames={{
+                            inner: "modalInner",
+                            content: "modalContent",
+                            header: "modalHeader",
+                        }}
+                        centered
+                    >
+                        <form>
+                            <div className="peek-members-div">
+                                {/* member names */}
+                                <ul>
+                                    {members &&
+                                        memberNames.map((memberName, index) => (
+                                            // <li><Button key={index} fullWidth>{memberName}</Button></li>
+                                            <li key={index}>{memberName}</li>
+                                        ))}
+                                </ul>
+                            </div>
+                        </form>
+                    </Modal>
+                )}
+
+                {section === "removeFamily" && (
+                    <Modal
+                        opened={opened}
+                        onClose={close}
+                        size={"sm"}
+                        title="Opuść rodzinę"
+                        withinPortal={false}
+                        classNames={{
+                            inner: "modalInner",
+                            content: "modalContent",
+                            header: "modalHeader",
+                        }}
+                        centered
+                    >
+                        <form>
+                            <div className="family-adding-form">
+                                <p>
+                                    Czy na pewno chcesz <b>usunąć rodzinę?</b>
+                                </p>
+
+                                <Button
+                                    type="submit"
+                                    onClick={handleRemoveFamily}
+                                    color="red"
+                                >
+                                    Usuń
+                                </Button>
+                            </div>
+                        </form>
+                    </Modal>
+                )}
+
+                {section === "leaveFamily" && (
+                    <Modal
+                        opened={opened}
+                        onClose={close}
+                        size={"sm"}
+                        title="Opuść rodzinę"
+                        withinPortal={false}
+                        classNames={{
+                            inner: "modalInner",
+                            content: "modalContent",
+                            header: "modalHeader",
+                        }}
+                        centered
+                    >
+                        <form>
+                            <div className="family-adding-form">
+                                <p>
+                                    Czy na pewno chcesz <b>opuścić rodzinę?</b>
+                                </p>
+
+                                <Button
+                                    type="submit"
+                                    onClick={handleLeaveFamily}
+                                    color="red"
+                                >
+                                    Opuść
+                                </Button>
+                            </div>
+                        </form>
+                    </Modal>
+                )}
+
+                {loggedIn ? <ExpenseAddingForm onUpdate={onUpdate} /> : <></>}
             </MantineProvider>
         </div>
     );
