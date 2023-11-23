@@ -51,10 +51,12 @@ export function CustomNavbar() {
     <>
       <nav className="navbar">
         {/* <Router> */}
-          <div className="logoContainer">
-            <img src={logo} alt="PocketPal logo" className="logo"/>
-            <Text size={'xl'}>PocketPal</Text>
-          </div>
+          <Link to="/" style={{color: "white"}}>
+            <div className="logoContainer">
+              <img src={logo} alt="PocketPal logo" className="logo"/>
+              <Text size={'xl'}>PocketPal</Text>
+            </div>
+          </Link>
           <div className="navbarContent">
             {isMobile ? (
               <>

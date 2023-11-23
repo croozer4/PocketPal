@@ -16,8 +16,8 @@ type Expense = {
   value: number;
 }
 
-function BasicPieChart({ data }: { data: Array<Expense> }) {
-  const [pieChartData, setPieChartData] = useState<number[]>([0, 0, 0, 0, 0]);
+function BasicPieChart({ data, earnings }: { data: Array<Expense>, earnings: number }) {
+  const [pieChartData, setPieChartData] = useState<number[]>([0, 0, 0, 0, 0, 0]);
   const [shouldGenerateRandomData, setShouldGenerateRandomData] = useState(true);
 
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
@@ -52,6 +52,12 @@ function BasicPieChart({ data }: { data: Array<Expense> }) {
       "label": "Opłaty",
       "value": pieChartData ? pieChartData[4] : 0,
       "color": "hsl(93,100%,46%)"
+    },
+    {
+      "id": "Pozostałe środki",
+      "label": "Środki",
+      "value": pieChartData ? pieChartData[5] : 0,
+      "color": "hsl(0,100%,50%)"
     }
   ];
 
@@ -66,7 +72,7 @@ function BasicPieChart({ data }: { data: Array<Expense> }) {
   useEffect(() => {
     const fetchData = (): boolean => {
       try {
-        const pieChartDataTemp: number[] = [0, 0, 0, 0, 0];
+        const pieChartDataTemp: number[] = [0, 0, 0, 0, 0, 0];
         for (const item of data) {
           if (item.category === "Jedzenie") {
             pieChartDataTemp[0] += item.value;
@@ -79,6 +85,16 @@ function BasicPieChart({ data }: { data: Array<Expense> }) {
           } else {
             pieChartDataTemp[4] += item.value;
           }
+
+          if(earnings !== 0) {
+            const earningsTemp = earnings - pieChartDataTemp[0] - pieChartDataTemp[1] - pieChartDataTemp[2] - pieChartDataTemp[3] - pieChartDataTemp[4];
+            if(earningsTemp >= 0) {
+              pieChartDataTemp[5] = earningsTemp;
+            } else {
+              pieChartDataTemp[5] = 0;
+            }
+          }
+
           setPieChartData(pieChartDataTemp);
         }
         return data.length !== 0;
@@ -101,7 +117,7 @@ function BasicPieChart({ data }: { data: Array<Expense> }) {
 
     const updateRandomData = () => {
       if (shouldGenerateRandomData) {
-        
+
         // Generuj nowe dane losowe co 3 sekundy tylko jeśli użytkownik nie jest zalogowany
         const randomData = generateRandomData();
         setPieChartData(randomData);
@@ -176,15 +192,15 @@ function BasicPieChart({ data }: { data: Array<Expense> }) {
   return (
     <div style={{ height: "400px", zIndex: 1 }} className="pie-chart">
       {pieChartData.length !== 0 &&
-        <>
-          <Text
-            size="md"
-            weight={500}
-            style={{ marginBottom: "0.5rem" }}
-          >
-            Podsumowanie wydatków
-          </Text>
-        </>
+          <>
+              <Text
+                  size="md"
+                  weight={500}
+                  style={{ marginBottom: "0.5rem" }}
+              >
+                  Podsumowanie wydatków
+              </Text>
+          </>
       }
       <ResponsivePie
         data={categories.filter((item) => item.value !== 0)}
@@ -271,6 +287,12 @@ function BasicPieChart({ data }: { data: Array<Expense> }) {
           {
             match: {
               id: 'Inne'
+            },
+            id: 'lines'
+          },
+          {
+            match: {
+              id: 'Pozostałe środki'
             },
             id: 'lines'
           },

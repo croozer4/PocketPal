@@ -3,18 +3,16 @@ import { MantineProvider, Text, Button } from "@mantine/core";
 import { toast } from "react-toastify";
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
-import { render } from 'react-dom';
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { auth, db } from "../config/firebase.tsx";
-import { collection, query, where } from "firebase/firestore";
+import {collection, doc, getDoc, query, where} from "firebase/firestore";
 import { getDocs } from "@firebase/firestore";
 import { DefaultAlertTime } from "../config/globals.tsx";
 import BasicPieChart from "../components/BasicPieChart";
 import HistoryComponent from "../components/HistoryComponent.tsx";
 import ExpenseAddingForm from "../components/ExpenseAddingForm.tsx";
 import { Timestamp } from "@firebase/firestore";
-import html2canvas from 'html2canvas';
 
 
 import "../App.css";
@@ -33,10 +31,38 @@ const MainPage = () => {
     const colorScheme = "dark";
     const [loggedIn, setLoggedIn] = useState<boolean>(false);
     const [data, setData] = useState<Array<Expense>>([]);
+    const [earnings, setEarnings] = useState<number>(0);
     const [reload, setReload] = useState<boolean>(true);
 
     const [selectedMonth, setSelectedMonth] = useState<number>(new Date().getMonth() + 1); // Current month
     const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear()); // Current year
+
+    const fetchMonthlyBudget = async () => {
+        try{
+            const uid = auth.currentUser?.uid || null;
+            if(uid){
+                const monthlyBudget = doc(db, "users", uid);
+                const docSnap = await getDoc(monthlyBudget);
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    const monthlyBudget = data?.earnings;
+                    setEarnings(monthlyBudget);
+                }
+            }
+        } catch (error) {
+            console.error(error);
+            toast.error("Wystąpił błąd podczas pobierania budżetu miesięcznego!", {
+                position: "top-center",
+                autoClose: DefaultAlertTime,
+                hideProgressBar: true,
+                closeOnClick: true,
+                pauseOnHover: false,
+                draggable: true,
+                progress: undefined,
+                theme: "dark",
+            });
+        }
+    }
 
     const fetchData = async () => {
         try {
@@ -75,8 +101,8 @@ const MainPage = () => {
                 setData(filteredData);
             }
 
+            fetchMonthlyBudget();
             setReload(false);
-
         } catch (error) {
             console.error(error);
             toast.error("Wystąpił błąd podczas pobierania danych!", {
@@ -93,6 +119,7 @@ const MainPage = () => {
     }
 
     const onUpdate = () => {
+        fetchMonthlyBudget();
         fetchData(); // Fetch data directly on update
     };
 
@@ -172,6 +199,7 @@ const MainPage = () => {
     useEffect(() => {
         // Fetch data only when logged in
         if (loggedIn) {
+            fetchMonthlyBudget();
             fetchData();
         }
     }, [selectedMonth, selectedYear, loggedIn]);
@@ -204,7 +232,7 @@ const MainPage = () => {
                             {data.length !== 0 ? (
                                 <>
                                     <div id="chart-container">
-                                        <BasicPieChart data={data} />
+                                        <BasicPieChart data={data} earnings={earnings}/>
                                     </div>
 
                                 </>
@@ -217,7 +245,7 @@ const MainPage = () => {
                                     >
                                         Brak danych do wyświetlenia
                                     </Text>
-                                    <BasicPieChart data={data} />
+                                    <BasicPieChart data={data} earnings={earnings}/>
                                 </div>
                             )}
                         </div>
@@ -231,7 +259,7 @@ const MainPage = () => {
                                 Witaj w PocketPal!
                             </Text>
 
-                            <BasicPieChart data={data} />
+                            <BasicPieChart data={data} earnings={earnings}/>
                         </div>
                     )}
                     {data.length !== 0 && loggedIn ? (
