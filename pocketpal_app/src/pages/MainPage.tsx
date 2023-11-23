@@ -108,7 +108,7 @@ const MainPage = () => {
 
             //zmienie koloru arcLinkLabelsTextColor="#FFFFFF"
 
-            
+
 
 
             // const chartCanvas = await html2canvas(chartContainer!);
@@ -125,6 +125,13 @@ const MainPage = () => {
                 item.value.toFixed(2),
             ]);
 
+            // Dodaj łączną sumę wydatków
+            const totalExpense = data.reduce((sum, item) => sum + item.value, 0);
+            const totalRow = ['Suma', '', totalExpense.toFixed(2)];
+            tableData.push(totalRow);
+
+            
+
             // Dodaj nagłówki do tabeli
             const tableHeaders = ['Kategoria', 'Opis', 'Wartosci'];
             (pdf as any).autoTable({
@@ -132,6 +139,8 @@ const MainPage = () => {
                 head: [tableHeaders],
                 body: tableData,
             });
+
+
 
             // Zapisz PDF
             pdf.save(`raport-${selectedMonth}-${selectedYear}.pdf`);
