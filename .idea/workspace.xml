@@ -6,7 +6,7 @@
   <component name="ChangeListManager">
     <list default="true" id="48dae3d9-6259-46ea-8a80-270b114f56d1" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pocketpal_app/src/pages/FamilyPage.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/pocketpal_app/src/pages/FamilyPage.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pocketpal_app/src/pages/MainPage.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/pocketpal_app/src/pages/MainPage.tsx" afterDir="false" />
     </list>
     <list id="8be2b088-1ae8-48a2-938d-bcedee583f9e" name="Changes by Konrad" comment="" />
     <option name="SHOW_DIALOG" value="false" />

@@ -145,65 +145,71 @@ const MainPage = () => {
     const generatePDF = async () => {
         try {
             const pdf = new jsPDF();
-    
-            // Dodaj tytuł do raportu z diseplayName i datą
+
+            // Pobierz aktualną datę i sformatuj ją
+            const now = new Date();
+            const formattedDate = `${now.getDate()}/${now.getMonth() + 1}/${now.getFullYear()} ${now.getHours()}:${now.getMinutes()}`;
+
+            // Dodaj aktualną datę na górze dokumentu
+            pdf.setFontSize(10);
+            pdf.text(`Data wygenerowania: ${formattedDate}`, 10, 10);
+
+            // Zwiększ margines dla tytułu raportu
             pdf.setFontSize(20);
-            pdf.text(`Raport dla ${data[0]?.displayName} z ${selectedMonth}/${selectedYear}`, 10, 10);
+            pdf.text(`Raport dla ${data[0]?.displayName} z ${selectedMonth}/${selectedYear}`, 10, 20);
 
+            //dopisz "Tabela wydatków"
+            pdf.setFontSize(14);
+            pdf.text(`Tabela wydatków`, 10, 30);
 
-    
             // Przygotuj dane do pierwszej tabeli (wydatki)
             const expenseTableData = data.map(item => [
                 item.category,
                 item.description || '-',
                 item.value.toFixed(2),
             ]);
-    
+
             // Dodaj łączną sumę wydatków
             const totalExpense = data.reduce((sum, item) => sum + item.value, 0);
             const totalExpenseRow = ['Suma', '', totalExpense.toFixed(2)];
             expenseTableData.push(totalExpenseRow);
-    
+
             // Dodaj nagłówki do pierwszej tabeli
             const expenseTableHeaders = ['Kategoria', 'Opis', 'Wartosci'];
             (pdf as any).autoTable({
-                startY: 20,
+                startY: 35,
                 head: [expenseTableHeaders],
                 body: expenseTableData,
             });
-    
 
-            // Dodaj odstęp między tabelami
-            pdf.addPage();
+            // Oblicz pozycję startY dla drugiej tabeli
+            let startYForSecondTable = (pdf as any).lastAutoTable.finalY + 10;  // Dodajemy 10 jako margines
 
-            // Przygotuj dane do trzeciej tabeli (earnings)
-            const earningsTableData2: (string | number)[][] = [
+            //dopisz "Podsumowanie"
+            pdf.setFontSize(14);
+            pdf.text(`Podsumowanie`, 10, startYForSecondTable);
+
+            // Przygotuj dane do drugiej tabeli (earnings)
+            const earningsTableData = [
                 [
                     data[0]?.earnings ? data[0].earnings.toFixed(2) : '-',
                     totalExpense.toFixed(2),
                     (
-                        (data[0]?.earnings
-                            ? parseFloat(data[0].earnings.toFixed(2))
-                            : 0) - parseFloat(totalExpense.toFixed(2))
+                      (data[0]?.earnings
+                        ? parseFloat(data[0].earnings.toFixed(2))
+                        : 0) - parseFloat(totalExpense.toFixed(2))
                     ).toFixed(2),
                 ],
             ];
-            
 
-            // Dodaj nagłówki do trzeciej tabeli
-            const earningsTableHeaders2 = ['Zarobki', 'Wydatki', 'Roznica'];
+            // Dodaj nagłówki do drugiej tabeli
+            const earningsTableHeaders = ['Zarobki', 'Wydatki', 'Roznica'];
             (pdf as any).autoTable({
-                startY: 20,
-                head: [earningsTableHeaders2],
-                body: earningsTableData2,
+                startY: startYForSecondTable + 5,
+                head: [earningsTableHeaders],
+                body: earningsTableData,
             });
 
-
-
-            
-
-
-    
             // Zapisz PDF
             pdf.save(`raport-${selectedMonth}-${selectedYear}.pdf`);
         } catch (error) {
