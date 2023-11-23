@@ -1,0 +1,11 @@
+.peek-members-div{
+    display: flex;
+    flex-direction: column;
+    /* justify-content: center; */
+    /* align-items: center; */
+    width: 100%;
+}
+
+.peek-members-div ul {
+    text-align: left;
+}

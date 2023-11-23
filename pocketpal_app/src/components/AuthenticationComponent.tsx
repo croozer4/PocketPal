@@ -17,6 +17,7 @@ const AuthComponent = ({ onClose }: { onClose: () => void }) => {
 
 
       let userData = {
+        id: "",
         displayName: "",
         email: "",
         uid: "",
@@ -25,6 +26,7 @@ const AuthComponent = ({ onClose }: { onClose: () => void }) => {
       await signInWithPopup(auth, provider).then((user) => {
         onClose();
         userData = {
+          id: user.user.uid || "",
           displayName: user.user.displayName || "",
           email: user.user.email || "",
           uid: user.user.uid || "",
@@ -39,6 +41,7 @@ const AuthComponent = ({ onClose }: { onClose: () => void }) => {
       // Jeśli użytkownik nie istnieje w kolekcji, to go dodajemy
       if (!userDoc.exists()) {
         const userDataUpload = {
+          id: userData.id,
           displayName: userData.displayName,
           email: userData.email,
           photoUrl: userData.photoUrl,
