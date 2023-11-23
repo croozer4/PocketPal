@@ -3,13 +3,19 @@
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
-    padding: 0 10px;
+    padding: 10px;
     height: 60px;
     /* background-color: #1f2c34; */
     border-radius: 90px;
     /* border-bottom: 1px solid #1f2c34; */
-    width: 100%;
-}
+    width: calc(100vw - 30px);
+    position: fixed;
+    top: 60px;
+    left: 10px;
+    background-color: #242424;
+    /* background-color: red; */
+    border-radius: 20px;
+    flex-wrap: wrap;
 
 .family-buttons{
     display: flex;
