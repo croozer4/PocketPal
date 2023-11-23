@@ -27,9 +27,10 @@ import { set } from "date-fns";
 import { Menu } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { toast } from "react-toastify";
-import {DefaultAlertTime, QuickAlertTime} from "../config/globals.tsx";
+import { DefaultAlertTime, QuickAlertTime } from "../config/globals.tsx";
+import { Timestamp } from "firebase/firestore";
 
-
+import BasicPieChart from "../components/BasicPieChart.tsx";
 
 interface Family {
     id: string;
@@ -41,13 +42,24 @@ interface Family {
     // Dodaj inne właściwości, jeśli istnieją
 }
 
+type Expense = {
+    id: string;
+    category: string;
+    creationDate: Timestamp;
+    description?: string;
+    type: boolean;
+    user: string;
+    value: number;
+};
+
 const FamilyPage = () => {
     const [reload, setReload] = useState<boolean>(true);
     const [userFamily, setUserFamily] = useState<Family | null>(null);
     const [isAdmin, setIsAdmin] = useState<boolean>(false);
     const [members, setMembers] = useState<string[]>([]);
+    const [loggedIn, setLoggedIn] = useState<boolean>(true);
 
-    const [familyData, setFamilyData] = useState<DocumentData | undefined>();
+    const [familyData, setFamilyData] = useState<Array<Expense>>([]);
 
     const onUpdate = () => {
         console.log("onUpdate");
@@ -99,7 +111,7 @@ const FamilyPage = () => {
             console.log("test");
 
             if (uid) {
-                if(members.length > 0){
+                if (members.length > 0) {
                     const q = query(
                         collection(db, "usersData"),
                         where("user", "in", members)
@@ -108,9 +120,11 @@ const FamilyPage = () => {
 
                     if (!querySnapshot.empty) {
                         const familyData = querySnapshot.docs;
-                        const familyDataArray = familyData.map((doc) => doc.data());
+                        const familyDataArray = familyData.map((doc) =>
+                            doc.data()
+                        );
                         setFamilyData(familyDataArray);
-                        // console.log(familyDataArray);
+                        console.log(familyDataArray);
                     } else {
                         console.log("Brak rodziny dla bieżącego użytkownika.");
                     }
@@ -131,7 +145,7 @@ const FamilyPage = () => {
                 theme: "dark",
             });
         }
-    }
+    };
 
     useEffect(() => {
         const unsubscribe = auth.onAuthStateChanged((user) => {
@@ -176,7 +190,7 @@ const FamilyPage = () => {
             draggable: true,
             progress: undefined,
             theme: "dark",
-          });
+        });
     };
 
     return (
@@ -184,24 +198,28 @@ const FamilyPage = () => {
             <MantineProvider theme={{ colorScheme: colorScheme }}>
                 <div className="interface">
                     <div className="family-page-header">
+                        <Menu shadow="md" width={200}>
+                            <Menu.Target>
+                                <Button>
+                                    Rodzina:{" "}
+                                    {userFamily
+                                        ? userFamily.name
+                                        : "Brak rodziny"}
+                                </Button>
+                            </Menu.Target>
 
-                    <Menu shadow="md" width={200}>
-            <Menu.Target>
-                <Button>Rodzina: {userFamily ? userFamily.name : "Brak rodziny"}</Button>
-            </Menu.Target>
+                            {userFamily && (
+                                <Menu.Dropdown>
+                                    <Menu.Label>
+                                        Kod: {userFamily?.inviteCode}
+                                    </Menu.Label>
+                                    <Menu.Item onClick={() => CopyInviteCode()}>
+                                        Kopiuj do schowka
+                                    </Menu.Item>
+                                </Menu.Dropdown>
+                            )}
+                        </Menu>
 
-        {userFamily && (
-            <Menu.Dropdown>
-                <Menu.Label>Kod: {userFamily?.inviteCode}</Menu.Label>
-                <Menu.Item onClick={()=>CopyInviteCode()}>
-                Kopiuj do schowka
-                </Menu.Item>
-            </Menu.Dropdown>
-        )}
-            </Menu>
-                        
-                        {/* <DisplayUserFamilies /> */}
-                        {/* <p>Invite Code: {userFamily?.inviteCode}</p> */}
                         <div className="family-buttons">
                             {!userFamily && (
                                 <>
@@ -230,6 +248,50 @@ const FamilyPage = () => {
                                 </>
                             )}
                         </div>
+
+                            {loggedIn ? (
+                                <div className="overview">
+                                    {familyData?.length !== 0 ? (
+                                        <>
+                                            <div id="chart-container">
+                                                <BasicPieChart
+                                                    data={familyData}
+                                                    earnings={0}
+                                                />
+                                            </div>
+                                        </>
+                                    ) : (
+                                        <div className="no-data-message">
+                                            <Text
+                                                size="xl"
+                                                weight={700}
+                                                style={{ marginBottom: "1rem" }}
+                                            >
+                                                Brak danych do wyświetlenia
+                                            </Text>
+                                            <BasicPieChart
+                                                data={familyData}
+                                                earnings={0}
+                                            />
+                                        </div>
+                                    )}
+                                </div>
+                            ) : (
+                                <div className="overview">
+                                    <Text
+                                        size="xl"
+                                        weight={700}
+                                        style={{ marginBottom: "1rem" }}
+                                    >
+                                        Witaj w PocketPal!
+                                    </Text>
+
+                                    <BasicPieChart
+                                        data={familyData}
+                                        earnings={0}
+                                    />
+                                </div>
+                            )}
                     </div>
                 </div>
             </MantineProvider>
