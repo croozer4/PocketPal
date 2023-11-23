@@ -23,6 +23,13 @@ import LeaveFamilyForm from "../components/LeaveFamilyForm.tsx";
 import RemoveFamilyForm from "../components/RemoveFamilyForm.tsx";
 import PeekMembersForm from "../components/PeekMembersButton.tsx";
 import { on } from "events";
+import { set } from "date-fns";
+import { Menu } from "@mantine/core";
+import { useDisclosure } from "@mantine/hooks";
+import { toast } from "react-toastify";
+import { QuickAlertTime } from "../config/globals.tsx";
+
+
 
 interface Family {
     id: string;
@@ -38,6 +45,8 @@ const FamilyPage = () => {
     const [reload, setReload] = useState<boolean>(true);
     const [userFamily, setUserFamily] = useState<Family | null>(null);
     const [isAdmin, setIsAdmin] = useState<boolean>(false);
+    const [members, setMembers] = useState<string[]>([]);
+        
 
     const onUpdate = () => {
         console.log("onUpdate");
@@ -47,17 +56,16 @@ const FamilyPage = () => {
 
     useEffect(() => {
         if (auth.currentUser && userFamily?.createdBy) {
-          if (userFamily.createdBy === auth.currentUser.uid) {
-            setIsAdmin(true);
-            console.log("Admin");
-          } else {
-            console.log("Not Admin");
-          }
-          console.log(userFamily.createdBy);
-          console.log(auth.currentUser.uid);
+            if (userFamily.createdBy === auth.currentUser.uid) {
+                setIsAdmin(true);
+                console.log("Admin");
+            } else {
+                console.log("Not Admin");
+            }
+            console.log(userFamily.createdBy);
+            console.log(auth.currentUser.uid);
         }
-      }, [userFamily, auth.currentUser]);
-      
+    }, [userFamily, auth.currentUser]);
 
     const getFamily = async () => {
         const userId = await auth.currentUser?.uid;
@@ -72,6 +80,7 @@ const FamilyPage = () => {
             if (!querySnapshot.empty) {
                 const familyData = querySnapshot.docs[0].data() as Family;
                 setUserFamily(familyData);
+                setMembers(familyData.members);
             } else {
                 // Obsługa przypadku braku wyników
                 console.log("Brak rodziny dla bieżącego użytkownika.");
@@ -102,13 +111,49 @@ const FamilyPage = () => {
 
     const colorScheme = "dark";
 
+    const CopyInviteCode = () => {
+        const el = document.createElement("textarea");
+        el.value = userFamily?.inviteCode || "";
+        document.body.appendChild(el);
+        el.select();
+        document.execCommand("copy");
+        document.body.removeChild(el);
+
+        toast.success("Skopiowano do schowka!", {
+            position: "top-center",
+            autoClose: QuickAlertTime,
+            hideProgressBar: true,
+            closeOnClick: true,
+            pauseOnHover: false,
+            draggable: true,
+            progress: undefined,
+            theme: "dark",
+          });
+    };
+
     return (
         <div className="family-page">
             <MantineProvider theme={{ colorScheme: colorScheme }}>
                 <div className="interface">
                     <div className="family-page-header">
-                        <DisplayUserFamilies />
-                        <p>Invite Code: {userFamily?.inviteCode}</p>
+
+                    <Menu shadow="md" width={200}>
+            <Menu.Target>
+                <Button>Rodzina: {userFamily ? userFamily.name : "Brak rodziny"}</Button>
+            </Menu.Target>
+
+        {userFamily && (
+            <Menu.Dropdown>
+                <Menu.Label>Kod: {userFamily?.inviteCode}</Menu.Label>
+                <Menu.Item onClick={()=>CopyInviteCode()}>
+                Kopiuj do schowka
+                </Menu.Item>
+            </Menu.Dropdown>
+        )}
+            </Menu>
+                        
+                        {/* <DisplayUserFamilies /> */}
+                        {/* <p>Invite Code: {userFamily?.inviteCode}</p> */}
                         <div className="family-buttons">
                             {!userFamily && (
                                 <>
@@ -118,7 +163,10 @@ const FamilyPage = () => {
                             )}
                             {userFamily && (
                                 <>
-                                    <PeekMembersForm onUpdate={onUpdate} familyId={userFamily.id}/>
+                                    <PeekMembersForm
+                                        onUpdate={onUpdate}
+                                        familyId={userFamily.id}
+                                    />
                                     {isAdmin && (
                                         <RemoveFamilyForm
                                             onUpdate={onUpdate}
@@ -131,6 +179,7 @@ const FamilyPage = () => {
                                             familyId={userFamily.id}
                                         />
                                     )}
+                                    
                                 </>
                             )}
                         </div>

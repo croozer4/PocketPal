@@ -1,31 +1,10 @@
 import { useDisclosure } from "@mantine/hooks";
-import {
-    Select,
-    NumberInput,
-    Switch,
-    TextInput,
-    Modal,
-    Button,
-} from "@mantine/core";
-
-// import { auth, projectFirestore } from "../config/firebase";
-import {
-    deleteDoc,
-    doc,
-    getDocs,
-    where,
-    query,
-    collection,
-    DocumentData,
-    collectionGroup,
-    updateDoc,
-} from "@firebase/firestore";
-
-import { auth, db } from "../config/firebase.tsx";
+import { Modal, Button } from "@mantine/core";
+import { getDocs, where, query, collection } from "@firebase/firestore";
+import { db } from "../config/firebase.tsx";
 import { useEffect, useState } from "react";
-import { get } from "http";
 
-// import "../styles/FamilyAddingFormStyles.css";
+import "../styles/PeekMembersStyle.css";
 
 function PeekMembersForm({
     onUpdate,
@@ -35,21 +14,13 @@ function PeekMembersForm({
     familyId: string;
 }) {
     const [opened, { open, close }] = useDisclosure(false);
-    const [familyName, setFamilyName] = useState<string>("");
-    const [inviteCode, setInviteCode] = useState<string>("");
     const [members, setMembers] = useState<string[]>([]);
     const [memberNames, setMemberNames] = useState<string[]>([]);
-
-    const handleSubmit = async (event: React.FormEvent) => {
-        event.preventDefault();
-
-        onUpdate();
-        close();
-    };
+    const [membersReady, setMembersReady] = useState<boolean>(false);
 
     useEffect(() => {
         const getMembers = async () => {
-            console.log("getting names for" + familyId);
+            // console.log("peek members getting names for " + familyId);
             const q = query(
                 collection(db, "family"),
                 where("id", "==", familyId)
@@ -61,35 +32,41 @@ function PeekMembersForm({
                 const familyData = querySnapshot.docs[0].data();
                 setMembers(familyData.members);
 
-                const memberNames: string[] = [];
+                const memberNamesPromises = familyData.members.map(
+                    async (member) => {
+                        const userQuery = query(
+                            collection(db, "users"),
+                            where("id", "==", member)
+                        );
 
-                for (const member of members) {
-                    const q = query(
-                        collection(db, "users"),
-                        where("id", "==", member)
-                    );
+                        const userQuerySnapshot = await getDocs(userQuery);
 
-                    const querySnapshot = await getDocs(q);
-
-                    if (!querySnapshot.empty) {
-                        const userData = querySnapshot.docs[0].data();
-                        memberNames.push(userData.displayName);
-                    } else {
-                        // Obsługa przypadku braku wyników
-                        console.log("Brak użytkownika dla podanego id.");
+                        if (!userQuerySnapshot.empty) {
+                            const userData = userQuerySnapshot.docs[0].data();
+                            return userData.displayName;
+                        } else {
+                            console.log("Brak użytkownika dla podanego id.");
+                            return ""; // or handle the case when the user is not found
+                        }
                     }
-                }
-                console.log(members);
+                );
 
-                console.log(memberNames);
+                const resolvedMemberNames = await Promise.all(
+                    memberNamesPromises
+                );
+
+                // console.log("Members:", familyData.members);
+                // console.log("Member Names:", resolvedMemberNames);
+
+                setMemberNames(resolvedMemberNames);
+                setMembersReady(true);
             } else {
-                // Obsługa przypadku braku wyników
                 console.log("Brak rodziny dla podanego kodu.");
             }
         };
 
         getMembers();
-    }, [opened]);
+    }, [familyId, opened]);
 
     return (
         <>
@@ -110,13 +87,13 @@ function PeekMembersForm({
                 centered
             >
                 <form>
-                    <div className="family-adding-form">
+                    <div className="peek-members-div">
                         {/* member names */}
-
                         <ul>
-                            {memberNames &&
-                                memberNames.map((memberName) => (
-                                    <li key={memberName}>{memberName}</li>
+                            {membersReady &&
+                                memberNames.map((memberName, index) => (
+                                    // <li><Button key={index} fullWidth>{memberName}</Button></li>
+                                    <li key={index}>{memberName}</li>
                                 ))}
                         </ul>
                     </div>
