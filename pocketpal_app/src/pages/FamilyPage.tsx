@@ -27,7 +27,7 @@ import { set } from "date-fns";
 import { Menu } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { toast } from "react-toastify";
-import { QuickAlertTime } from "../config/globals.tsx";
+import {DefaultAlertTime, QuickAlertTime} from "../config/globals.tsx";
 
 
 
@@ -46,7 +46,8 @@ const FamilyPage = () => {
     const [userFamily, setUserFamily] = useState<Family | null>(null);
     const [isAdmin, setIsAdmin] = useState<boolean>(false);
     const [members, setMembers] = useState<string[]>([]);
-        
+
+    const [familyData, setFamilyData] = useState<DocumentData | undefined>();
 
     const onUpdate = () => {
         console.log("onUpdate");
@@ -91,6 +92,47 @@ const FamilyPage = () => {
         }
     };
 
+    const fetchFamilyData = async () => {
+        try {
+            const uid = auth.currentUser?.uid || null;
+
+            console.log("test");
+
+            if (uid) {
+                if(members.length > 0){
+                    const q = query(
+                        collection(db, "usersData"),
+                        where("user", "in", members)
+                    );
+                    const querySnapshot = await getDocs(q);
+
+                    if (!querySnapshot.empty) {
+                        const familyData = querySnapshot.docs;
+                        const familyDataArray = familyData.map((doc) => doc.data());
+                        setFamilyData(familyDataArray);
+                        // console.log(familyDataArray);
+                    } else {
+                        console.log("Brak rodziny dla bieżącego użytkownika.");
+                    }
+                }
+            }
+
+            setReload(false);
+        } catch (error) {
+            console.error(error);
+            toast.error("Wystąpił błąd podczas pobierania danych!", {
+                position: "top-center",
+                autoClose: DefaultAlertTime,
+                hideProgressBar: true,
+                closeOnClick: true,
+                pauseOnHover: false,
+                draggable: true,
+                progress: undefined,
+                theme: "dark",
+            });
+        }
+    }
+
     useEffect(() => {
         const unsubscribe = auth.onAuthStateChanged((user) => {
             if (user) {
@@ -108,6 +150,12 @@ const FamilyPage = () => {
         // Ta funkcja zostanie wykonana, gdy userFamily zostanie zaktualizowane
         console.log(userFamily);
     }, [userFamily]);
+
+    useEffect(() => {
+        if (members.length > 0 && reload) {
+            fetchFamilyData();
+        }
+    }, [members]);
 
     const colorScheme = "dark";
 
@@ -179,7 +227,6 @@ const FamilyPage = () => {
                                             familyId={userFamily.id}
                                         />
                                     )}
-                                    
                                 </>
                             )}
                         </div>
