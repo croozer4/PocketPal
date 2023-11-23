@@ -9,6 +9,7 @@ import {
     deleteDoc,
     doc,
     getDocs,
+    getDoc,
     where,
     query,
     collection,
@@ -29,6 +30,7 @@ import { useDisclosure } from "@mantine/hooks";
 import { toast } from "react-toastify";
 import { DefaultAlertTime, QuickAlertTime } from "../config/globals.tsx";
 import { Timestamp } from "firebase/firestore";
+import HistoryComponent from "../components/HistoryComponent.tsx";
 
 import BasicPieChart from "../components/BasicPieChart.tsx";
 
@@ -58,6 +60,13 @@ const FamilyPage = () => {
     const [isAdmin, setIsAdmin] = useState<boolean>(false);
     const [members, setMembers] = useState<string[]>([]);
     const [loggedIn, setLoggedIn] = useState<boolean>(true);
+    const [selectedMonth, setSelectedMonth] = useState<number>(
+        new Date().getMonth() + 1
+    ); // Current month
+    const [selectedYear, setSelectedYear] = useState<number>(
+        new Date().getFullYear()
+    ); // Current year
+    const [earnings, setEarnings] = useState<number>(0);
 
     const [familyData, setFamilyData] = useState<Array<Expense>>([]);
 
@@ -104,6 +113,90 @@ const FamilyPage = () => {
         }
     };
 
+    const fetchData = async () => {
+        try {
+            const uid = auth.currentUser?.uid || null;
+
+            if (uid) {
+                const q = query(
+                    collection(db, "usersData"),
+                    where("user", "==", uid)
+                );
+
+                const querySnapshot = await getDocs(q);
+
+                const fetchedData = querySnapshot.docs.map((doc) => {
+                    const docData = doc.data();
+                    return {
+                        id: doc.id,
+                        category: docData.category,
+                        creationDate: docData.creationDate,
+                        description: docData.description,
+                        type: docData.type,
+                        user: docData.user,
+                        value: docData.value,
+                    };
+                });
+
+                // Filtruj dane na podstawie wybranego miesiąca i roku
+                const filteredData = fetchedData.filter((item) => {
+                    const itemDate = new Date(item.creationDate.toMillis());
+                    return (
+                        itemDate.getFullYear() === selectedYear &&
+                        itemDate.getMonth() + 1 === selectedMonth
+                    );
+                });
+
+                setFamilyData(filteredData);
+            }
+
+            fetchMonthlyBudget();
+            setReload(false);
+        } catch (error) {
+            console.error(error);
+            toast.error("Wystąpił błąd podczas pobierania danych!", {
+                position: "top-center",
+                autoClose: DefaultAlertTime,
+                hideProgressBar: true,
+                closeOnClick: true,
+                pauseOnHover: false,
+                draggable: true,
+                progress: undefined,
+                theme: "dark",
+            });
+        }
+    };
+
+    const fetchMonthlyBudget = async () => {
+        try {
+            const uid = auth.currentUser?.uid || null;
+            if (uid) {
+                const monthlyBudget = doc(db, "users", uid);
+                const docSnap = await getDoc(monthlyBudget);
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    const monthlyBudget = data?.earnings;
+                    setEarnings(monthlyBudget);
+                }
+            }
+        } catch (error) {
+            console.error(error);
+            toast.error(
+                "Wystąpił błąd podczas pobierania budżetu miesięcznego!",
+                {
+                    position: "top-center",
+                    autoClose: DefaultAlertTime,
+                    hideProgressBar: true,
+                    closeOnClick: true,
+                    pauseOnHover: false,
+                    draggable: true,
+                    progress: undefined,
+                    theme: "dark",
+                }
+            );
+        }
+    };
+
     const fetchFamilyData = async () => {
         try {
             const uid = auth.currentUser?.uid || null;
@@ -120,9 +213,17 @@ const FamilyPage = () => {
 
                     if (!querySnapshot.empty) {
                         const familyData = querySnapshot.docs;
-                        const familyDataArray = familyData.map((doc) =>
-                            doc.data()
-                        );
+                        const familyDataArray = familyData.map((doc) => {
+                            return {
+                                id: doc.id,
+                                category: doc.data().category,
+                                creationDate: doc.data().creationDate,
+                                description: doc.data().description,
+                                type: doc.data().type,
+                                user: doc.data().user,
+                                value: doc.data().value,
+                            };
+                        });
                         setFamilyData(familyDataArray);
                         console.log(familyDataArray);
                     } else {
@@ -248,51 +349,58 @@ const FamilyPage = () => {
                                 </>
                             )}
                         </div>
-
-                            {loggedIn ? (
-                                <div className="overview">
-                                    {familyData?.length !== 0 ? (
-                                        <>
-                                            <div id="chart-container">
-                                                <BasicPieChart
-                                                    data={familyData}
-                                                    earnings={0}
-                                                />
-                                            </div>
-                                        </>
-                                    ) : (
-                                        <div className="no-data-message">
-                                            <Text
-                                                size="xl"
-                                                weight={700}
-                                                style={{ marginBottom: "1rem" }}
-                                            >
-                                                Brak danych do wyświetlenia
-                                            </Text>
-                                            <BasicPieChart
-                                                data={familyData}
-                                                earnings={0}
-                                            />
-                                        </div>
-                                    )}
-                                </div>
+                    </div>
+                    {loggedIn ? (
+                        <div className="overview">
+                            {familyData?.length !== 0 ? (
+                                <>
+                                    <div id="chart-container">
+                                        <BasicPieChart
+                                            data={familyData}
+                                            earnings={0}
+                                        />
+                                    </div>
+                                </>
                             ) : (
-                                <div className="overview">
+                                <div className="no-data-message">
                                     <Text
                                         size="xl"
                                         weight={700}
                                         style={{ marginBottom: "1rem" }}
                                     >
-                                        Witaj w PocketPal!
+                                        Brak danych do wyświetlenia
                                     </Text>
-
                                     <BasicPieChart
                                         data={familyData}
                                         earnings={0}
                                     />
                                 </div>
                             )}
-                    </div>
+                        </div>
+                    ) : (
+                        <div className="overview">
+                            <Text
+                                size="xl"
+                                weight={700}
+                                style={{ marginBottom: "1rem" }}
+                            >
+                                Witaj w PocketPal!
+                            </Text>
+
+                            <BasicPieChart data={familyData} earnings={0} />
+                        </div>
+                    )}
+                    {familyData.length !== 0 && loggedIn ? (
+                        <div>
+                            <HistoryComponent
+                                data={familyData}
+                                fetchData={fetchFamilyData}
+                            />
+                            {/* <Button className='raport_button' onClick={generatePDF}>Generuj raport PDF</Button> */}
+                        </div>
+                    ) : (
+                        <></>
+                    )}
                 </div>
             </MantineProvider>
         </div>
