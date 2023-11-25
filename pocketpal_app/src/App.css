@@ -252,4 +252,9 @@
     margin: 5rem 2rem 2rem 2rem;
   }
 
-  
+  .family_raport_button{
+    position: fixed;
+    bottom: 20px;
+    right: 180px;
+    z-index: 3;
+  }

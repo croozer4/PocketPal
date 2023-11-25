@@ -46,6 +46,12 @@ import "../styles/PeekMembersStyle.css";
 
 import ExpenseAddingForm from "../components/ExpenseAddingForm.tsx";
 
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
+
+
+
+
 interface Family {
     id: string;
     name: string;
@@ -64,6 +70,7 @@ type Expense = {
     type: boolean;
     user: string;
     value: number;
+    
 };
 
 const FamilyPage = () => {
@@ -108,18 +115,23 @@ const FamilyPage = () => {
     useEffect(() => {
         const getFamilyNames = async () => {
             let memberNames: string[] = [];
+            let earningsSum: number = 0;
             for (const member of members) {
                 const q = doc(db, "users", member);
                 const querySnapshot = await getDoc(q);
                 if (querySnapshot.exists()) {
                     const memberData = querySnapshot.data().displayName;
                     memberNames.push(memberData);
+
+                    const earnings = querySnapshot.data().earnings;
+                    earningsSum += earnings;
                 } else {
                     // Obsługa przypadku braku wyników
                     console.log("Brak użytkownika dla podanego id.");
                 }
             }
             setMemberNames(memberNames);
+            setEarnings(earningsSum);
         };
 
         if (members.length > 0) {
@@ -493,6 +505,92 @@ const FamilyPage = () => {
         });
     }, [reload, familyData, selectedMonth, selectedYear]);
 
+    const generatePDF = () => {
+        
+        //dodaj 
+
+        const doc = new jsPDF();
+
+
+        
+
+        //ustaw czcionkę z polskimi znakami
+        doc.addFont('https://fonts.gstatic.com/s/roboto/v20/KFOmCnqEu92Fr1Mu4mxP.ttf', 'Roboto', 'normal');
+        doc.setFont('Roboto');
+
+        
+        
+
+
+        const tableColumn = ["Category", "Date", "Description", "Value"];
+        const tableRows: any[][] = [];
+
+        familyData.forEach((expense) => {
+            const expenseData: any[] = [
+                expense.category,
+                
+                expense.creationDate.toDate().toLocaleDateString(),
+                expense.description,
+                expense.value,
+            ];
+            tableRows.push(expenseData);
+        });
+
+        //dodaj do tablicy sumę wydatków
+        const sum = familyData.reduce((a, b) => a + b.value, 0);
+        const sumData: any[] = ["Suma wydatków", "", "", sum];
+        tableRows.push(sumData);
+
+
+        (doc as any).autoTable({
+            head: [tableColumn],
+            body: tableRows,
+            startY: 20,
+            theme: 'grid'
+        });
+
+        
+
+        doc.text(
+            "Raport wydatków dla rodziny " + userFamily?.name,
+            14,
+            15
+        );
+
+        // Oblicz pozycję startY dla drugiej tabeli
+        const pageHeight = doc.internal.pageSize.height;
+        const firstTableHeight = 20 + (familyData.length + 1) * 10;
+        const secondTableStartY = pageHeight - firstTableHeight;
+
+
+        // talica z zarobkami, suma wydatków i roznica między nimi
+        const earningsTableColumn = ["Earnings", "Expenses", "Difference"];
+        const earningsTableRows: any[][] = [];
+
+        const earningsData: any[] = [
+            earnings,
+            familyData.reduce((a, b) => a + b.value, 0),
+            earnings - familyData.reduce((a, b) => a + b.value, 0),
+        ];
+        earningsTableRows.push(earningsData);
+
+        (doc as any).autoTable({
+            head: [earningsTableColumn],
+            body: earningsTableRows,
+            startY: secondTableStartY + 20,
+            theme: 'grid'
+        });
+
+
+
+
+        
+
+
+        
+        doc.save("raport.pdf");
+    };
+
     return (
         <div className="family-page">
             <MantineProvider theme={{ colorScheme: colorScheme }}>
@@ -670,7 +768,7 @@ const FamilyPage = () => {
                                 data={familyData}
                                 fetchData={fetchFamilyData}
                             />
-                            {/* <Button className='raport_button' onClick={generatePDF}>Generuj raport PDF</Button> */}
+                           
                         </div>
                     ) : (
                         <></>
@@ -841,6 +939,7 @@ const FamilyPage = () => {
                 )}
 
                 {loggedIn ? <ExpenseAddingForm onUpdate={onUpdate} /> : <></>}
+                {loggedIn ? <Button className="family_raport_button" onClick={generatePDF}>Generuj raport PDF</Button> : <></>}
             </MantineProvider>
         </div>
     );
