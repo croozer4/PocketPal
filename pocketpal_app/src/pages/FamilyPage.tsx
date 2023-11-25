@@ -98,14 +98,6 @@ const FamilyPage = () => {
         window.location.reload();
     };
 
-    useEffect(() => {
-        // Fetch data only when logged in
-        if (loggedIn) {
-            fetchMonthlyBudget();
-            fetchFamilyData();
-        }
-    }, [selectedMonth, selectedYear, loggedIn]);
-
     const handleOpenModal = (section: string) => {
         setSection(section);
         setTimeout(() => {
@@ -403,11 +395,15 @@ const FamilyPage = () => {
                             );
                         });
 
-                        // setFamilyData(familyDataArray);
-                        setFamilyData(filteredData);
-                        
+                        if (members) {
+                            console.log("filteredData" + filteredData);
+                            setFamilyData(filteredData);
+                        }else{
+                            console.log("familyDataArray" + familyDataArray);
+                            setFamilyData(familyDataArray);
+                        }
 
-                        console.log(familyDataArray);
+                        // console.log(familyDataArray);
                     } else {
                         console.log("Brak rodziny dla bieżącego użytkownika.");
                     }
@@ -475,6 +471,27 @@ const FamilyPage = () => {
             theme: "dark",
         });
     };
+
+    useEffect(() => {
+        // Fetch data only when logged in
+            // getFamily();
+            // fetchMonthlyBudget();
+            // fetchFamilyData();
+
+            if (members.length > 0) {
+                fetchFamilyData();
+            }
+    }, [selectedMonth, selectedYear, loggedIn]);
+
+    useEffect(() => {
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                setLoggedIn(true);
+            } else {
+                setLoggedIn(false);
+            }
+        });
+    }, [reload, familyData, selectedMonth, selectedYear]);
 
     return (
         <div className="family-page">
