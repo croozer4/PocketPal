@@ -1,5 +1,4 @@
-import React, { useEffect } from "react";
-import { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Button } from "@mantine/core";
 import { MantineProvider, Text } from "@mantine/core";
 import FamilyAddingForm from "../components/FamilyAddingForm.tsx";
@@ -17,6 +16,8 @@ import {
     addDoc,
     updateDoc,
 } from "@firebase/firestore";
+
+import DatePicker from "react-datepicker";
 
 import { IconPhoto, IconDownload, IconArrowRight } from "@tabler/icons-react";
 
@@ -96,6 +97,14 @@ const FamilyPage = () => {
         setReload(true);
         window.location.reload();
     };
+
+    useEffect(() => {
+        // Fetch data only when logged in
+        if (loggedIn) {
+            fetchMonthlyBudget();
+            fetchFamilyData();
+        }
+    }, [selectedMonth, selectedYear, loggedIn]);
 
     const handleOpenModal = (section: string) => {
         setSection(section);
@@ -385,7 +394,19 @@ const FamilyPage = () => {
                                 value: doc.data().value,
                             };
                         });
-                        setFamilyData(familyDataArray);
+
+                        const filteredData = familyDataArray.filter(item => {
+                            const itemDate = new Date(item.creationDate.toMillis());
+                            return (
+                                itemDate.getFullYear() === selectedYear &&
+                                itemDate.getMonth() + 1 === selectedMonth
+                            );
+                        });
+
+                        // setFamilyData(familyDataArray);
+                        setFamilyData(filteredData);
+                        
+
                         console.log(familyDataArray);
                     } else {
                         console.log("Brak rodziny dla bieżącego użytkownika.");
@@ -458,6 +479,25 @@ const FamilyPage = () => {
     return (
         <div className="family-page">
             <MantineProvider theme={{ colorScheme: colorScheme }}>
+            {loggedIn ? (
+                    <div className="MonthPicker">
+                        <label id="month">Select Month: </label>
+                        <DatePicker className="MonthPicker__input"
+                            selected={new Date(selectedYear, selectedMonth - 1)}
+                            onChange={(date: any) => {
+                                console.log('Selected Date:', date);
+
+                                setSelectedMonth(date.getMonth() + 1);
+                                setSelectedYear(date.getFullYear());
+                            }}
+                            dateFormat="MM/yyyy"
+                            showMonthYearPicker
+                            id="month"
+                        />
+                    </div>
+                ) : (
+                    <></>
+                )}
                 <div className="interface">
                     <div className="family-page-header">
                         <Menu shadow="md" width={200} position="top-start">
