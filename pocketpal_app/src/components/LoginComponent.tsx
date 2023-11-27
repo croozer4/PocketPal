@@ -71,6 +71,33 @@ function LoginComponent({userPhotoURL}: LoginComponentProps) {
     });
   }
 
+  const handleSignOut = () => {
+    auth.signOut().then(() => {
+      toast.success('Wylogowano pomyślnie!', {
+        position: "top-center",
+        autoClose: QuickAlertTime,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: false,
+        draggable: true,
+        progress: undefined,
+        theme: "dark",
+      });
+    }).catch((error) => {
+      toast.error('Nie udało się wylogować!', {
+          position: "top-center",
+          autoClose: QuickAlertTime,
+          hideProgressBar: true,
+          closeOnClick: true,
+          pauseOnHover: false,
+          draggable: true,
+          progress: undefined,
+          theme: "dark",
+      });
+      console.error(error);
+    });
+  }
+
   const handleAddEarnings = async () => {
     if (earnings <= 0) {
       toast.error('Przychody muszą być większe od 0!', {
@@ -389,7 +416,7 @@ function LoginComponent({userPhotoURL}: LoginComponentProps) {
               <Menu.Item
                 color={"red"}
                 icon={<IconLogout/>}
-                onClick={() => setTimeout(() => auth.signOut(), 200)}
+                onClick={() => handleSignOut()}
               >
                 Wyloguj
               </Menu.Item>

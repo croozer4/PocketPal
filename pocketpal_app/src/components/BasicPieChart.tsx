@@ -63,7 +63,7 @@ function BasicPieChart({ data, earnings }: { data: Array<Expense>, earnings: num
 
   const generateRandomData = () => {
     const randomData = [];
-    for (let i = 0; i < 5; i++) {
+    for (let i = 0; i < 6; i++) {
       randomData.push(Math.floor(Math.random() * 1000)); // Losowe liczby
     }
     return randomData;

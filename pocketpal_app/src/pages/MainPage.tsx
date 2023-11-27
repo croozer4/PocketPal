@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { MantineProvider, Text, Button } from "@mantine/core";
 import { toast } from "react-toastify";
 import jsPDF from 'jspdf';
@@ -13,10 +13,7 @@ import BasicPieChart from "../components/BasicPieChart";
 import HistoryComponent from "../components/HistoryComponent.tsx";
 import ExpenseAddingForm from "../components/ExpenseAddingForm.tsx";
 import { Timestamp } from "@firebase/firestore";
-
-
 import "../App.css";
-import { display } from 'html2canvas/dist/types/css/property-descriptors/display';
 
 type Expense = {
     id: string;

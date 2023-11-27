@@ -27,7 +27,7 @@ function ExpenseAddingForm({ onUpdate }: { onUpdate: () => void }) {
     );
     const [InputType, setInputType] = useState<boolean>(false);
     const [InputDescription, setInputDescription] = useState("");
-    // const [InputDate, setInputDate] = useState<Date | null>(null);
+    const [InputRegularExpense, setInputRegularExpense] = useState<boolean>(false);
 
     const handleSubmit = async (event: React.FormEvent) => {
         // console.log("submitting form");
