@@ -492,7 +492,7 @@ const FamilyPage = () => {
         doc.setFont('Roboto');
 
 
-        const tableColumn = ["Category", "Date", "Description", "Value"];
+        const tableColumn = ["Kategoria", "Data", "Opis", "Wartosc"];
         const tableRows: any[][] = [];
 
         familyData.forEach((expense) => {
@@ -533,7 +533,7 @@ const FamilyPage = () => {
 
 
         // talica z zarobkami, suma wydatków i roznica między nimi
-        const earningsTableColumn = ["Earnings", "Expenses", "Difference"];
+        const earningsTableColumn = ["Przychody", "Wydatki", "Roznica"];
         const earningsTableRows: any[][] = [];
 
         const earningsData: any[] = [

@@ -184,8 +184,14 @@ const MainPage = () => {
     };
 
     const generatePDF = async () => {
+        
         try {
             const pdf = new jsPDF();
+
+            //ustaw czcionkę na roboto
+            pdf.setFont('Roboto');
+            
+            
 
             // Pobierz aktualną datę i sformatuj ją
             const now = new Date();
@@ -206,21 +212,23 @@ const MainPage = () => {
             // Przygotuj dane do pierwszej tabeli (wydatki)
             const expenseTableData = data.map(item => [
                 item.category,
+                item.creationDate.toDate().toLocaleDateString(),
                 item.description || '-',
                 item.value.toFixed(2),
             ]);
 
             // Dodaj łączną sumę wydatków
             const totalExpense = data.reduce((sum, item) => sum + item.value, 0);
-            const totalExpenseRow = ['Suma', '', totalExpense.toFixed(2)];
+            const totalExpenseRow = ['Suma', '', '',totalExpense.toFixed(2)];
             expenseTableData.push(totalExpenseRow);
 
             // Dodaj nagłówki do pierwszej tabeli
-            const expenseTableHeaders = ['Kategoria', 'Opis', 'Wartosci'];
+            const expenseTableHeaders = ['Kategoria', 'Data', 'Opis', 'Wartosci'];
             (pdf as any).autoTable({
                 startY: 35,
                 head: [expenseTableHeaders],
                 body: expenseTableData,
+                theme: 'grid',
             });
 
             // Oblicz pozycję startY dla drugiej tabeli
@@ -244,11 +252,12 @@ const MainPage = () => {
             ];
 
             // Dodaj nagłówki do drugiej tabeli
-            const earningsTableHeaders = ['Zarobki', 'Wydatki', 'Roznica'];
+            const earningsTableHeaders = ['Przychody', 'Wydatki', 'Roznica'];
             (pdf as any).autoTable({
                 startY: startYForSecondTable + 5,
                 head: [earningsTableHeaders],
                 body: earningsTableData,
+                theme: 'grid',
             });
 
             // Zapisz PDF
