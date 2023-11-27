@@ -51,6 +51,37 @@ const deleteExpense = async (id: string) => {
   }
 }
 
+const deleteRecurrentExpense = async (id: string) => {
+    try {
+        const uid = auth.currentUser?.uid || null;
+        if (uid) {
+        await deleteDoc(doc(db, "users", uid, "recurrentExpenses", id)).then(() => {
+            toast.success('Stały wydatek został usunięty!', {
+            position: "top-center",
+            autoClose: QuickAlertTime,
+            hideProgressBar: true,
+            closeOnClick: true,
+            pauseOnHover: false,
+            draggable: true,
+            progress: undefined,
+            theme: "dark",
+            });
+        });
+        }
+    } catch (error) {
+        toast.error('Wystąpił błąd podczas usuwania stałego wydatku!', {
+        position: "top-center",
+        autoClose: QuickAlertTime,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: false,
+        draggable: true,
+        progress: undefined,
+        theme: "dark",
+        });
+    }
+}
+
 const PeekDetails = ({ fetchData, ...item }: Expense & { fetchData: () => void }) => {
   // Formatowanie daty przy użyciu date-fns
   const timestamp = item.creationDate.toMillis(); // Konwersja na timestamp w milisekundach
@@ -77,13 +108,36 @@ const PeekDetails = ({ fetchData, ...item }: Expense & { fetchData: () => void }
     }
   }
 
+  const handleDeleteRecurrentExpense = async (id: string) => {
+    try {
+      // Usuń wydatek i wywołaj fetchData po pomyślnym usunięciu
+      await deleteRecurrentExpense(id);
+      fetchData();
+    } catch (error) {
+      toast.error('Wystąpił błąd podczas usuwania stałego wydatku!', {
+        position: "top-center",
+        autoClose: QuickAlertTime,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: false,
+        draggable: true,
+        progress: undefined,
+        theme: "dark",
+      });
+    }
+  }
+
   return (
     <Accordion.Item key={item.id} value={item.id}>
-      <Accordion.Control>{item.category} | {item.value}zł ({dateFormatted})</Accordion.Control>
+      <Accordion.Control>{item.category} | {item.value}zł ({dateFormatted}){item.type ? " | Stały wydatek" : null}</Accordion.Control>
       <Accordion.Panel>
         <div className='description-container'>{item.description}</div>
-        <Button variant="filled" color="red" style={{ marginTop: "10px" }} onClick={() => handleDeleteExpense(item.id)}>Usuń</Button>
-      </Accordion.Panel>
+        {item.type ?
+            <Button variant="filled" color="orange" style={{ marginTop: "10px" }} onClick={() => handleDeleteRecurrentExpense(item.id)}>Usuń stały wydatek</Button>
+             :
+            <Button variant="filled" color="red" style={{ marginTop: "10px" }} onClick={() => handleDeleteExpense(item.id)}>Usuń</Button>
+        }
+        </Accordion.Panel>
     </Accordion.Item>
   );
 }

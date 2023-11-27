@@ -5,8 +5,8 @@ import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import { auth, db } from "../config/firebase.tsx";
-import {collection, doc, getDoc, query, where} from "firebase/firestore";
+import {auth, db, projectFirestore} from "../config/firebase.tsx";
+import {addDoc, collection, doc, getDoc, query, where} from "firebase/firestore";
 import { getDocs } from "@firebase/firestore";
 import { DefaultAlertTime } from "../config/globals.tsx";
 import BasicPieChart from "../components/BasicPieChart";
@@ -64,8 +64,46 @@ const MainPage = () => {
         }
     }
 
+    const fetchRecurrentExpenses = async () => {
+        const recurrentExpenses: Expense[] = [];
+        try{
+            const uid = auth.currentUser?.uid || null;
+            if(uid){
+                const querySnapshot = await getDocs(query(collection(db, "users", uid, "recurrentExpenses"), where("type", "==", true)));
+                for(const doc of querySnapshot.docs){
+                    const data = doc.data();
+                    const expense = {
+                        id: doc.id,
+                        category: data.category,
+                        creationDate: data.creationDate,
+                        description: data.description,
+                        type: data.type,
+                        user: data.user,
+                        value: data.value,
+                    };
+                    recurrentExpenses.push(expense);
+                }
+            }
+            return recurrentExpenses;
+        } catch (error) {
+            console.error(error);
+            toast.error("Wystąpił błąd podczas pobierania budżetu miesięcznego!", {
+                position: "top-center",
+                autoClose: DefaultAlertTime,
+                hideProgressBar: true,
+                closeOnClick: true,
+                pauseOnHover: false,
+                draggable: true,
+                progress: undefined,
+                theme: "dark",
+            });
+        }
+    }
+
     const fetchData = async () => {
         try {
+            await fetchMonthlyBudget();
+
             const uid = auth.currentUser?.uid || null;
     
             if (uid) {
@@ -89,35 +127,40 @@ const MainPage = () => {
                 // Pobierz zarobki z danych użytkownika
                 const earnings = userData.earnings || 0;
                 const displayName = userData.displayName || "";
-    
+
                 const fetchedData = expensesSnapshot.docs.map((doc) => {
                     const docData = doc.data();
-                    return {
-                        id: doc.id,
-                        category: docData.category,
-                        creationDate: docData.creationDate,
-                        description: docData.description,
-                        type: docData.type,
-                        user: docData.user,
-                        value: docData.value,
-                        earnings: earnings,
-                        displayName: displayName,
-                    };
+                    if(docData.type !== true) {
+                        return {
+                            id: doc.id,
+                            category: docData.category,
+                            creationDate: docData.creationDate,
+                            description: docData.description,
+                            type: docData.type,
+                            user: docData.user,
+                            value: docData.value,
+                            earnings: earnings,
+                            displayName: displayName,
+                        };
+                    }
                 });
-    
+
                 // Filtruj dane na podstawie wybranego miesiąca i roku
                 const filteredData = fetchedData.filter(item => {
-                    const itemDate = new Date(item.creationDate.toMillis());
-                    return (
-                        itemDate.getFullYear() === selectedYear &&
-                        itemDate.getMonth() + 1 === selectedMonth
-                    );
+                    if(item !== undefined) {
+                        if(item.type !== true) {
+                            const itemDate = new Date(item.creationDate.toMillis());
+                            return (
+                                itemDate.getFullYear() === selectedYear &&
+                                itemDate.getMonth() + 1 === selectedMonth
+                            );
+                        }
+                    }
                 });
-    
-                setData(filteredData);
+
+                if(filteredData !== undefined) setData([...filteredData, ...await fetchRecurrentExpenses()]);
             }
 
-            fetchMonthlyBudget();
             setReload(false);
         } catch (error) {
             console.error(error);
@@ -135,7 +178,6 @@ const MainPage = () => {
     }
 
     const onUpdate = () => {
-        fetchMonthlyBudget();
         fetchData(); // Fetch data directly on update
     };
 
@@ -237,7 +279,6 @@ const MainPage = () => {
     useEffect(() => {
         // Fetch data only when logged in
         if (loggedIn) {
-            fetchMonthlyBudget();
             fetchData();
         }
     }, [selectedMonth, selectedYear, loggedIn]);

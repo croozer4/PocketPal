@@ -27,7 +27,6 @@ function ExpenseAddingForm({ onUpdate }: { onUpdate: () => void }) {
     );
     const [InputType, setInputType] = useState<boolean>(false);
     const [InputDescription, setInputDescription] = useState("");
-    const [InputRegularExpense, setInputRegularExpense] = useState<boolean>(false);
 
     const handleSubmit = async (event: React.FormEvent) => {
         // console.log("submitting form");
@@ -54,29 +53,47 @@ function ExpenseAddingForm({ onUpdate }: { onUpdate: () => void }) {
         }
 
         const creationDate = InputCreationDate || new Date();
-
-        await addDoc(collection(projectFirestore, "usersData"), {
+        const dataToUpload = {
             description: InputDescription,
             category: InputCategory,
             creationDate,
             type: InputType,
             user: auth.currentUser.uid,
-            value: InputValue,
-        });
-        // console.log("Document written with ID: ", docRef.id);
+            value: InputValue
+        };
 
-        toast.success("Dodano wydatek!", {
-            position: "top-center",
-            autoClose: QuickAlertTime,
-            hideProgressBar: true,
-            closeOnClick: true,
-            pauseOnHover: false,
-            draggable: true,
-            progress: undefined,
-            theme: "dark",
+        await addDoc(collection(projectFirestore, "usersData"), {
+            ...dataToUpload,
         });
+        if(InputType) {
+            await addDoc(collection(projectFirestore, "users", auth.currentUser?.uid, "recurrentExpenses"), {
+                ...dataToUpload,
+            });
+        }
 
-        // alert("Pomyślnie dodano wydatek");
+        if(InputType) {
+            toast.success("Dodano stały wydatek!", {
+                position: "top-center",
+                autoClose: QuickAlertTime,
+                hideProgressBar: true,
+                closeOnClick: true,
+                pauseOnHover: false,
+                draggable: true,
+                progress: undefined,
+                theme: "dark",
+            });
+        } else {
+            toast.success("Dodano wydatek!", {
+                position: "top-center",
+                autoClose: QuickAlertTime,
+                hideProgressBar: true,
+                closeOnClick: true,
+                pauseOnHover: false,
+                draggable: true,
+                progress: undefined,
+                theme: "dark",
+            });
+        }
 
         close();
 
