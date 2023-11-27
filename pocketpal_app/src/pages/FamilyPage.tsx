@@ -546,7 +546,7 @@ const FamilyPage = () => {
         (doc as any).autoTable({
             head: [earningsTableColumn],
             body: earningsTableRows,
-            startY: secondTableStartY + 20,
+            startY: secondTableStartY + 50,
             theme: 'grid'
         });
 
