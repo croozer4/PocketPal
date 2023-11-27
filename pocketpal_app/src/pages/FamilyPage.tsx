@@ -22,12 +22,6 @@ import DatePicker from "react-datepicker";
 import { IconPhoto, IconDownload, IconArrowRight } from "@tabler/icons-react";
 
 import "../styles/FamilyPageStyle.css";
-import JoinFamilyForm from "../components/JoinFamilyForm.tsx";
-import LeaveFamilyForm from "../components/LeaveFamilyForm.tsx";
-import RemoveFamilyForm from "../components/RemoveFamilyForm.tsx";
-import PeekMembersForm from "../components/PeekMembersButton.tsx";
-import { on } from "events";
-import { set } from "date-fns";
 import { Menu } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { toast } from "react-toastify";
@@ -97,10 +91,10 @@ const FamilyPage = () => {
 
     // const [members, setMembers] = useState<string[]>([]);
     const [memberNames, setMemberNames] = useState<string[]>([]);
-    const [membersReady, setMembersReady] = useState<boolean>(false);
+    // const [membersReady, setMembersReady] = useState<boolean>(false);
 
     const onUpdate = () => {
-        console.log("onUpdate");
+        // console.log("onUpdate");
         setReload(true);
         window.location.reload();
     };
@@ -254,12 +248,12 @@ const FamilyPage = () => {
         if (auth.currentUser && userFamily?.createdBy) {
             if (userFamily.createdBy === auth.currentUser.uid) {
                 setIsAdmin(true);
-                console.log("Admin");
+                // console.log("Admin");
             } else {
-                console.log("Not Admin");
+                // console.log("Not Admin");
             }
-            console.log(userFamily.createdBy);
-            console.log(auth.currentUser.uid);
+            // console.log(userFamily.createdBy);
+            // console.log(auth.currentUser.uid);
         }
     }, [userFamily, auth.currentUser]);
 
@@ -284,60 +278,6 @@ const FamilyPage = () => {
         } else {
             // Obsługa przypadku braku zalogowanego użytkownika
             console.log("Brak zalogowanego użytkownika.");
-        }
-    };
-
-    const fetchData = async () => {
-        try {
-            const uid = auth.currentUser?.uid || null;
-
-            if (uid) {
-                const q = query(
-                    collection(db, "usersData"),
-                    where("user", "==", uid)
-                );
-
-                const querySnapshot = await getDocs(q);
-
-                const fetchedData = querySnapshot.docs.map((doc) => {
-                    const docData = doc.data();
-                    return {
-                        id: doc.id,
-                        category: docData.category,
-                        creationDate: docData.creationDate,
-                        description: docData.description,
-                        type: docData.type,
-                        user: docData.user,
-                        value: docData.value,
-                    };
-                });
-
-                // Filtruj dane na podstawie wybranego miesiąca i roku
-                const filteredData = fetchedData.filter((item) => {
-                    const itemDate = new Date(item.creationDate.toMillis());
-                    return (
-                        itemDate.getFullYear() === selectedYear &&
-                        itemDate.getMonth() + 1 === selectedMonth
-                    );
-                });
-
-                setFamilyData(filteredData);
-            }
-
-            fetchMonthlyBudget();
-            setReload(false);
-        } catch (error) {
-            console.error(error);
-            toast.error("Wystąpił błąd podczas pobierania danych!", {
-                position: "top-center",
-                autoClose: DefaultAlertTime,
-                hideProgressBar: true,
-                closeOnClick: true,
-                pauseOnHover: false,
-                draggable: true,
-                progress: undefined,
-                theme: "dark",
-            });
         }
     };
 
@@ -375,7 +315,7 @@ const FamilyPage = () => {
         try {
             const uid = auth.currentUser?.uid || null;
 
-            console.log("test");
+            // console.log("test");
 
             if (uid) {
                 if (members.length > 0) {
@@ -408,10 +348,10 @@ const FamilyPage = () => {
                         });
 
                         if (members) {
-                            console.log("filteredData" + filteredData);
+                            // console.log("filteredData" + filteredData);
                             setFamilyData(filteredData);
                         }else{
-                            console.log("familyDataArray" + familyDataArray);
+                            // console.log("familyDataArray" + familyDataArray);
                             setFamilyData(familyDataArray);
                         }
 
@@ -444,7 +384,7 @@ const FamilyPage = () => {
                 getFamily();
             } else {
                 // Obsługa przypadku braku zalogowanego użytkownika
-                console.log("Brak zalogowanego użytkownika.");
+                // console.log("Brak zalogowanego użytkownika.");
             }
         });
 
@@ -453,7 +393,7 @@ const FamilyPage = () => {
 
     useEffect(() => {
         // Ta funkcja zostanie wykonana, gdy userFamily zostanie zaktualizowane
-        console.log(userFamily);
+        // console.log(userFamily);
     }, [userFamily]);
 
     useEffect(() => {
@@ -600,7 +540,7 @@ const FamilyPage = () => {
                         <DatePicker className="MonthPicker__input"
                             selected={new Date(selectedYear, selectedMonth - 1)}
                             onChange={(date: any) => {
-                                console.log('Selected Date:', date);
+                                // console.log('Selected Date:', date);
 
                                 setSelectedMonth(date.getMonth() + 1);
                                 setSelectedYear(date.getFullYear());

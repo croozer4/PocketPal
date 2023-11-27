@@ -54,6 +54,7 @@ const deleteExpense = async (id: string) => {
 const deleteRecurrentExpense = async (id: string) => {
     try {
         const uid = auth.currentUser?.uid || null;
+        console.log(id);
         if (uid) {
             await deleteDoc(doc(db, "users", uid, "recurrentExpenses", id)).then(() => {
                 toast.success('Stały wydatek został usunięty!', {
