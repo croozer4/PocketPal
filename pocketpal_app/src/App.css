@@ -149,6 +149,7 @@
     align-items: center;
     min-width: 30vw;
 }
+
 .close-button {
     position: relative;
     top: -65px;
@@ -162,6 +163,7 @@
     cursor: pointer;
     transition: background-color 0.25s;
 }
+
 .area_button {
     display: flex;
     flex-direction: row;
@@ -170,6 +172,7 @@
     margin: 10px 0 5px;
     gap: 1rem;
 }
+
 .Reg_form {
     display: flex;
     flex-direction: column;
@@ -211,7 +214,7 @@
     border: 0;
 }
 
-.MonthPicker{
+.MonthPicker {
     display: flex;
     flex-direction: row;
     flex-wrap: wrap;
@@ -222,8 +225,8 @@
     z-index: 3;
 }
 
-.MonthPicker__input{
-    
+.MonthPicker__input {
+
     padding: 0.5rem;
     border-radius: 8px;
     border: 1px solid #333;
@@ -240,21 +243,32 @@
     margin-top: 15vh;
     height: 200px; /* Ustaw wysokość, aby komunikat był wyśrodkowany na ekranie */
     z-index: -1;
-  }
-  
-  .no-data-message h1 {
+}
+
+.no-data-message h1 {
     font-size: 18px;
     font-weight: 700;
     color: #333; /* Kolor tekstu */
-  }
+}
 
-  .raport_button{
+.raport_button {
     margin: 5rem 2rem 2rem 2rem;
-  }
+}
 
-  .family_raport_button{
+.family_raport_button {
     position: fixed;
-    bottom: 20px;
-    right: 180px;
     z-index: 3;
-  }
+    bottom: 20px;
+    right: 70px;
+    cursor: pointer;
+    border: 0;
+    transition: all 0.25s;
+}
+
+.family_raport_button:hover {
+    transform: translateY(-5px);
+}
+
+.family_raport_button:active {
+    transform: translateY(2px);
+}

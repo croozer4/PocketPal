@@ -1,4 +1,4 @@
-import {useEffect, useState} from "react";
+import React, {useEffect, useState} from "react";
 import Auth from "./AuthenticationComponent.tsx"
 import {auth} from "../config/firebase";
 import {PasswordInput, TextInput, Button, Modal, UnstyledButton, Menu, Text, Divider, NumberInput} from "@mantine/core";
@@ -15,7 +15,7 @@ import {toast} from "react-toastify";
 import {updateProfile} from "firebase/auth";
 import {getFirestore, collection, addDoc, updateDoc, doc} from "firebase/firestore";
 import {AiOutlineMenu} from "react-icons/ai";
-import {IconArrowLeft, IconLogout, IconUsers} from "@tabler/icons-react";
+import {IconArrowLeft, IconLogout, IconMenu2, IconUsers} from "@tabler/icons-react";
 import {Link} from "react-router-dom";
 
 interface LoginComponentProps {
@@ -348,7 +348,7 @@ function LoginComponent({userPhotoURL}: LoginComponentProps) {
       >
         <Menu.Target>
           <UnstyledButton className="login-button">
-            <AiOutlineMenu size={40}/>
+            <IconMenu2 size={40} style={{filter: "invert(0.6)"}}/>
           </UnstyledButton>
         </Menu.Target>
         <Menu.Dropdown>
@@ -429,9 +429,9 @@ function LoginComponent({userPhotoURL}: LoginComponentProps) {
             <Modal
               opened={opened}
               onClose={handleClose}
-              size={"lg"}
+              size={"sm"}
               title="Profil"
-              classNames={{inner: "modalInner", content: "modalContent", header: "modalHeader", body: "modalBody"}}
+              classNames={{inner: "modalInner", content: "modalContent", header: "modalHeader", body: "modalBodyProfile"}}
             >
               <h4>Użytkownik zalogowany</h4>
               {userPhotoURL ?

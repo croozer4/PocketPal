@@ -153,7 +153,7 @@ const PeekDetails = ({fetchData, ...item}: Expense & { fetchData: () => void }) 
 const HistoryComponent = ({data, fetchData}: { data: Array<Expense>, fetchData: () => void }) => {
     return (
         <MantineProvider theme={{colorScheme: 'dark'}}>
-            <Accordion multiple style={{minWidth: "50vw"}} className='history-list'>
+            <Accordion multiple style={{minWidth: "50vw", paddingBottom: "60px"}} className='history-list'>
                 {
                     data.map((item) => (
                         <PeekDetails key={item.id} {...item} fetchData={fetchData}/>

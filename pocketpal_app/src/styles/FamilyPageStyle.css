@@ -27,6 +27,18 @@
     gap: 5px;
 }
 
+.family-button {
+    transition: all 0.25s;
+}
+
+.family-button:hover {
+    transform: translateY(-5px);
+}
+
+.family-button:active {
+    transform: translateY(2px);
+}
+
 .family-name-input{
     width: 100%;
 }

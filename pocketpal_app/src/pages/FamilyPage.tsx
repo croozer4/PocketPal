@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from "react";
-import { Button } from "@mantine/core";
-import { MantineProvider, Text } from "@mantine/core";
+import React, {useEffect, useState} from "react";
+import {Button} from "@mantine/core";
+import {MantineProvider, Text} from "@mantine/core";
 import FamilyAddingForm from "../components/FamilyAddingForm.tsx";
 import DisplayUserFamilies from "../components/DisplayUserFamilies.tsx";
-import { auth, db, projectFirestore } from "../config/firebase.tsx";
+import {auth, db, projectFirestore} from "../config/firebase.tsx";
 import {
     deleteDoc,
     doc,
@@ -19,21 +19,21 @@ import {
 
 import DatePicker from "react-datepicker";
 
-import { IconPhoto, IconDownload, IconArrowRight } from "@tabler/icons-react";
+import {IconPhoto, IconDownload, IconArrowRight, IconFileTypePdf} from "@tabler/icons-react";
 
 import "../styles/FamilyPageStyle.css";
-import { Menu } from "@mantine/core";
-import { useDisclosure } from "@mantine/hooks";
-import { toast } from "react-toastify";
-import { DefaultAlertTime, QuickAlertTime } from "../config/globals.tsx";
-import { Timestamp } from "firebase/firestore";
+import {Menu} from "@mantine/core";
+import {useDisclosure} from "@mantine/hooks";
+import {toast} from "react-toastify";
+import {DefaultAlertTime, QuickAlertTime} from "../config/globals.tsx";
+import {Timestamp} from "firebase/firestore";
 import HistoryComponent from "../components/HistoryComponent.tsx";
 
-import { Modal } from "@mantine/core";
+import {Modal} from "@mantine/core";
 
 import BasicPieChart from "../components/BasicPieChart.tsx";
-import { TextInput } from "@mantine/core";
-import { v4 as uuidv4 } from "uuid";
+import {TextInput} from "@mantine/core";
+import {v4 as uuidv4} from "uuid";
 
 import "../styles/FamilyAddingFormStyles.css";
 import "../styles/PeekMembersStyle.css";
@@ -42,8 +42,6 @@ import ExpenseAddingForm from "../components/ExpenseAddingForm.tsx";
 
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
-
-
 
 
 interface Family {
@@ -64,10 +62,11 @@ type Expense = {
     type: boolean;
     user: string;
     value: number;
-    
+
 };
 
 const FamilyPage = () => {
+    const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
     const [reload, setReload] = useState<boolean>(true);
     const [userFamily, setUserFamily] = useState<Family | null>(null);
     const [isAdmin, setIsAdmin] = useState<boolean>(false);
@@ -83,7 +82,7 @@ const FamilyPage = () => {
 
     const [familyData, setFamilyData] = useState<Array<Expense>>([]);
 
-    const [opened, { open, close }] = useDisclosure(false);
+    const [opened, {open, close}] = useDisclosure(false);
     const [section, setSection] = useState<string>("overview");
 
     const [familyName, setFamilyName] = useState<string>("");
@@ -311,6 +310,41 @@ const FamilyPage = () => {
         }
     };
 
+    const fetchFamilyRecurrentExpenses = async () => {
+        const recurrentExpenses: Expense[] = [];
+        try {
+            for (const uid of members) {
+                const querySnapshot = await getDocs(query(collection(db, "users", uid, "recurrentExpenses"), where("type", "==", true)));
+                for (const doc of querySnapshot.docs) {
+                    const data = doc.data();
+                    const expense = {
+                        id: doc.id,
+                        category: data.category,
+                        creationDate: data.creationDate,
+                        description: data.description,
+                        type: data.type,
+                        user: data.user,
+                        value: data.value,
+                    };
+                    recurrentExpenses.push(expense);
+                }
+            }
+            return recurrentExpenses;
+        } catch (error) {
+            console.error(error);
+            toast.error("Wystąpił błąd podczas pobierania budżetu miesięcznego!", {
+                position: "top-center",
+                autoClose: DefaultAlertTime,
+                hideProgressBar: true,
+                closeOnClick: true,
+                pauseOnHover: false,
+                draggable: true,
+                progress: undefined,
+                theme: "dark",
+            });
+        }
+    }
+
     const fetchFamilyData = async () => {
         try {
             const uid = auth.currentUser?.uid || null;
@@ -321,7 +355,8 @@ const FamilyPage = () => {
                 if (members.length > 0) {
                     const q = query(
                         collection(db, "usersData"),
-                        where("user", "in", members)
+                        where("user", "in", members),
+                        where("type", "!=", true)
                     );
                     const querySnapshot = await getDocs(q);
 
@@ -349,8 +384,8 @@ const FamilyPage = () => {
 
                         if (members) {
                             // console.log("filteredData" + filteredData);
-                            setFamilyData(filteredData);
-                        }else{
+                            setFamilyData([...filteredData, ...await fetchFamilyRecurrentExpenses()]);
+                        } else {
                             // console.log("familyDataArray" + familyDataArray);
                             setFamilyData(familyDataArray);
                         }
@@ -426,13 +461,13 @@ const FamilyPage = () => {
 
     useEffect(() => {
         // Fetch data only when logged in
-            // getFamily();
-            // fetchMonthlyBudget();
-            // fetchFamilyData();
+        // getFamily();
+        // fetchMonthlyBudget();
+        // fetchFamilyData();
 
-            if (members.length > 0) {
-                fetchFamilyData();
-            }
+        if (members.length > 0) {
+            fetchFamilyData();
+        }
     }, [selectedMonth, selectedYear, loggedIn]);
 
     useEffect(() => {
@@ -446,20 +481,15 @@ const FamilyPage = () => {
     }, [reload, familyData, selectedMonth, selectedYear]);
 
     const generatePDF = () => {
-        
+
         //dodaj 
 
         const doc = new jsPDF();
 
 
-        
-
         //ustaw czcionkę z polskimi znakami
         doc.addFont('https://fonts.gstatic.com/s/roboto/v20/KFOmCnqEu92Fr1Mu4mxP.ttf', 'Roboto', 'normal');
         doc.setFont('Roboto');
-
-        
-        
 
 
         const tableColumn = ["Category", "Date", "Description", "Value"];
@@ -468,7 +498,7 @@ const FamilyPage = () => {
         familyData.forEach((expense) => {
             const expenseData: any[] = [
                 expense.category,
-                
+
                 expense.creationDate.toDate().toLocaleDateString(),
                 expense.description,
                 expense.value,
@@ -489,7 +519,6 @@ const FamilyPage = () => {
             theme: 'grid'
         });
 
-        
 
         doc.text(
             "Raport wydatków dla rodziny " + userFamily?.name,
@@ -522,32 +551,38 @@ const FamilyPage = () => {
         });
 
 
-
-
-        
-
-
-        
         doc.save("raport.pdf");
     };
 
+    useEffect(() => {
+        const handleResize = () => {
+            setIsMobile(window.innerWidth <= 768);
+        };
+
+        window.addEventListener('resize', handleResize);
+
+        return () => {
+            window.removeEventListener('resize', handleResize);
+        };
+    }, []);
+
     return (
         <div className="family-page">
-            <MantineProvider theme={{ colorScheme: colorScheme }}>
-            {loggedIn ? (
+            <MantineProvider theme={{colorScheme: colorScheme}}>
+                {loggedIn ? (
                     <div className="MonthPicker">
-                        <label id="month">Select Month: </label>
+                        <label id="month">Wybierz miesiąc: </label>
                         <DatePicker className="MonthPicker__input"
-                            selected={new Date(selectedYear, selectedMonth - 1)}
-                            onChange={(date: any) => {
-                                // console.log('Selected Date:', date);
+                                    selected={new Date(selectedYear, selectedMonth - 1)}
+                                    onChange={(date: any) => {
+                                        // console.log('Selected Date:', date);
 
-                                setSelectedMonth(date.getMonth() + 1);
-                                setSelectedYear(date.getFullYear());
-                            }}
-                            dateFormat="MM/yyyy"
-                            showMonthYearPicker
-                            id="month"
+                                        setSelectedMonth(date.getMonth() + 1);
+                                        setSelectedYear(date.getFullYear());
+                                    }}
+                                    dateFormat="MM/yyyy"
+                                    showMonthYearPicker
+                                    id="month"
                         />
                     </div>
                 ) : (
@@ -557,7 +592,7 @@ const FamilyPage = () => {
                     <div className="family-page-header">
                         <Menu shadow="md" width={200} position="top-start">
                             <Menu.Target>
-                                <Button>
+                                <Button className={"family-button"}>
                                     Rodzina:{" "}
                                     {userFamily
                                         ? userFamily.name
@@ -577,7 +612,7 @@ const FamilyPage = () => {
                                         >
                                             Kopiuj do schowka
                                         </Menu.Item>
-                                        <Menu.Divider />
+                                        <Menu.Divider/>
                                     </>
                                 )}
                                 {!userFamily && (
@@ -669,7 +704,7 @@ const FamilyPage = () => {
                                     <div id="chart-container">
                                         <BasicPieChart
                                             data={familyData}
-                                            earnings={0}
+                                            earnings={earnings}
                                         />
                                     </div>
                                 </>
@@ -678,7 +713,7 @@ const FamilyPage = () => {
                                     <Text
                                         size="xl"
                                         weight={700}
-                                        style={{ marginBottom: "1rem" }}
+                                        style={{marginBottom: "1rem"}}
                                     >
                                         Brak danych do wyświetlenia
                                     </Text>
@@ -694,12 +729,12 @@ const FamilyPage = () => {
                             <Text
                                 size="xl"
                                 weight={700}
-                                style={{ marginBottom: "1rem" }}
+                                style={{marginBottom: "1rem"}}
                             >
                                 Witaj w PocketPal!
                             </Text>
 
-                            <BasicPieChart data={familyData} earnings={0} />
+                            <BasicPieChart data={familyData} earnings={0}/>
                         </div>
                     )}
                     {familyData.length !== 0 && loggedIn ? (
@@ -708,7 +743,7 @@ const FamilyPage = () => {
                                 data={familyData}
                                 fetchData={fetchFamilyData}
                             />
-                           
+
                         </div>
                     ) : (
                         <></>
@@ -738,7 +773,7 @@ const FamilyPage = () => {
                                         setFamilyName(e.currentTarget.value)
                                     }
                                     className="family-name-input"
-                                    styles={{ root: { width: "100%" } }}
+                                    styles={{root: {width: "100%"}}}
                                 />
 
                                 <Button type="submit" onClick={handleAddFamily}>
@@ -771,7 +806,7 @@ const FamilyPage = () => {
                                     onChange={(e) =>
                                         setInviteCode(e.currentTarget.value)
                                     }
-                                    styles={{ root: { width: "100%" } }}
+                                    styles={{root: {width: "100%"}}}
                                 />
 
                                 <Button
@@ -878,8 +913,20 @@ const FamilyPage = () => {
                     </Modal>
                 )}
 
-                {loggedIn ? <ExpenseAddingForm onUpdate={onUpdate} /> : <></>}
-                {loggedIn ? <Button className="family_raport_button" onClick={generatePDF}>Generuj raport PDF</Button> : <></>}
+                {loggedIn ? <ExpenseAddingForm onUpdate={onUpdate}/> : <></>}
+                {loggedIn ?
+                    <Button className="family_raport_button" onClick={generatePDF}
+                            style={{
+                                paddingLeft: isMobile ? "5px" : "20px",
+                                paddingRight: isMobile ? "5px" : "20px",
+                                right: isMobile ? "70px" : "170px",
+                                borderRadius: isMobile ? "50%" : "0.25rem"
+                            }}>
+                        {isMobile ? <IconFileTypePdf/> : "Generuj raport PDF"}
+                    </Button>
+                    :
+                    <></>
+                }
             </MantineProvider>
         </div>
     );

@@ -1,19 +1,20 @@
-import { useState, useEffect } from 'react';
-import { MantineProvider, Text, Button } from "@mantine/core";
-import { toast } from "react-toastify";
+import React, {useState, useEffect} from 'react';
+import {MantineProvider, Text, Button} from "@mantine/core";
+import {toast} from "react-toastify";
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import {auth, db, projectFirestore} from "../config/firebase.tsx";
 import {addDoc, collection, doc, getDoc, query, where} from "firebase/firestore";
-import { getDocs } from "@firebase/firestore";
-import { DefaultAlertTime } from "../config/globals.tsx";
+import {getDocs} from "@firebase/firestore";
+import {DefaultAlertTime} from "../config/globals.tsx";
 import BasicPieChart from "../components/BasicPieChart";
 import HistoryComponent from "../components/HistoryComponent.tsx";
 import ExpenseAddingForm from "../components/ExpenseAddingForm.tsx";
-import { Timestamp } from "@firebase/firestore";
+import {Timestamp} from "@firebase/firestore";
 import "../App.css";
+import {IconFileTypePdf, IconPlus} from "@tabler/icons-react";
 
 type Expense = {
     id: string;
@@ -29,6 +30,7 @@ type Expense = {
 
 const MainPage = () => {
     const colorScheme = "dark";
+    const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
     const [loggedIn, setLoggedIn] = useState<boolean>(false);
     const [data, setData] = useState<Array<Expense>>([]);
     const [earnings, setEarnings] = useState<number>(0);
@@ -38,9 +40,9 @@ const MainPage = () => {
     const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear()); // Current year
 
     const fetchMonthlyBudget = async () => {
-        try{
+        try {
             const uid = auth.currentUser?.uid || null;
-            if(uid){
+            if (uid) {
                 const monthlyBudget = doc(db, "users", uid);
                 const docSnap = await getDoc(monthlyBudget);
                 if (docSnap.exists()) {
@@ -66,11 +68,11 @@ const MainPage = () => {
 
     const fetchRecurrentExpenses = async () => {
         const recurrentExpenses: Expense[] = [];
-        try{
+        try {
             const uid = auth.currentUser?.uid || null;
-            if(uid){
+            if (uid) {
                 const querySnapshot = await getDocs(query(collection(db, "users", uid, "recurrentExpenses"), where("type", "==", true)));
-                for(const doc of querySnapshot.docs){
+                for (const doc of querySnapshot.docs) {
                     const data = doc.data();
                     const expense = {
                         id: doc.id,
@@ -105,32 +107,32 @@ const MainPage = () => {
             await fetchMonthlyBudget();
 
             const uid = auth.currentUser?.uid || null;
-    
+
             if (uid) {
                 // Zapytanie do kolekcji 'usersData' (wydatki)
                 const expensesQuery = query(
                     collection(db, "usersData"),
                     where("user", "==", uid),
                 );
-    
+
                 const expensesSnapshot = await getDocs(expensesQuery);
-    
+
                 // Zapytanie do kolekcji 'users' (dane użytkownika)
                 const userQuery = query(
                     collection(db, "users"),
                     where("email", "==", auth.currentUser?.email),
                 );
-    
+
                 const userSnapshot = await getDocs(userQuery);
                 const userData = userSnapshot.docs[0]?.data() || {};
-    
+
                 // Pobierz zarobki z danych użytkownika
                 const earnings = userData.earnings || 0;
                 const displayName = userData.displayName || "";
 
                 const fetchedData = expensesSnapshot.docs.map((doc) => {
                     const docData = doc.data();
-                    if(docData.type !== true) {
+                    if (docData.type !== true) {
                         return {
                             id: doc.id,
                             category: docData.category,
@@ -147,8 +149,8 @@ const MainPage = () => {
 
                 // Filtruj dane na podstawie wybranego miesiąca i roku
                 const filteredData = fetchedData.filter(item => {
-                    if(item !== undefined) {
-                        if(item.type !== true) {
+                    if (item !== undefined) {
+                        if (item.type !== true) {
                             const itemDate = new Date(item.creationDate.toMillis());
                             return (
                                 itemDate.getFullYear() === selectedYear &&
@@ -158,7 +160,7 @@ const MainPage = () => {
                     }
                 });
 
-                if(filteredData !== undefined) setData([...filteredData, ...await fetchRecurrentExpenses()]);
+                if (filteredData !== undefined) setData([...filteredData, ...await fetchRecurrentExpenses()]);
             }
 
             setReload(false);
@@ -234,9 +236,9 @@ const MainPage = () => {
                     data[0]?.earnings ? data[0].earnings.toFixed(2) : '-',
                     totalExpense.toFixed(2),
                     (
-                      (data[0]?.earnings
-                        ? parseFloat(data[0].earnings.toFixed(2))
-                        : 0) - parseFloat(totalExpense.toFixed(2))
+                        (data[0]?.earnings
+                            ? parseFloat(data[0].earnings.toFixed(2))
+                            : 0) - parseFloat(totalExpense.toFixed(2))
                     ).toFixed(2),
                 ],
             ];
@@ -283,23 +285,35 @@ const MainPage = () => {
         }
     }, [selectedMonth, selectedYear, loggedIn]);
 
+    useEffect(() => {
+        const handleResize = () => {
+            setIsMobile(window.innerWidth <= 768);
+        };
+
+        window.addEventListener('resize', handleResize);
+
+        return () => {
+            window.removeEventListener('resize', handleResize);
+        };
+    }, []);
+
     return (
         <div className="main-page">
-            <MantineProvider theme={{ colorScheme: colorScheme }}>
+            <MantineProvider theme={{colorScheme: colorScheme}}>
                 {loggedIn ? (
                     <div className="MonthPicker">
-                        <label id="month">Select Month: </label>
+                        <label id="month">Wybierz miesiąc: </label>
                         <DatePicker className="MonthPicker__input"
-                            selected={new Date(selectedYear, selectedMonth - 1)}
-                            onChange={(date: any) => {
-                                console.log('Selected Date:', date);
+                                    selected={new Date(selectedYear, selectedMonth - 1)}
+                                    onChange={(date: any) => {
+                                        console.log('Selected Date:', date);
 
-                                setSelectedMonth(date.getMonth() + 1);
-                                setSelectedYear(date.getFullYear());
-                            }}
-                            dateFormat="MM/yyyy"
-                            showMonthYearPicker
-                            id="month"
+                                        setSelectedMonth(date.getMonth() + 1);
+                                        setSelectedYear(date.getFullYear());
+                                    }}
+                                    dateFormat="MM/yyyy"
+                                    showMonthYearPicker
+                                    id="month"
                         />
                     </div>
                 ) : (
@@ -320,7 +334,7 @@ const MainPage = () => {
                                     <Text
                                         size="xl"
                                         weight={700}
-                                        style={{ marginBottom: "1rem" }}
+                                        style={{marginBottom: "1rem"}}
                                     >
                                         Brak danych do wyświetlenia
                                     </Text>
@@ -333,7 +347,7 @@ const MainPage = () => {
                             <Text
                                 size="xl"
                                 weight={700}
-                                style={{ marginBottom: "1rem" }}
+                                style={{marginBottom: "1rem"}}
                             >
                                 Witaj w PocketPal!
                             </Text>
@@ -342,15 +356,25 @@ const MainPage = () => {
                         </div>
                     )}
                     {data.length !== 0 && loggedIn ? (
-                        <div>
-                            <HistoryComponent data={data} fetchData={fetchData} />
-                            <Button className='raport_button' onClick={generatePDF}>Generuj raport PDF</Button>
-                        </div>
+                        <HistoryComponent data={data} fetchData={fetchData}/>
                     ) : (
                         <></>
                     )}
                 </div>
-                {loggedIn ? <ExpenseAddingForm onUpdate={onUpdate} /> : <></>}
+                {loggedIn ? <ExpenseAddingForm onUpdate={onUpdate}/> : <></>}
+                {loggedIn ?
+                    <Button className="family_raport_button" onClick={generatePDF}
+                            style={{
+                                paddingLeft: isMobile ? "5px" : "20px",
+                                paddingRight: isMobile ? "5px" : "20px",
+                                right: isMobile ? "70px" : "170px",
+                                borderRadius: isMobile ? "50%" : "0.25rem"
+                            }}>
+                        {isMobile ? <IconFileTypePdf/> : "Generuj raport PDF"}
+                    </Button>
+                    :
+                    <></>
+                }
             </MantineProvider>
         </div>
     );

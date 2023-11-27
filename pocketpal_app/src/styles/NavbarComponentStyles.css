@@ -133,3 +133,9 @@
     background-color: #808080;
 }
 
+.modalBodyProfile {
+    margin-bottom: 40px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
