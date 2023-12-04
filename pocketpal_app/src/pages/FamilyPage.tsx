@@ -92,6 +92,11 @@ const FamilyPage = () => {
     const [memberNames, setMemberNames] = useState<string[]>([]);
     // const [membersReady, setMembersReady] = useState<boolean>(false);
 
+    const onUpdateData = () => {
+        // console.log("onUpdateData");
+        fetchFamilyData();
+    };
+
     const onUpdate = () => {
         // console.log("onUpdate");
         setReload(true);
@@ -120,7 +125,7 @@ const FamilyPage = () => {
                     earningsSum += earnings;
                 } else {
                     // Obsługa przypadku braku wyników
-                    console.log("Brak użytkownika dla podanego id.");
+                    // console.log("Brak użytkownika dla podanego id.");
                 }
             }
             setMemberNames(memberNames);
@@ -271,7 +276,7 @@ const FamilyPage = () => {
                 setUserFamily(familyData);
                 setMembers(familyData.members);
             } else {
-                // Obsługa przypadku braku wyników
+                setMembers([userId]);
                 console.log("Brak rodziny dla bieżącego użytkownika.");
             }
         } else {
@@ -360,7 +365,7 @@ const FamilyPage = () => {
                     );
                     const querySnapshot = await getDocs(q);
 
-                    if (!querySnapshot.empty) {
+
                         const familyData = querySnapshot.docs;
                         const familyDataArray = familyData.map((doc) => {
                             return {
@@ -391,9 +396,7 @@ const FamilyPage = () => {
                         }
 
                         // console.log(familyDataArray);
-                    } else {
-                        console.log("Brak rodziny dla bieżącego użytkownika.");
-                    }
+
                 }
             }
 
@@ -418,6 +421,9 @@ const FamilyPage = () => {
             if (user) {
                 getFamily();
             } else {
+                setFamilyData([]);
+                setUserFamily(null);
+                setMembers([]);
                 // Obsługa przypadku braku zalogowanego użytkownika
                 // console.log("Brak zalogowanego użytkownika.");
             }
@@ -474,8 +480,17 @@ const FamilyPage = () => {
         auth.onAuthStateChanged((user) => {
             if (user) {
                 setLoggedIn(true);
+                if(members.length > 0 && reload) {
+                    fetchFamilyData();
+                }
             } else {
                 setLoggedIn(false);
+                if(!reload) {
+                    setFamilyData([]);
+                    setUserFamily(null);
+                    setMembers([]);
+                }
+                setReload(true);
             }
         });
     }, [reload, familyData, selectedMonth, selectedYear]);
@@ -589,6 +604,7 @@ const FamilyPage = () => {
                     <></>
                 )}
                 <div className="interface">
+                    {loggedIn &&
                     <div className="family-page-header">
                         <Menu shadow="md" width={200} position="top-start">
                             <Menu.Target>
@@ -665,40 +681,13 @@ const FamilyPage = () => {
                                     </Menu.Item>
                                 )}
                             </Menu.Dropdown>
-                            {/* )} */}
                         </Menu>
-
-                        <div className="family-buttons">
-                            {/* {!userFamily && (
-                                <>
-                                    <FamilyAddingForm onUpdate={onUpdate} />
-                                    <JoinFamilyForm onUpdate={onUpdate} />
-                                </>
-                            )}
-                            {userFamily && (
-                                <>
-                                    <PeekMembersForm
-                                        onUpdate={onUpdate}
-                                        familyId={userFamily.id}
-                                    />
-                                    {isAdmin && (
-                                        <RemoveFamilyForm
-                                            onUpdate={onUpdate}
-                                            familyId={userFamily.id}
-                                        />
-                                    )}
-                                    {!isAdmin && (
-                                        <LeaveFamilyForm
-                                            onUpdate={onUpdate}
-                                            familyId={userFamily.id}
-                                        />
-                                    )}
-                                </>
-                            )} */}
-                        </div>
                     </div>
+                    }
                     {loggedIn ? (
-                        <div className="overview">
+                        <div className="overview"
+                             style={{minWidth: familyData.length !== 0 ? "45vw" : "100%"}}
+                        >
                             {familyData?.length !== 0 ? (
                                 <>
                                     <div id="chart-container">
@@ -725,7 +714,9 @@ const FamilyPage = () => {
                             )}
                         </div>
                     ) : (
-                        <div className="overview">
+                        <div className="overview"
+                             style={{minWidth: familyData.length !== 0 ? "45vw" : "100%", top: "calc(50% - 250px)"}}
+                        >
                             <Text
                                 size="xl"
                                 weight={700}
@@ -737,14 +728,11 @@ const FamilyPage = () => {
                             <BasicPieChart data={familyData} earnings={0}/>
                         </div>
                     )}
-                    {familyData.length !== 0 && loggedIn ? (
-                        <div>
-                            <HistoryComponent
-                                data={familyData}
-                                fetchData={fetchFamilyData}
-                            />
-
-                        </div>
+                    {loggedIn && familyData?.length !== 0 ? (
+                        <HistoryComponent
+                            data={familyData}
+                            fetchData={fetchFamilyData}
+                        />
                     ) : (
                         <></>
                     )}
@@ -913,7 +901,7 @@ const FamilyPage = () => {
                     </Modal>
                 )}
 
-                {loggedIn ? <ExpenseAddingForm onUpdate={onUpdate}/> : <></>}
+                {loggedIn ? <ExpenseAddingForm onUpdate={onUpdateData}/> : <></>}
                 {loggedIn ?
                     <Button className="family_raport_button" onClick={generatePDF}
                             style={{

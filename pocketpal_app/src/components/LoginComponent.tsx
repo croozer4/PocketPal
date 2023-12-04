@@ -16,7 +16,7 @@ import {updateProfile} from "firebase/auth";
 import {getFirestore, collection, addDoc, updateDoc, doc} from "firebase/firestore";
 import {AiOutlineMenu} from "react-icons/ai";
 import {IconArrowLeft, IconLogout, IconMenu2, IconUsers} from "@tabler/icons-react";
-import {Link} from "react-router-dom";
+import {Link, redirect} from "react-router-dom";
 
 interface LoginComponentProps {
   userPhotoURL: string;
@@ -64,7 +64,27 @@ function LoginComponent({userPhotoURL}: LoginComponentProps) {
 
     signInWithEmailAndPassword(auth, email, password).then(() => {
       close();
+      toast.success("Zalogowano pomyślnie!", {
+        position: "top-center",
+        autoClose: QuickAlertTime,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: false,
+        draggable: true,
+        progress: undefined,
+        theme: "dark",
+      });
     }).catch((error) => {
+      toast.error("Niepoprawne dane logowania!", {
+        position: "top-center",
+        autoClose: QuickAlertTime,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: false,
+        draggable: true,
+        progress: undefined,
+        theme: "dark",
+      });
       const errorCode = error.code;
       const errorMessage = error.message;
       console.error(errorCode, errorMessage);

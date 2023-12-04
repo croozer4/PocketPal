@@ -42,16 +42,16 @@ function BasicPieChart({ data, earnings }: { data: Array<Expense>, earnings: num
       "color": "hsl(166,70%,50%)"
     },
     {
-      "id": "Inne",
-      "label": "Inne",
-      "value": pieChartData ? pieChartData[3] : 0,
-      "color": "hsl(314, 70%, 50%)"
-    },
-    {
       "id": "Opłaty",
       "label": "Opłaty",
-      "value": pieChartData ? pieChartData[4] : 0,
+      "value": pieChartData ? pieChartData[3] : 0,
       "color": "hsl(93,100%,46%)"
+    },
+    {
+      "id": "Inne",
+      "label": "Inne",
+      "value": pieChartData ? pieChartData[4] : 0,
+      "color": "hsl(314, 70%, 50%)"
     },
     {
       "id": "Pozostałe środki",
@@ -69,52 +69,52 @@ function BasicPieChart({ data, earnings }: { data: Array<Expense>, earnings: num
     return randomData;
   };
 
-  useEffect(() => {
-    const fetchData = (): boolean => {
-      try {
-        const pieChartDataTemp: number[] = [0, 0, 0, 0, 0, 0];
-        for (const item of data) {
-          if (item.category === "Jedzenie") {
-            pieChartDataTemp[0] += item.value;
-          } else if (item.category === "Rozrywka") {
-            pieChartDataTemp[1] += item.value;
-          } else if (item.category === "Transport") {
-            pieChartDataTemp[2] += item.value;
-          } else if (item.category === "Opłaty") {
-            pieChartDataTemp[3] += item.value;
-          } else {
-            pieChartDataTemp[4] += item.value;
-          }
-
-          if(earnings !== 0) {
-            const earningsTemp = earnings - pieChartDataTemp[0] - pieChartDataTemp[1] - pieChartDataTemp[2] - pieChartDataTemp[3] - pieChartDataTemp[4];
-            if(earningsTemp >= 0) {
-              pieChartDataTemp[5] = earningsTemp;
-            } else {
-              pieChartDataTemp[5] = 0;
-            }
-          }
-
-          setPieChartData(pieChartDataTemp);
+  const fetchData = (): boolean => {
+    try {
+      const pieChartDataTemp: number[] = [0, 0, 0, 0, 0, 0];
+      for (const item of data) {
+        if (item.category === "Jedzenie") {
+          pieChartDataTemp[0] += item.value;
+        } else if (item.category === "Rozrywka") {
+          pieChartDataTemp[1] += item.value;
+        } else if (item.category === "Transport") {
+          pieChartDataTemp[2] += item.value;
+        } else if (item.category === "Opłaty") {
+          pieChartDataTemp[3] += item.value;
+        } else {
+          pieChartDataTemp[4] += item.value;
         }
-        return data.length !== 0;
-      } catch (error) {
-        console.error(error);
-        toast.error('Nie udało się pobrać danych!', {
-          position: "top-center",
-          autoClose: DefaultAlertTime,
-          hideProgressBar: true,
-          closeOnClick: true,
-          pauseOnHover: false,
-          draggable: true,
-          progress: undefined,
-          theme: "dark",
-        });
 
-        return false;
+        if(earnings !== 0) {
+          const earningsTemp = earnings - pieChartDataTemp[0] - pieChartDataTemp[1] - pieChartDataTemp[2] - pieChartDataTemp[3] - pieChartDataTemp[4];
+          if(earningsTemp >= 0) {
+            pieChartDataTemp[5] = earningsTemp;
+          } else {
+            pieChartDataTemp[5] = 0;
+          }
+        }
+
+        setPieChartData(pieChartDataTemp);
       }
-    }
+      return data.length !== 0;
+    } catch (error) {
+      console.error(error);
+      toast.error('Nie udało się pobrać danych!', {
+        position: "top-center",
+        autoClose: DefaultAlertTime,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: false,
+        draggable: true,
+        progress: undefined,
+        theme: "dark",
+      });
 
+      return false;
+    }
+  }
+
+  useEffect(() => {
     const updateRandomData = () => {
       if (shouldGenerateRandomData) {
 

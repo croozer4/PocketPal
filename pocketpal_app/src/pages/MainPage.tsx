@@ -184,14 +184,14 @@ const MainPage = () => {
     };
 
     const generatePDF = async () => {
-        
+
         try {
             const pdf = new jsPDF();
 
             //ustaw czcionkę na roboto
             pdf.setFont('Roboto');
-            
-            
+
+
 
             // Pobierz aktualną datę i sformatuj ją
             const now = new Date();
@@ -283,6 +283,11 @@ const MainPage = () => {
                 setLoggedIn(true);
             } else {
                 setLoggedIn(false);
+                if(!reload) {
+                    setData([]);
+                    setEarnings(0);
+                }
+                setReload(true);
             }
         });
     }, [reload, data, selectedMonth, selectedYear]);
@@ -290,6 +295,7 @@ const MainPage = () => {
     useEffect(() => {
         // Fetch data only when logged in
         if (loggedIn) {
+            // console.log('Fetching data...');
             fetchData();
         }
     }, [selectedMonth, selectedYear, loggedIn]);
@@ -315,8 +321,7 @@ const MainPage = () => {
                         <DatePicker className="MonthPicker__input"
                                     selected={new Date(selectedYear, selectedMonth - 1)}
                                     onChange={(date: any) => {
-                                        console.log('Selected Date:', date);
-
+                                        // console.log('Selected Date:', date);
                                         setSelectedMonth(date.getMonth() + 1);
                                         setSelectedYear(date.getFullYear());
                                     }}
@@ -330,13 +335,14 @@ const MainPage = () => {
                 )}
                 <div className="interface">
                     {loggedIn ? (
-                        <div className="overview">
+                        <div className="overview"
+                            style={{minWidth: data.length !== 0 ? "45vw" : "100%"}}
+                        >
                             {data.length !== 0 ? (
                                 <>
                                     <div id="chart-container">
                                         <BasicPieChart data={data} earnings={earnings}/>
                                     </div>
-
                                 </>
                             ) : (
                                 <div className="no-data-message">
@@ -352,7 +358,9 @@ const MainPage = () => {
                             )}
                         </div>
                     ) : (
-                        <div className="overview">
+                        <div className="overview"
+                             style={{minWidth: data.length !== 0 ? "45vw" : "100%", top: "calc(50% - 250px)"}}
+                        >
                             <Text
                                 size="xl"
                                 weight={700}

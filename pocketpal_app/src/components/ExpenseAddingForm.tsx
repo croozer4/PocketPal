@@ -52,6 +52,20 @@ function ExpenseAddingForm({ onUpdate }: { onUpdate: () => void }) {
             return;
         }
 
+        if(!InputCategory) {
+            toast.error("Wybierz kategorię wydatku!", {
+                position: "top-center",
+                autoClose: QuickAlertTime,
+                hideProgressBar: true,
+                closeOnClick: true,
+                pauseOnHover: false,
+                draggable: true,
+                progress: undefined,
+                theme: "dark",
+            });
+            return;
+        }
+
         const creationDate = InputCreationDate || new Date();
         const dataToUpload = {
             description: InputDescription,

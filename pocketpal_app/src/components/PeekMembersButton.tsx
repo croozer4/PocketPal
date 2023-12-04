@@ -42,7 +42,7 @@ function PeekMembersForm({
                                 const userData = userQuerySnapshot.data();
                                 return userData.displayName;
                             } else {
-                                console.log("Brak użytkownika dla podanego id.");
+                                // console.log("Brak użytkownika dla podanego id.");
                                 return "";
                             }
                         } catch (error) {
