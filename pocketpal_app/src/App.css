@@ -83,6 +83,11 @@
         /* background-color: blue; */
     }
 
+    /*svg inside a div inside .pie-chart*/
+    .pie-chart div svg, .pie-chart div svg rect {
+        width: 80vw !important;
+    }
+
     .history-list {
         width: 100% !important;
         /* background-color: green; */

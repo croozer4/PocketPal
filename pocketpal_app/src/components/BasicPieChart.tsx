@@ -190,7 +190,7 @@ function BasicPieChart({ data, earnings }: { data: Array<Expense>, earnings: num
   }, []);
 
   return (
-    <div style={{ height: "400px", zIndex: 1 }} className="pie-chart">
+    <div style={{ height: "400px", zIndex: 1}} className="pie-chart">
       {pieChartData.length !== 0 &&
           <>
               <Text
