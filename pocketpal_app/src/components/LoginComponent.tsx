@@ -13,7 +13,7 @@ import {faUser, faUserPlus} from "@fortawesome/free-solid-svg-icons";
 import {DefaultAlertTime, QuickAlertTime} from "../config/globals.tsx";
 import {toast} from "react-toastify";
 import {updateProfile} from "firebase/auth";
-import {getFirestore, collection, addDoc, updateDoc, doc} from "firebase/firestore";
+import {getFirestore, collection, addDoc, updateDoc, doc, setDoc} from "firebase/firestore";
 import {AiOutlineMenu} from "react-icons/ai";
 import {IconArrowLeft, IconLogout, IconMenu2, IconUsers} from "@tabler/icons-react";
 import {Link, redirect} from "react-router-dom";
@@ -240,13 +240,15 @@ function LoginComponent({userPhotoURL}: LoginComponentProps) {
       });
     } else {
       createUserWithEmailAndPassword(auth, email, password).then(async (userCredential) => {
+        const docRef = doc(db, "users", userCredential.user.uid);
+
         const userDocData = {
           id: userCredential.user.uid,
           displayName: firstName + " " + lastName,
           email: email,
         };
 
-        await addDoc(usersCollection, userDocData);
+        await setDoc(docRef, userDocData);
 
         updateProfile(userCredential.user, {
           displayName: firstName + " " + lastName,
