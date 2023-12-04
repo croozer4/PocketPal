@@ -346,15 +346,15 @@ function LoginComponent({userPhotoURL}: LoginComponentProps) {
 
   const validatePassword = (password: string) => {
     // eslint-disable-next-line no-useless-escape
-    const re = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=!])([0-9a-zA-Z@#$%^&+=!]){8,}$/;
+    const re = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=!*.<>?;:'"_\-\(\)\[\]\{\}~\\|,=])([0-9a-zA-Z@#$%^&+=!*.<>?;:'"_\-\(\)\[\]\{\}~\\|,=]){8,}$/;
     return re.test(password);
-  }
+  };
 
   const validateName = (name: string) => {
     // eslint-disable-next-line no-useless-escape
-    const re = /^[a-zA-Z]+$/;
+    const re = /^[a-zA-ZąćęłńóśźżĄĆĘŁŃÓŚŹŻ]+$/;
     return re.test(name);
-  }
+  };
 
   return (
     <>
