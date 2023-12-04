@@ -81,11 +81,16 @@
     .pie-chart {
         width: 100% !important;
         /* background-color: blue; */
+
     }
 
     /*svg inside a div inside .pie-chart*/
     .pie-chart div svg, .pie-chart div svg rect {
-        width: 80vw !important;
+        width: 90vw !important;
+        display: flex;
+        flex-direction: column;
+        justify-content: center !important;
+        align-items: center !important;
     }
 
     .history-list {
