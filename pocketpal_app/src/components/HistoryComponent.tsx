@@ -196,6 +196,15 @@ const PeekDetails = ({
                 const querySnapshot = await getDocs(q);
 
                 querySnapshot.forEach((doc) => {
+                    // sprawdz czy creationDate jest starsze niz dzisiejsza data
+                    const creationDate = doc.data().creationDate.toMillis();
+                    const today = new Date().getTime();
+
+                    if (creationDate < today) {
+                        // pomin wydatek
+                        console.log("skip");
+                        return;
+                    }
                     console.log(doc.id, " => ", doc.data());
                     deleteRecurrentExpenseNoNotification(doc.id);
                 });
@@ -262,7 +271,7 @@ const PeekDetails = ({
                                         )
                                     }
                                 >
-                                    Usuń wszystkie{" "}
+                                    Usuń niezapłacone{" "}
                                 </Button>
                             </div>
                         ) : (
