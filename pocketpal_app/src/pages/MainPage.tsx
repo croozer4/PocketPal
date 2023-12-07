@@ -15,6 +15,7 @@ import ExpenseAddingForm from "../components/ExpenseAddingForm.tsx";
 import {Timestamp} from "@firebase/firestore";
 import "../App.css";
 import {IconFileTypePdf, IconPlus} from "@tabler/icons-react";
+import { set } from 'date-fns';
 
 type Expense = {
     id: string;
@@ -147,20 +148,26 @@ const MainPage = () => {
                     }
                 });
 
+                // add recurrent expenses to fetched data
+
+                fetchedData.push(...await fetchRecurrentExpenses());
+
                 // Filtruj dane na podstawie wybranego miesiąca i roku
                 const filteredData = fetchedData.filter(item => {
                     if (item !== undefined) {
-                        if (item.type !== true) {
+                        // if (item.type !== true) {
                             const itemDate = new Date(item.creationDate.toMillis());
                             return (
                                 itemDate.getFullYear() === selectedYear &&
                                 itemDate.getMonth() + 1 === selectedMonth
                             );
-                        }
+                        // }
                     }
                 });
 
-                if (filteredData !== undefined) setData([...filteredData, ...await fetchRecurrentExpenses()]);
+                setData(filteredData);
+
+                // if (filteredData !== undefined) setData([...filteredData, ...await fetchRecurrentExpenses()]);
             }
 
             setReload(false);

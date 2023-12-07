@@ -1,6 +1,6 @@
 import { auth, projectFirestore } from "../config/firebase";
 import { collection, addDoc } from "firebase/firestore";
-import React, {useEffect, useState} from "react";
+import React, { useEffect, useState } from "react";
 import {
     Select,
     NumberInput,
@@ -14,19 +14,52 @@ import { useDisclosure } from "@mantine/hooks";
 import "../styles/ExpenseAddingFormStyles.css";
 import { toast } from "react-toastify";
 import { QuickAlertTime } from "../config/globals.tsx";
-import {IconPlus} from "@tabler/icons-react";
+import { IconPlus } from "@tabler/icons-react";
+import { set } from "date-fns";
 
 function ExpenseAddingForm({ onUpdate }: { onUpdate: () => void }) {
     const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
     const [opened, { open, close }] = useDisclosure(false);
+    const [recurringOpened, { open: openRecurring, close: closeRecurring }] =
+        useDisclosure(false);
 
     const [InputValue, setInputValue] = useState<number>(); // Ustaw początkową wartość na 0
     const [InputCategory, setInputCategory] = useState<string>();
     const [InputCreationDate, setInputCreationDate] = useState<Date | null>(
         null
     );
+    const [InputEndDate, setInputEndDate] = useState<Date | null>(null);
     const [InputType, setInputType] = useState<boolean>(false);
     const [InputDescription, setInputDescription] = useState("");
+
+    const [repeat, setRepeat] = useState<string>();
+
+    useEffect(() => {
+        if (InputType === true) {
+            openRecurring();
+        }
+    }, [InputType]);
+
+    useEffect(() => {
+        if (InputType === false) {
+            setInputEndDate(null);
+            setRepeat("");
+        }
+    }, [InputType]);
+
+    const handleCloseRecurring = () => {
+        console.log("handleCloseRecurring");
+        if (InputType === true && InputEndDate === null || InputType === true && repeat === "") {
+            setRepeat("");
+            setInputEndDate(null);
+            setInputType(false);
+            console.log("zamknięto modal bez dodania daty zakończenia wydatku");
+            closeRecurring();
+        }
+
+        closeRecurring();
+        
+    }
 
     const handleSubmit = async (event: React.FormEvent) => {
         // console.log("submitting form");
@@ -52,7 +85,7 @@ function ExpenseAddingForm({ onUpdate }: { onUpdate: () => void }) {
             return;
         }
 
-        if(!InputCategory) {
+        if (!InputCategory) {
             toast.error("Wybierz kategorię wydatku!", {
                 position: "top-center",
                 autoClose: QuickAlertTime,
@@ -67,25 +100,145 @@ function ExpenseAddingForm({ onUpdate }: { onUpdate: () => void }) {
         }
 
         const creationDate = InputCreationDate || new Date();
-        const dataToUpload = {
-            description: InputDescription,
-            category: InputCategory,
-            creationDate,
-            type: InputType,
-            user: auth.currentUser.uid,
-            value: InputValue
-        };
+        const endDate = InputEndDate || new Date();
 
-        await addDoc(collection(projectFirestore, "usersData"), {
-            ...dataToUpload,
-        });
-        if(InputType) {
-            await addDoc(collection(projectFirestore, "users", auth.currentUser?.uid, "recurrentExpenses"), {
-                ...dataToUpload,
-            });
+        if (InputType && endDate < creationDate) {
+            toast.error(
+                "Data zakończenia wydatku nie może być wcześniejsza niż data jego rozpoczęcia!",
+                {
+                    position: "top-center",
+                    autoClose: QuickAlertTime,
+                    hideProgressBar: true,
+                    closeOnClick: true,
+                    pauseOnHover: false,
+                    draggable: true,
+                    progress: undefined,
+                    theme: "dark",
+                }
+            );
+            return;
         }
 
-        if(InputType) {
+        if(InputType && !repeat) {
+            toast.error(
+                "Wybierz częstotliwość powtarzania wydatku!",
+                {
+                    position: "top-center",
+                    autoClose: QuickAlertTime,
+                    hideProgressBar: true,
+                    closeOnClick: true,
+                    pauseOnHover: false,
+                    draggable: true,
+                    progress: undefined,
+                    theme: "dark",
+                }
+            );
+            return;
+        }
+
+        if (InputType === false) {
+            const dataToUpload = {
+                description: InputDescription,
+                category: InputCategory,
+                creationDate,
+                type: InputType,
+                user: auth.currentUser.uid,
+                value: InputValue,
+            };
+
+            await addDoc(collection(projectFirestore, "usersData"), {
+                ...dataToUpload,
+            });
+            if (InputType) {
+                await addDoc(
+                    collection(
+                        projectFirestore,
+                        "users",
+                        auth.currentUser?.uid,
+                        "recurrentExpenses"
+                    ),
+                    {
+                        ...dataToUpload,
+                    }
+                );
+            }
+
+            if (InputType) {
+                toast.success("Dodano stały wydatek!", {
+                    position: "top-center",
+                    autoClose: QuickAlertTime,
+                    hideProgressBar: true,
+                    closeOnClick: true,
+                    pauseOnHover: false,
+                    draggable: true,
+                    progress: undefined,
+                    theme: "dark",
+                });
+            } else {
+                toast.success("Dodano wydatek!", {
+                    position: "top-center",
+                    autoClose: QuickAlertTime,
+                    hideProgressBar: true,
+                    closeOnClick: true,
+                    pauseOnHover: false,
+                    draggable: true,
+                    progress: undefined,
+                    theme: "dark",
+                });
+            }
+
+            close();
+
+            // wyzeruj stan
+            setInputValue(undefined);
+            setInputCategory("");
+            setInputCreationDate(null);
+            setInputType(false);
+            setInputDescription("");
+            setRepeat("");
+            setInputEndDate(null);
+
+            onUpdate();
+        } else {
+            // dodawanie wydatku stałego co miesiąc tego samego dnia do daty zakończenia
+            // generuj identyfikator wydatku
+
+            const recurrentId = Math.random().toString(36).substr(2, 9);
+
+            const dataToUpload = {
+                description: InputDescription,
+                category: InputCategory,
+                creationDate,
+                type: InputType,
+                user: auth.currentUser.uid,
+                value: InputValue,
+                recurrentId: recurrentId,
+            };
+
+            await addDoc(collection(projectFirestore, "usersData"), {
+                ...dataToUpload,
+            });
+
+            const date = new Date(creationDate);
+            const endDate = new Date(InputEndDate);
+
+            while (date <= endDate) {
+                await addDoc(
+                    collection(
+                        projectFirestore,
+                        "users",
+                        auth.currentUser?.uid,
+                        "recurrentExpenses"
+                    ),
+                    {
+                        ...dataToUpload,
+                        creationDate: date,
+                    }
+                );
+                if (repeat === "Tydzień") date.setDate(date.getDate() + 7);
+                else date.setMonth(date.getMonth() + 1);
+            }
+
             toast.success("Dodano stały wydatek!", {
                 position: "top-center",
                 autoClose: QuickAlertTime,
@@ -96,29 +249,20 @@ function ExpenseAddingForm({ onUpdate }: { onUpdate: () => void }) {
                 progress: undefined,
                 theme: "dark",
             });
-        } else {
-            toast.success("Dodano wydatek!", {
-                position: "top-center",
-                autoClose: QuickAlertTime,
-                hideProgressBar: true,
-                closeOnClick: true,
-                pauseOnHover: false,
-                draggable: true,
-                progress: undefined,
-                theme: "dark",
-            });
+
+            close();
+
+            // wyzeruj stan
+            setInputValue(undefined);
+            setInputCategory("");
+            setInputCreationDate(null);
+            setInputType(false);
+            setInputDescription("");
+            setRepeat("");
+            setInputEndDate(null);
+
+            onUpdate();
         }
-
-        close();
-
-        // wyzeruj stan
-        setInputValue(undefined);
-        setInputCategory("");
-        setInputCreationDate(null);
-        setInputType(false);
-        setInputDescription("");
-
-        onUpdate();
     };
 
     useEffect(() => {
@@ -126,18 +270,25 @@ function ExpenseAddingForm({ onUpdate }: { onUpdate: () => void }) {
             setIsMobile(window.innerWidth <= 768);
         };
 
-        window.addEventListener('resize', handleResize);
+        window.addEventListener("resize", handleResize);
 
         return () => {
-            window.removeEventListener('resize', handleResize);
+            window.removeEventListener("resize", handleResize);
         };
     }, []);
 
     return (
         <>
-            <Button onClick={open} className={"modalButton"}
-            style={{ paddingLeft: isMobile ? "5px" : "20px", paddingRight: isMobile ? "5px" : "20px", borderRadius: isMobile ? "50%" : "0.25rem"}}>
-                { isMobile ? <IconPlus/> : "Dodaj wydatek"}
+            <Button
+                onClick={open}
+                className={"modalButton"}
+                style={{
+                    paddingLeft: isMobile ? "5px" : "20px",
+                    paddingRight: isMobile ? "5px" : "20px",
+                    borderRadius: isMobile ? "50%" : "0.25rem",
+                }}
+            >
+                {isMobile ? <IconPlus /> : "Dodaj wydatek"}
             </Button>
             <Modal
                 opened={opened}
@@ -145,7 +296,11 @@ function ExpenseAddingForm({ onUpdate }: { onUpdate: () => void }) {
                 size={"lg"}
                 title="Dodaj wydatek"
                 withinPortal={false}
-                classNames={{ inner: "modalInner", content: "modalContent", header: "modalHeader" }}
+                classNames={{
+                    inner: "modalInner",
+                    content: "modalContent",
+                    header: "modalHeader",
+                }}
                 centered
             >
                 <form>
@@ -207,6 +362,7 @@ function ExpenseAddingForm({ onUpdate }: { onUpdate: () => void }) {
                                 className="modal-switch"
                                 label="Czy jest to wydatek stały?"
                                 defaultChecked={false}
+                                checked={InputType}
                                 onChange={(e) => setInputType(e.target.checked)}
                             />
                         </div>
@@ -218,6 +374,40 @@ function ExpenseAddingForm({ onUpdate }: { onUpdate: () => void }) {
                             Dodaj
                         </Button>
                     </div>
+                </form>
+            </Modal>
+
+            <Modal
+                opened={recurringOpened}
+                onClose={handleCloseRecurring}
+                size={"sm"}
+                title="Wybierz datę zakończenia wydatku"
+                withinPortal={false}
+                classNames={{
+                    inner: "modalInner",
+                    content: "modalContent",
+                    header: "modalHeader",
+                }}
+                centered
+            >
+                <form>
+                    <DatePicker
+                        value={InputEndDate}
+                        onChange={(value) => setInputEndDate(value)}
+                    />
+
+                    <Select
+                        label="Powtarzaj co"
+                        placeholder="Powtarzaj co"
+                        data={[
+                            { value: "Miesiac", label: "Miesiąc" },
+                            { value: "Tydzień", label: "Tydzień" },
+                        ]}
+                        name="Reapeat"
+                        onChange={(value: string) => setRepeat(value)}
+                        styles={{ input: { marginTop: "7px" } }}
+                    />
+                    <br />
                 </form>
             </Modal>
         </>

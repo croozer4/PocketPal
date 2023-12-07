@@ -379,6 +379,8 @@ const FamilyPage = () => {
                             };
                         });
 
+                        familyDataArray.push(...await fetchFamilyRecurrentExpenses());
+
                         const filteredData = familyDataArray.filter(item => {
                             const itemDate = new Date(item.creationDate.toMillis());
                             return (
@@ -389,10 +391,12 @@ const FamilyPage = () => {
 
                         if (members) {
                             // console.log("filteredData" + filteredData);
-                            setFamilyData([...filteredData, ...await fetchFamilyRecurrentExpenses()]);
+                            // setFamilyData([...filteredData, ...await fetchFamilyRecurrentExpenses()]);
+                            setFamilyData(filteredData);
                         } else {
                             // console.log("familyDataArray" + familyDataArray);
                             setFamilyData(familyDataArray);
+        
                         }
 
                         // console.log(familyDataArray);
