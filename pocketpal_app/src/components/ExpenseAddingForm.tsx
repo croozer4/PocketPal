@@ -49,7 +49,10 @@ function ExpenseAddingForm({ onUpdate }: { onUpdate: () => void }) {
 
     const handleCloseRecurring = () => {
         console.log("handleCloseRecurring");
-        if (InputType === true && InputEndDate === null || InputType === true && repeat === "") {
+        if (
+            (InputType === true && InputEndDate === null) ||
+            (InputType === true && repeat === "")
+        ) {
             setRepeat("");
             setInputEndDate(null);
             setInputType(false);
@@ -58,8 +61,7 @@ function ExpenseAddingForm({ onUpdate }: { onUpdate: () => void }) {
         }
 
         closeRecurring();
-        
-    }
+    };
 
     const handleSubmit = async (event: React.FormEvent) => {
         // console.log("submitting form");
@@ -119,20 +121,17 @@ function ExpenseAddingForm({ onUpdate }: { onUpdate: () => void }) {
             return;
         }
 
-        if(InputType && !repeat) {
-            toast.error(
-                "Wybierz częstotliwość powtarzania wydatku!",
-                {
-                    position: "top-center",
-                    autoClose: QuickAlertTime,
-                    hideProgressBar: true,
-                    closeOnClick: true,
-                    pauseOnHover: false,
-                    draggable: true,
-                    progress: undefined,
-                    theme: "dark",
-                }
-            );
+        if (InputType && !repeat) {
+            toast.error("Wybierz częstotliwość powtarzania wydatku!", {
+                position: "top-center",
+                autoClose: QuickAlertTime,
+                hideProgressBar: true,
+                closeOnClick: true,
+                pauseOnHover: false,
+                draggable: true,
+                progress: undefined,
+                theme: "dark",
+            });
             return;
         }
 
@@ -220,6 +219,7 @@ function ExpenseAddingForm({ onUpdate }: { onUpdate: () => void }) {
             });
 
             const date = new Date(creationDate);
+            const originalDate = new Date(creationDate);
             const endDate = new Date(InputEndDate);
 
             while (date <= endDate) {
@@ -236,7 +236,35 @@ function ExpenseAddingForm({ onUpdate }: { onUpdate: () => void }) {
                     }
                 );
                 if (repeat === "Tydzień") date.setDate(date.getDate() + 7);
-                else date.setMonth(date.getMonth() + 1);
+                else {
+                
+                    // sprawdz ile dni ma następny miesiąc
+                    const nextMonth = new Date(date);
+                    nextMonth.setMonth(nextMonth.getMonth() + 1);
+                    const daysInNextMonth = new Date(
+                        nextMonth.getFullYear(),
+                        nextMonth.getMonth(),
+                        0
+                    ).getDate();
+
+                    console.log("następny miesiąc to " + nextMonth + " i ma " + daysInNextMonth + " dni");
+
+                    // sprawdz czy data jest większa niż ilość dni w następnym miesiącu
+                    if (date.getDate() > daysInNextMonth) {
+                        // jeśli tak to ustaw datę na ostatni dzień miesiąca
+                        console.log("data jest większa niż ilość dni w następnym miesiącu");
+                        date.setDate(daysInNextMonth);
+                        console.log("ustawiona data to " + date);
+                    } else {
+                        // jeśli nie to ustaw datę na tą samą datę w następnym miesiącu
+                        console.log("data jest mniejsza niż ilość dni w następnym miesiącu");
+                        date.setMonth(date.getMonth() + 1);
+                        console.log("ustawiona data to " + date);
+                    }
+
+                }
+                
+                
             }
 
             toast.success("Dodano stały wydatek!", {
