@@ -112,7 +112,7 @@ const FamilyPage = () => {
 
     useEffect(() => {
         const getFamilyNames = async () => {
-            let memberNames: string[] = [];
+            const memberNames: string[] = [];
             let earningsSum: number = 0;
             for (const member of members) {
                 const q = doc(db, "users", member);
@@ -141,7 +141,7 @@ const FamilyPage = () => {
         event.preventDefault();
 
         await addDoc(collection(projectFirestore, "family"), {
-            id: uuidv4(),
+            // id: uuidv4(),
             name: familyName,
             // wygeneruj losowy kod
             inviteCode:
@@ -152,6 +152,18 @@ const FamilyPage = () => {
             admins: [auth.currentUser?.uid],
             // dodaj użytkownika, który stworzył rodzinę jako członek
             members: [auth.currentUser?.uid],
+        }).then(async (familyDoc) => {
+            const familyId = familyDoc.id;
+            if(auth.currentUser?.uid) {
+                const userRef = doc(db, "users", auth.currentUser?.uid);
+                const userSnapshot = await getDoc(userRef);
+
+                if (userSnapshot.exists()) {
+                    await updateDoc(userRef, {
+                        familyId: familyId,
+                    });
+                }
+            }
         });
 
         onUpdate();
@@ -173,20 +185,13 @@ const FamilyPage = () => {
                 const familyData = querySnapshot.docs[0].data();
                 const familyId = querySnapshot.docs[0].id;
 
+                console.log(familyData);
+
                 const familyRef = doc(db, "family", familyId);
 
                 await updateDoc(familyRef, {
                     members: [...familyData.members, auth.currentUser?.uid],
                 });
-
-                const userRef = doc(db, "users", auth.currentUser?.uid);
-                const userSnapshot = await getDoc(userRef);
-
-                if (userSnapshot.exists()) {
-                    await updateDoc(userRef, {
-                        familyId: familyId,
-                    });
-                }
 
                 if(auth.currentUser?.uid) {
                     const userRef = doc(db, "users", auth.currentUser?.uid);
@@ -213,22 +218,30 @@ const FamilyPage = () => {
     const handleRemoveFamily = async (event: React.FormEvent) => {
         event.preventDefault();
 
-        const q = query(
-            collection(db, "family"),
-            where("id", "==", userFamily?.id)
-        );
-        const querySnapshot = await getDocs(q);
+        if(userFamily) {
+            const q = doc(db, "family", userFamily.id);
+            const querySnapshot = await getDoc(q);
 
-        if (!querySnapshot.empty) {
-            const familyId = querySnapshot.docs[0].id;
-            const familyRef = doc(db, "family", familyId);
+            if (querySnapshot.exists()) {
+                const familyId = querySnapshot.id;
+                const familyRef = doc(db, "family", familyId);
 
-            await deleteDoc(familyRef);
+                await deleteDoc(familyRef).then(async () => {
+                    if (auth.currentUser?.uid) {
+                        const userRef = doc(db, "users", auth.currentUser?.uid);
+                        const userSnapshot = await getDoc(userRef);
 
-            onUpdate();
-        } else {
-            // Obsługa przypadku braku wyników
-            console.log("Brak rodziny dla podanego kodu.");
+                        if (userSnapshot.exists()) {
+                            await updateDoc(userRef, {
+                                familyId: null,
+                            });
+                        }
+                    }
+                });
+            } else {
+                // Obsługa przypadku braku wyników
+                console.log("Brak rodziny dla podanego kodu.");
+            }
         }
 
         onUpdate();
@@ -238,18 +251,15 @@ const FamilyPage = () => {
     const handleLeaveFamily = async (event: React.FormEvent) => {
         event.preventDefault();
 
-        console.log(userFamily);
+        // console.log(userFamily);
 
         if(userFamily) {
-            const familyRef = query(
-              collection(db, "family"),
-              where("id", "==", userFamily.id)
-            );
-            const snapshot = await getDocs(familyRef);
+            const familyRef = doc(db, "family", userFamily.id);
+            const snapshot = await getDoc(familyRef);
 
-            if (!snapshot.empty) {
-                const familyData = snapshot.docs[0].data();
-                const familyId = snapshot.docs[0].id;
+            if (snapshot.exists()) {
+                const familyData = snapshot.data();
+                const familyId = snapshot.id;
 
                 const familyRef = doc(db, "family", familyId);
 
@@ -302,7 +312,10 @@ const FamilyPage = () => {
             const querySnapshot = await getDocs(q);
 
             if (!querySnapshot.empty) {
+                const familyId = querySnapshot.docs[0].id;
                 const familyData = querySnapshot.docs[0].data() as Family;
+                familyData.id = familyId;
+
                 setUserFamily(familyData);
                 setMembers(familyData.members);
             } else {
