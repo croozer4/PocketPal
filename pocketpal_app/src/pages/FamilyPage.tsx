@@ -161,27 +161,49 @@ const FamilyPage = () => {
     const handleJoinFamily = async (event: React.FormEvent) => {
         event.preventDefault();
 
-        const q = query(
-            collection(db, "family"),
-            where("inviteCode", "==", inviteCode)
-        );
+        if(auth.currentUser?.uid) {
+            const q = query(
+              collection(db, "family"),
+              where("inviteCode", "==", inviteCode)
+            );
 
-        const querySnapshot = await getDocs(q);
+            const querySnapshot = await getDocs(q);
 
-        if (!querySnapshot.empty) {
-            const familyData = querySnapshot.docs[0].data();
-            const familyId = querySnapshot.docs[0].id;
+            if (!querySnapshot.empty) {
+                const familyData = querySnapshot.docs[0].data();
+                const familyId = querySnapshot.docs[0].id;
 
-            const familyRef = doc(db, "family", familyId);
+                const familyRef = doc(db, "family", familyId);
 
-            await updateDoc(familyRef, {
-                members: [...familyData.members, auth.currentUser?.uid],
-            });
+                await updateDoc(familyRef, {
+                    members: [...familyData.members, auth.currentUser?.uid],
+                });
 
-            onUpdate();
-        } else {
-            // Obsługa przypadku braku wyników
-            console.log("Brak rodziny dla podanego kodu.");
+                const userRef = doc(db, "users", auth.currentUser?.uid);
+                const userSnapshot = await getDoc(userRef);
+
+                if (userSnapshot.exists()) {
+                    await updateDoc(userRef, {
+                        familyId: familyId,
+                    });
+                }
+
+                if(auth.currentUser?.uid) {
+                    const userRef = doc(db, "users", auth.currentUser?.uid);
+                    const userSnapshot = await getDoc(userRef);
+
+                    if (userSnapshot.exists()) {
+                        await updateDoc(userRef, {
+                            familyId: familyId,
+                        });
+                    }
+                }
+
+                onUpdate();
+            } else {
+                // Obsługa przypadku braku wyników
+                console.log("Brak rodziny dla podanego kodu.");
+            }
         }
 
         onUpdate();
@@ -195,13 +217,10 @@ const FamilyPage = () => {
             collection(db, "family"),
             where("id", "==", userFamily?.id)
         );
-
         const querySnapshot = await getDocs(q);
 
         if (!querySnapshot.empty) {
-            const familyData = querySnapshot.docs[0].data();
             const familyId = querySnapshot.docs[0].id;
-
             const familyRef = doc(db, "family", familyId);
 
             await deleteDoc(familyRef);
@@ -219,33 +238,44 @@ const FamilyPage = () => {
     const handleLeaveFamily = async (event: React.FormEvent) => {
         event.preventDefault();
 
-        const q = query(
-            collection(db, "family"),
-            where("id", "==", userFamily?.id)
-        );
+        console.log(userFamily);
 
-        const querySnapshot = await getDocs(q);
+        if(userFamily) {
+            const familyRef = query(
+              collection(db, "family"),
+              where("id", "==", userFamily.id)
+            );
+            const snapshot = await getDocs(familyRef);
 
-        if (!querySnapshot.empty) {
-            const familyData = querySnapshot.docs[0].data();
-            const familyId = querySnapshot.docs[0].id;
+            if (!snapshot.empty) {
+                const familyData = snapshot.docs[0].data();
+                const familyId = snapshot.docs[0].id;
 
-            const familyRef = doc(db, "family", familyId);
+                const familyRef = doc(db, "family", familyId);
 
-            await updateDoc(familyRef, {
-                members: familyData.members.filter(
-                    (member: string) => member !== auth.currentUser?.uid
-                ),
-            });
+                await updateDoc(familyRef, {
+                    members: familyData.members.filter(
+                      (member: string) => member !== auth.currentUser?.uid
+                    ),
+                });
+
+                if(auth.currentUser?.uid) {
+                    const userRef = doc(db, "users", auth.currentUser?.uid);
+                    const userSnapshot = await getDoc(userRef);
+
+                    if (userSnapshot.exists()) {
+                        await updateDoc(userRef, {
+                            familyId: null,
+                        });
+                    }
+                }
+            } else {
+                console.log("Brak rodziny dla podanego kodu.");
+            }
 
             onUpdate();
-        } else {
-            // Obsługa przypadku braku wyników
-            console.log("Brak rodziny dla podanego kodu.");
+            close();
         }
-
-        onUpdate();
-        close();
     };
 
     useEffect(() => {

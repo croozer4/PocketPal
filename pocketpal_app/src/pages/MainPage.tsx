@@ -119,13 +119,10 @@ const MainPage = () => {
                 const expensesSnapshot = await getDocs(expensesQuery);
 
                 // Zapytanie do kolekcji 'users' (dane użytkownika)
-                const userQuery = query(
-                    collection(db, "users"),
-                    where("email", "==", auth.currentUser?.email),
-                );
+                const userQuery = doc(db, "users", uid);
 
-                const userSnapshot = await getDocs(userQuery);
-                const userData = userSnapshot.docs[0]?.data() || {};
+                const userSnapshot = await getDoc(userQuery);
+                const userData = userSnapshot.data() || {};
 
                 // Pobierz zarobki z danych użytkownika
                 const earnings = userData.earnings || 0;
