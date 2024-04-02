@@ -1,9 +1,9 @@
-import React, {useEffect, useState} from "react";
-import {Button} from "@mantine/core";
-import {MantineProvider, Text} from "@mantine/core";
+import React, { useEffect, useState } from "react";
+import { Button } from "@mantine/core";
+import { MantineProvider, Text, ActionIcon } from "@mantine/core";
 import FamilyAddingForm from "../components/FamilyAddingForm.tsx";
 import DisplayUserFamilies from "../components/DisplayUserFamilies.tsx";
-import {auth, db, projectFirestore} from "../config/firebase.tsx";
+import { auth, db, projectFirestore } from "../config/firebase.tsx";
 import {
     deleteDoc,
     doc,
@@ -19,21 +19,21 @@ import {
 
 import DatePicker from "react-datepicker";
 
-import {IconPhoto, IconDownload, IconArrowRight, IconFileTypePdf} from "@tabler/icons-react";
+import { IconPhoto, IconDownload, IconArrowRight, IconFileTypePdf, IconCheck, IconX } from "@tabler/icons-react";
 
 import "../styles/FamilyPageStyle.css";
-import {Menu} from "@mantine/core";
-import {useDisclosure} from "@mantine/hooks";
-import {toast} from "react-toastify";
-import {DefaultAlertTime, QuickAlertTime} from "../config/globals.tsx";
-import {Timestamp} from "firebase/firestore";
+import { Menu } from "@mantine/core";
+import { useDisclosure } from "@mantine/hooks";
+import { toast } from "react-toastify";
+import { DefaultAlertTime, QuickAlertTime } from "../config/globals.tsx";
+import { Timestamp } from "firebase/firestore";
 import HistoryComponent from "../components/HistoryComponent.tsx";
 
-import {Modal} from "@mantine/core";
+import { Modal } from "@mantine/core";
 
 import BasicPieChart from "../components/BasicPieChart.tsx";
-import {TextInput} from "@mantine/core";
-import {v4 as uuidv4} from "uuid";
+import { TextInput } from "@mantine/core";
+import { v4 as uuidv4 } from "uuid";
 
 import "../styles/FamilyAddingFormStyles.css";
 import "../styles/PeekMembersStyle.css";
@@ -42,6 +42,7 @@ import ExpenseAddingForm from "../components/ExpenseAddingForm.tsx";
 
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
+import { display } from "html2canvas/dist/types/css/property-descriptors/display";
 
 
 interface Family {
@@ -65,6 +66,14 @@ type Expense = {
 
 };
 
+type Request = {
+    familyAdminId: string;
+    familyId: string;
+    status: string;
+    submittinUserId: string;
+    displayName: string;
+};
+
 const FamilyPage = () => {
     const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
     const [reload, setReload] = useState<boolean>(true);
@@ -82,7 +91,7 @@ const FamilyPage = () => {
 
     const [familyData, setFamilyData] = useState<Array<Expense>>([]);
 
-    const [opened, {open, close}] = useDisclosure(false);
+    const [opened, { open, close }] = useDisclosure(false);
     const [section, setSection] = useState<string>("overview");
 
     const [familyName, setFamilyName] = useState<string>("");
@@ -90,6 +99,7 @@ const FamilyPage = () => {
 
     // const [members, setMembers] = useState<string[]>([]);
     const [memberNames, setMemberNames] = useState<string[]>([]);
+    const [familyRequests, setFamilyRequests] = useState<Request[]>([]);
     // const [membersReady, setMembersReady] = useState<boolean>(false);
 
     const onUpdateData = () => {
@@ -109,6 +119,121 @@ const FamilyPage = () => {
             open();
         }, 1);
     };
+
+    useEffect(() => {
+        if (isAdmin) {
+            fetchFamilyRequests();
+            console.log("fetchFamilyRequests");
+            console.log(familyRequests);
+        }
+    }, [familyData]);
+
+
+    const fetchFamilyRequests = async () => {
+        const q = query(
+            collection(db, "requests"),
+            where("familyAdminId", "==", auth.currentUser?.uid)
+        );
+        const querySnapshot = await getDocs(q);
+        if (!querySnapshot.empty) {
+            const requests = querySnapshot.docs.map((doc) => {
+                return {
+                    id: doc.id,
+                    familyAdminId: doc.data().familyAdminId,
+                    familyId: doc.data().familyId,
+                    status: doc.data().status,
+                    submittinUserId: doc.data().submittinUserId,
+                    displayName: doc.data().displayName,
+                };
+            });
+            
+            setFamilyRequests(requests);
+
+            if (requests.length > 0) {
+                // console.log(requests);
+                toast.info("Masz nowe prośby o dołączenie do rodziny!", {
+                    position: "top-center",
+                    autoClose: QuickAlertTime,
+                    hideProgressBar: true,
+                    closeOnClick: true,
+                    pauseOnHover: false,
+                    draggable: true,
+                    progress: undefined,
+                    theme: "dark",
+                });
+            }
+        }
+    }
+
+    const requestAccept = async (userId: string) => {
+        const q = query(
+            collection(db, "requests"),
+            where("submittinUserId", "==", userId)
+        );
+        const querySnapshot = await getDocs(q);
+        if (!querySnapshot.empty) {
+            const requestId = querySnapshot.docs[0].id;
+            const requestRef = doc(db, "requests", requestId);
+
+            // usuń request
+            await deleteDoc(requestRef);
+
+            // dodaj do członków
+            const familyRef = doc(db, "family", querySnapshot.docs[0].data().familyId);
+            const familySnapshot = await getDoc(familyRef);
+            if (familySnapshot.exists()) {
+                await updateDoc(familyRef, {
+                    members: [...familySnapshot.data().members, userId],
+                });
+            }
+
+            toast.success("Prośba została zaakceptowana!", {
+                position: "top-center",
+                autoClose: QuickAlertTime,
+                hideProgressBar: true,
+                closeOnClick: true,
+                pauseOnHover: false,
+                draggable: true,
+                progress: undefined,
+                theme: "dark",
+            });
+        }
+
+        // onUpdate();
+        // close();
+        fetchFamilyRequests();
+    
+    }
+
+    const requestDecline = async (userId: string) => {
+        const q = query(
+            collection(db, "requests"),
+            where("submittinUserId", "==", userId)
+        );
+        const querySnapshot = await getDocs(q);
+        if (!querySnapshot.empty) {
+            const requestId = querySnapshot.docs[0].id;
+            const requestRef = doc(db, "requests", requestId);
+
+            // usuń request
+            await deleteDoc(requestRef);
+
+            toast.success("Prośba została odrzucona!", {
+                position: "top-center",
+                autoClose: QuickAlertTime,
+                hideProgressBar: true,
+                closeOnClick: true,
+                pauseOnHover: false,
+                draggable: true,
+                progress: undefined,
+                theme: "dark",
+            });
+        }
+
+        fetchFamilyRequests();
+        // onUpdate();
+        // close();
+    }
 
     useEffect(() => {
         const getFamilyNames = async () => {
@@ -154,7 +279,7 @@ const FamilyPage = () => {
             members: [auth.currentUser?.uid],
         }).then(async (familyDoc) => {
             const familyId = familyDoc.id;
-            if(auth.currentUser?.uid) {
+            if (auth.currentUser?.uid) {
                 const userRef = doc(db, "users", auth.currentUser?.uid);
                 const userSnapshot = await getDoc(userRef);
 
@@ -173,52 +298,103 @@ const FamilyPage = () => {
     const handleJoinFamily = async (event: React.FormEvent) => {
         event.preventDefault();
 
-        if(auth.currentUser?.uid) {
+        // nowa wersja z requestami
+
+        if (auth.currentUser?.uid) {
             const q = query(
-              collection(db, "family"),
-              where("inviteCode", "==", inviteCode)
+                collection(db, "family"),
+                where("inviteCode", "==", inviteCode)
             );
 
             const querySnapshot = await getDocs(q);
 
             if (!querySnapshot.empty) {
-                const familyData = querySnapshot.docs[0].data();
-                const familyId = querySnapshot.docs[0].id;
+                const q2 = query(
+                    collection(db, "requests"),
+                    where("familyId", "==", querySnapshot.docs[0].id),
+                    where("submittinUserId", "==", auth.currentUser?.uid)
+                );
 
-                console.log(familyData);
+                const querySnapshot2 = await getDocs(q2);
+                if (querySnapshot2.empty) {
+                    
+                    console.log("Udało się odczytać rodzinę!")
+                    console.log(querySnapshot.docs[0].data().admins[0]);
+                    console.log(querySnapshot.docs[0].id);
 
-                const familyRef = doc(db, "family", familyId);
+                    var displayName = "";
 
-                await updateDoc(familyRef, {
-                    members: [...familyData.members, auth.currentUser?.uid],
-                });
-
-                if(auth.currentUser?.uid) {
-                    const userRef = doc(db, "users", auth.currentUser?.uid);
-                    const userSnapshot = await getDoc(userRef);
-
-                    if (userSnapshot.exists()) {
-                        await updateDoc(userRef, {
-                            familyId: familyId,
-                        });
+                    const q3 = doc(db, "users", auth.currentUser?.uid);
+                    const querySnapshot3 = await getDoc(q3);
+                    if(querySnapshot3.exists()) {
+                        displayName = querySnapshot3.data().displayName;
                     }
-                }
+                    // zrob nowy dokument w kolekcji requests
+                    const requestRef = collection(db, "requests");
+                    
 
-                onUpdate();
-            } else {
+                    const request = {
+                        familyAdminId: querySnapshot.docs[0].data().admins[0],
+                        familyId: querySnapshot.docs[0].id,
+                        status: "pending",
+                        submittinUserId: auth.currentUser?.uid,
+                        displayName: displayName,
+                    };
+
+
+                    await addDoc(requestRef, request);
+
+                    console.log(request);
+
+                    // onUpdate();
+                    close();
+
+                    toast.success("Wysłano prośbę o dołączenie do rodziny!", {
+                        position: "top-center",
+                        autoClose: QuickAlertTime,
+                        hideProgressBar: true,
+                        closeOnClick: true,
+                        pauseOnHover: false,
+                        draggable: true,
+                        progress: undefined,
+                        theme: "dark",
+                    });
+
+                } else {
+                    toast.error("Już wysłałeś prośbę o dołączenie do tej rodziny!", {
+                        position: "top-center",
+                        autoClose: QuickAlertTime,
+                        hideProgressBar: true,
+                        closeOnClick: true,
+                        pauseOnHover: false,
+                        draggable: true,
+                        progress: undefined,
+                        theme: "dark",
+                    });
+                }
+                
+            }
+            else {
                 // Obsługa przypadku braku wyników
                 console.log("Brak rodziny dla podanego kodu.");
+                toast.error("Nie ma takiej rodziny!", {
+                    position: "top-center",
+                    autoClose: QuickAlertTime,
+                    hideProgressBar: true,
+                    closeOnClick: true,
+                    pauseOnHover: false,
+                    draggable: true,
+                    progress: undefined,
+                    theme: "dark",
+                });
             }
         }
-
-        onUpdate();
-        close();
     };
 
     const handleRemoveFamily = async (event: React.FormEvent) => {
         event.preventDefault();
 
-        if(userFamily) {
+        if (userFamily) {
             const q = doc(db, "family", userFamily.id);
             const querySnapshot = await getDoc(q);
 
@@ -253,7 +429,7 @@ const FamilyPage = () => {
 
         // console.log(userFamily);
 
-        if(userFamily) {
+        if (userFamily) {
             const familyRef = doc(db, "family", userFamily.id);
             const snapshot = await getDoc(familyRef);
 
@@ -265,11 +441,11 @@ const FamilyPage = () => {
 
                 await updateDoc(familyRef, {
                     members: familyData.members.filter(
-                      (member: string) => member !== auth.currentUser?.uid
+                        (member: string) => member !== auth.currentUser?.uid
                     ),
                 });
 
-                if(auth.currentUser?.uid) {
+                if (auth.currentUser?.uid) {
                     const userRef = doc(db, "users", auth.currentUser?.uid);
                     const userSnapshot = await getDoc(userRef);
 
@@ -409,40 +585,40 @@ const FamilyPage = () => {
                     const querySnapshot = await getDocs(q);
 
 
-                        const familyData = querySnapshot.docs;
-                        const familyDataArray = familyData.map((doc) => {
-                            return {
-                                id: doc.id,
-                                category: doc.data().category,
-                                creationDate: doc.data().creationDate,
-                                description: doc.data().description,
-                                type: doc.data().type,
-                                user: doc.data().user,
-                                value: doc.data().value,
-                            };
-                        });
+                    const familyData = querySnapshot.docs;
+                    const familyDataArray = familyData.map((doc) => {
+                        return {
+                            id: doc.id,
+                            category: doc.data().category,
+                            creationDate: doc.data().creationDate,
+                            description: doc.data().description,
+                            type: doc.data().type,
+                            user: doc.data().user,
+                            value: doc.data().value,
+                        };
+                    });
 
-                        familyDataArray.push(...await fetchFamilyRecurrentExpenses());
+                    familyDataArray.push(...await fetchFamilyRecurrentExpenses());
 
-                        const filteredData = familyDataArray.filter(item => {
-                            const itemDate = new Date(item.creationDate.toMillis());
-                            return (
-                                itemDate.getFullYear() === selectedYear &&
-                                itemDate.getMonth() + 1 === selectedMonth
-                            );
-                        });
+                    const filteredData = familyDataArray.filter(item => {
+                        const itemDate = new Date(item.creationDate.toMillis());
+                        return (
+                            itemDate.getFullYear() === selectedYear &&
+                            itemDate.getMonth() + 1 === selectedMonth
+                        );
+                    });
 
-                        if (members) {
-                            // console.log("filteredData" + filteredData);
-                            // setFamilyData([...filteredData, ...await fetchFamilyRecurrentExpenses()]);
-                            setFamilyData(filteredData);
-                        } else {
-                            // console.log("familyDataArray" + familyDataArray);
-                            setFamilyData(familyDataArray);
-        
-                        }
+                    if (members) {
+                        // console.log("filteredData" + filteredData);
+                        // setFamilyData([...filteredData, ...await fetchFamilyRecurrentExpenses()]);
+                        setFamilyData(filteredData);
+                    } else {
+                        // console.log("familyDataArray" + familyDataArray);
+                        setFamilyData(familyDataArray);
 
-                        // console.log(familyDataArray);
+                    }
+
+                    // console.log(familyDataArray);
 
                 }
             }
@@ -527,12 +703,12 @@ const FamilyPage = () => {
         auth.onAuthStateChanged((user) => {
             if (user) {
                 setLoggedIn(true);
-                if(members.length > 0 && reload) {
+                if (members.length > 0 && reload) {
                     fetchFamilyData();
                 }
             } else {
                 setLoggedIn(false);
-                if(!reload) {
+                if (!reload) {
                     setFamilyData([]);
                     setUserFamily(null);
                     setMembers([]);
@@ -630,21 +806,21 @@ const FamilyPage = () => {
 
     return (
         <div className="family-page">
-            <MantineProvider theme={{colorScheme: colorScheme}}>
+            <MantineProvider theme={{ colorScheme: colorScheme }}>
                 {loggedIn ? (
                     <div className="MonthPicker">
                         <label id="month">Wybierz miesiąc: </label>
                         <DatePicker className="MonthPicker__input"
-                                    selected={new Date(selectedYear, selectedMonth - 1)}
-                                    onChange={(date: any) => {
-                                        // console.log('Selected Date:', date);
+                            selected={new Date(selectedYear, selectedMonth - 1)}
+                            onChange={(date: any) => {
+                                // console.log('Selected Date:', date);
 
-                                        setSelectedMonth(date.getMonth() + 1);
-                                        setSelectedYear(date.getFullYear());
-                                    }}
-                                    dateFormat="MM/yyyy"
-                                    showMonthYearPicker
-                                    id="month"
+                                setSelectedMonth(date.getMonth() + 1);
+                                setSelectedYear(date.getFullYear());
+                            }}
+                            dateFormat="MM/yyyy"
+                            showMonthYearPicker
+                            id="month"
                         />
                     </div>
                 ) : (
@@ -652,88 +828,98 @@ const FamilyPage = () => {
                 )}
                 <div className="interface">
                     {loggedIn &&
-                    <div className="family-page-header">
-                        <Menu shadow="md" width={200} position="top-start">
-                            <Menu.Target>
-                                <Button className={"family-button"}>
-                                    Rodzina:{" "}
-                                    {userFamily
-                                        ? userFamily.name
-                                        : "Brak rodziny"}
-                                </Button>
-                            </Menu.Target>
+                        <div className="family-page-header">
+                            <Menu shadow="md" width={200} position="top-start">
+                                <Menu.Target>
+                                    <Button className={"family-button"}>
+                                        Rodzina:{" "}
+                                        {userFamily
+                                            ? userFamily.name
+                                            : "Brak rodziny"}
+                                    </Button>
+                                </Menu.Target>
 
-                            {/* {auth.currentUser && ( */}
-                            <Menu.Dropdown>
-                                {userFamily && (
-                                    <>
-                                        <Menu.Label>
-                                            Kod: {userFamily?.inviteCode}
-                                        </Menu.Label>
-                                        <Menu.Item
-                                            onClick={() => CopyInviteCode()}
-                                        >
-                                            Kopiuj do schowka
-                                        </Menu.Item>
-                                        <Menu.Divider/>
-                                    </>
-                                )}
-                                {!userFamily && (
-                                    <>
+                                {/* {auth.currentUser && ( */}
+                                <Menu.Dropdown>
+                                    {userFamily && (
+                                        <>
+                                            <Menu.Label>
+                                                Kod: {userFamily?.inviteCode}
+                                            </Menu.Label>
+                                            <Menu.Item
+                                                onClick={() => CopyInviteCode()}
+                                            >
+                                                Kopiuj do schowka
+                                            </Menu.Item>
+                                            <Menu.Divider />
+                                        </>
+                                    )}
+                                    {!userFamily && (
+                                        <>
+                                            <Menu.Item
+                                                onClick={() =>
+                                                    handleOpenModal("addFamily")
+                                                }
+                                            >
+                                                Stwórz rodzinę
+                                            </Menu.Item>
+
+                                            <Menu.Item
+                                                onClick={() =>
+                                                    handleOpenModal("joinFamily")
+                                                }
+                                            >
+                                                Dołącz do rodziny
+                                            </Menu.Item>
+                                        </>
+                                    )}
+
+                                    {userFamily && (
                                         <Menu.Item
                                             onClick={() =>
-                                                handleOpenModal("addFamily")
+                                                handleOpenModal("peekMembers")
                                             }
                                         >
-                                            Stwórz rodzinę
+                                            Pokaż członków
                                         </Menu.Item>
+                                    )}
 
+                                    {isAdmin && (
                                         <Menu.Item
                                             onClick={() =>
-                                                handleOpenModal("joinFamily")
+                                                handleOpenModal("peekRequests")
                                             }
                                         >
-                                            Dołącz do rodziny
+                                            Zobacz prośby
                                         </Menu.Item>
-                                    </>
-                                )}
+                                    )}
 
-                                {userFamily && (
-                                    <Menu.Item
-                                        onClick={() =>
-                                            handleOpenModal("peekMembers")
-                                        }
-                                    >
-                                        Pokaż członków
-                                    </Menu.Item>
-                                )}
+                                    {isAdmin && (
+                                        <Menu.Item
+                                            onClick={() =>
+                                                handleOpenModal("removeFamily")
+                                            }
+                                        >
+                                            Usuń rodzinę
+                                        </Menu.Item>
+                                    )}
 
-                                {isAdmin && (
-                                    <Menu.Item
-                                        onClick={() =>
-                                            handleOpenModal("removeFamily")
-                                        }
-                                    >
-                                        Usuń rodzinę
-                                    </Menu.Item>
-                                )}
-
-                                {userFamily && !isAdmin && (
-                                    <Menu.Item
-                                        onClick={() =>
-                                            handleOpenModal("leaveFamily")
-                                        }
-                                    >
-                                        Opuść rodzinę
-                                    </Menu.Item>
-                                )}
-                            </Menu.Dropdown>
-                        </Menu>
-                    </div>
+                                    {userFamily && !isAdmin && (
+                                        <Menu.Item
+                                            onClick={() =>
+                                                handleOpenModal("leaveFamily")
+                                            }
+                                        >
+                                            Opuść rodzinę
+                                        </Menu.Item>
+                                    )}
+                                </Menu.Dropdown>
+                            </Menu>
+                        </div>
                     }
                     {loggedIn ? (
                         <div className="overview"
-                             style={{minWidth: familyData.length !== 0 ? "45vw" : "100%"}}
+                            style={{ minWidth: familyData.length !== 0 ? "45vw" : "100%" }}
                         >
                             {familyData?.length !== 0 ? (
                                 <>
@@ -749,7 +935,7 @@ const FamilyPage = () => {
                                     <Text
                                         size="xl"
                                         weight={700}
-                                        style={{marginBottom: "1rem"}}
+                                        style={{ marginBottom: "1rem" }}
                                     >
                                         Brak danych do wyświetlenia
                                     </Text>
@@ -762,17 +948,17 @@ const FamilyPage = () => {
                         </div>
                     ) : (
                         <div className="overview"
-                             style={{minWidth: familyData.length !== 0 ? "45vw" : "100%", top: "calc(50% - 250px)"}}
+                            style={{ minWidth: familyData.length !== 0 ? "45vw" : "100%", top: "calc(50% - 250px)" }}
                         >
                             <Text
                                 size="xl"
                                 weight={700}
-                                style={{marginBottom: "1rem"}}
+                                style={{ marginBottom: "1rem" }}
                             >
                                 Witaj w PocketPal!
                             </Text>
 
-                            <BasicPieChart data={familyData} earnings={0}/>
+                            <BasicPieChart data={familyData} earnings={0} />
                         </div>
                     )}
                     {loggedIn && familyData?.length !== 0 ? (
@@ -808,7 +994,7 @@ const FamilyPage = () => {
                                         setFamilyName(e.currentTarget.value)
                                     }
                                     className="family-name-input"
-                                    styles={{root: {width: "100%"}}}
+                                    styles={{ root: { width: "100%" } }}
                                 />
 
                                 <Button type="submit" onClick={handleAddFamily}>
@@ -841,7 +1027,7 @@ const FamilyPage = () => {
                                     onChange={(e) =>
                                         setInviteCode(e.currentTarget.value)
                                     }
-                                    styles={{root: {width: "100%"}}}
+                                    styles={{ root: { width: "100%" } }}
                                 />
 
                                 <Button
@@ -878,6 +1064,40 @@ const FamilyPage = () => {
                                             // <li><Button key={index} fullWidth>{memberName}</Button></li>
                                             <li key={index}>{memberName}</li>
                                         ))}
+                                </ul>
+                            </div>
+                        </form>
+                    </Modal>
+                )}
+
+                {section === "peekRequests" && (
+                    <Modal
+                        opened={opened}
+                        onClose={close}
+                        size={"md"}
+                        title="Prośby o dołączenie"
+                        withinPortal={false}
+                        classNames={{
+                            inner: "modalInner",
+                            content: "modalContent",
+                            header: "modalHeader",
+                        }}
+                        centered
+                    >
+                        <form>
+                            <div className="peek-members-div">
+                                {/* member names */}
+                                <ul>
+                                    {familyRequests.length > 0 ? (
+                                        familyRequests.map((request, index) => (
+                                            // zrob to jako przyciski
+                                            <li style={{ display: "flex", flexDirection: "row", gap: "10px"}}><Text truncate>{"Prośba od " + request.displayName}</Text>
+                                            <ActionIcon color="teal" variant="filled" onClick={() => requestAccept(request.submittinUserId)}><IconCheck></IconCheck></ActionIcon>
+                                            <ActionIcon color="red" variant="filled" onClick={() => requestDecline(request.submittinUserId)}><IconX></IconX></ActionIcon></li>
+                                        ))
+                                    ) : (
+                                        <li>Brak prośb o dołączenie</li>
+                                    )}
                                 </ul>
                             </div>
                         </form>
@@ -948,16 +1168,16 @@ const FamilyPage = () => {
                     </Modal>
                 )}
 
-                {loggedIn ? <ExpenseAddingForm onUpdate={onUpdateData}/> : <></>}
+                {loggedIn ? <ExpenseAddingForm onUpdate={onUpdateData} /> : <></>}
                 {loggedIn ?
                     <Button className="family_raport_button" onClick={generatePDF}
-                            style={{
-                                paddingLeft: isMobile ? "5px" : "20px",
-                                paddingRight: isMobile ? "5px" : "20px",
-                                right: isMobile ? "70px" : "170px",
-                                borderRadius: isMobile ? "50%" : "0.25rem"
-                            }}>
-                        {isMobile ? <IconFileTypePdf/> : "Generuj raport PDF"}
+                        style={{
+                            paddingLeft: isMobile ? "5px" : "20px",
+                            paddingRight: isMobile ? "5px" : "20px",
+                            right: isMobile ? "70px" : "170px",
+                            borderRadius: isMobile ? "50%" : "0.25rem"
+                        }}>
+                        {isMobile ? <IconFileTypePdf /> : "Generuj raport PDF"}
                     </Button>
                     :
                     <></>

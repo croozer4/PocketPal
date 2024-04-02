@@ -19,6 +19,7 @@ import {
     DocumentData,
     collectionGroup,
     updateDoc,
+    addDoc,
 } from "@firebase/firestore";
 
 import { auth, db } from "../config/firebase.tsx";
@@ -35,6 +36,35 @@ function JoinFamilyForm({ onUpdate }: { onUpdate: () => void }) {
     const handleSubmit = async (event: React.FormEvent) => {
         event.preventDefault();
 
+        // stara werjsa bez requestów
+        // const q = query(
+        //     collection(db, "family"),
+        //     where("inviteCode", "==", inviteCode)
+        // );
+
+        // const querySnapshot = await getDocs(q);
+
+        // if (!querySnapshot.empty) {
+        //     const familyData = querySnapshot.docs[0].data();
+        //     const familyId = querySnapshot.docs[0].id;
+
+        //     const familyRef = doc(db, "family", familyId);
+
+        //     await updateDoc(familyRef, {
+        //         members: [...familyData.members, auth.currentUser?.uid],
+        //     });
+
+        //     onUpdate();
+        // } else {
+        //     // Obsługa przypadku braku wyników
+        //     console.log("Brak rodziny dla podanego kodu.");
+        // }
+
+        // onUpdate();
+        // close();
+
+        // nowa wersja z requestami
+
         const q = query(
             collection(db, "family"),
             where("inviteCode", "==", inviteCode)
@@ -43,23 +73,28 @@ function JoinFamilyForm({ onUpdate }: { onUpdate: () => void }) {
         const querySnapshot = await getDocs(q);
 
         if (!querySnapshot.empty) {
-            const familyData = querySnapshot.docs[0].data();
-            const familyId = querySnapshot.docs[0].id;
+            // zrob nowy dokument w kolekcji requests
+            const requestRef = collection(db, "requests");
 
-            const familyRef = doc(db, "family", familyId);
+            const request = {
+                familyAdminId: querySnapshot.docs[0].data().admins[0],
+                familyId: querySnapshot.docs[0].id,
+                status: "pending",
+                submittinUserId: auth.currentUser?.uid,
+            };
 
-            await updateDoc(familyRef, {
-                members: [...familyData.members, auth.currentUser?.uid],
-            });
+
+            await addDoc(requestRef, request);
+            
+            console.log(request);
 
             onUpdate();
-        } else {
+            close();
+        }
+        else {
             // Obsługa przypadku braku wyników
             console.log("Brak rodziny dla podanego kodu.");
         }
-
-        onUpdate();
-        close();
     };
 
     return (
@@ -71,7 +106,7 @@ function JoinFamilyForm({ onUpdate }: { onUpdate: () => void }) {
                 opened={opened}
                 onClose={close}
                 size={"sm"}
-                title="Dołącz do rodziny"
+                title="Dołącz do rodziny (zgłoszenie)"
                 withinPortal={false}
                 classNames={{
                     inner: "modalInner",
