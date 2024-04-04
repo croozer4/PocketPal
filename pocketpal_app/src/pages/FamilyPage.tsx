@@ -135,59 +135,22 @@ const FamilyPage = () => {
             where("familyAdminId", "==", auth.currentUser?.uid)
         );
         const querySnapshot = await getDocs(q);
-        if (!querySnapshot.empty) {
-            const requests = querySnapshot.docs.map((doc) => {
-                return {
-                    id: doc.id,
-                    familyAdminId: doc.data().familyAdminId,
-                    familyId: doc.data().familyId,
-                    status: doc.data().status,
-                    submittinUserId: doc.data().submittinUserId,
-                    displayName: doc.data().displayName,
-                };
-            });
-            
-            setFamilyRequests(requests);
+        const requests = querySnapshot.docs.map((doc) => {
+            return {
+                id: doc.id,
+                familyAdminId: doc.data().familyAdminId,
+                familyId: doc.data().familyId,
+                status: doc.data().status,
+                submittinUserId: doc.data().submittinUserId,
+                displayName: doc.data().displayName,
+            };
+        });
 
-            if (requests.length > 0) {
-                // console.log(requests);
-                toast.info("Masz nowe prośby o dołączenie do rodziny!", {
-                    position: "top-center",
-                    autoClose: QuickAlertTime,
-                    hideProgressBar: true,
-                    closeOnClick: true,
-                    pauseOnHover: false,
-                    draggable: true,
-                    progress: undefined,
-                    theme: "dark",
-                });
-            }
-        }
-    }
+        setFamilyRequests(requests);
 
-    const requestAccept = async (userId: string) => {
-        const q = query(
-            collection(db, "requests"),
-            where("submittinUserId", "==", userId)
-        );
-        const querySnapshot = await getDocs(q);
-        if (!querySnapshot.empty) {
-            const requestId = querySnapshot.docs[0].id;
-            const requestRef = doc(db, "requests", requestId);
-
-            // usuń request
-            await deleteDoc(requestRef);
-
-            // dodaj do członków
-            const familyRef = doc(db, "family", querySnapshot.docs[0].data().familyId);
-            const familySnapshot = await getDoc(familyRef);
-            if (familySnapshot.exists()) {
-                await updateDoc(familyRef, {
-                    members: [...familySnapshot.data().members, userId],
-                });
-            }
-
-            toast.success("Prośba została zaakceptowana!", {
+        if (requests.length > 0) {
+            // console.log(requests);
+            toast.info("Masz nowe prośby o dołączenie do rodziny!", {
                 position: "top-center",
                 autoClose: QuickAlertTime,
                 hideProgressBar: true,
@@ -198,12 +161,58 @@ const FamilyPage = () => {
                 theme: "dark",
             });
         }
-
-        // onUpdate();
-        // close();
-        fetchFamilyRequests();
-    
+        console.log("fetchFamilyRequests executed");
+        console.log(familyRequests);
     }
+
+    const requestAccept = async (userId: string) => {
+        try {
+            const q = query(
+                collection(db, "requests"),
+                where("submittinUserId", "==", userId)
+            );
+            const querySnapshot = await getDocs(q);
+            if (!querySnapshot.empty) {
+                const requestId = querySnapshot.docs[0].id;
+                const requestRef = doc(db, "requests", requestId);
+
+                // Usuń request
+                await deleteDoc(requestRef); // Użyj await, aby poczekać na zakończenie usunięcia
+
+                // Aktualizacja danych po usunięciu żądania
+                // odczekaj 1s na usunięcie requestu
+                setTimeout(() => {
+                    fetchFamilyRequests();
+                    fetchFamilyData();
+                    getFamily();
+                }, 1000);
+
+                // Dodaj do członków
+                const familyRef = doc(db, "family", querySnapshot.docs[0].data().familyId);
+                const familySnapshot = await getDoc(familyRef);
+                if (familySnapshot.exists()) {
+                    await updateDoc(familyRef, {
+                        members: [...familySnapshot.data().members, userId],
+                    });
+                }
+
+                toast.success("Prośba została zaakceptowana!", {
+                    position: "top-center",
+                    autoClose: QuickAlertTime,
+                    hideProgressBar: true,
+                    closeOnClick: true,
+                    pauseOnHover: false,
+                    draggable: true,
+                    progress: undefined,
+                    theme: "dark",
+                });
+            }
+        } catch (error) {
+            console.error("Error accepting request:", error);
+            // Obsługa błędu, np. wyświetlenie komunikatu o błędzie
+        }
+    }
+
 
     const requestDecline = async (userId: string) => {
         const q = query(
@@ -216,7 +225,11 @@ const FamilyPage = () => {
             const requestRef = doc(db, "requests", requestId);
 
             // usuń request
-            await deleteDoc(requestRef);
+            deleteDoc(requestRef).then(() => {
+                fetchFamilyRequests(); // Aktualizacja danych po usunięciu żądania
+                fetchFamilyData();
+                getFamily();
+            });
 
             toast.success("Prośba została odrzucona!", {
                 position: "top-center",
@@ -229,11 +242,9 @@ const FamilyPage = () => {
                 theme: "dark",
             });
         }
-
-        fetchFamilyRequests();
-        // onUpdate();
-        // close();
     }
+
+
 
     useEffect(() => {
         const getFamilyNames = async () => {
@@ -317,7 +328,7 @@ const FamilyPage = () => {
 
                 const querySnapshot2 = await getDocs(q2);
                 if (querySnapshot2.empty) {
-                    
+
                     console.log("Udało się odczytać rodzinę!")
                     console.log(querySnapshot.docs[0].data().admins[0]);
                     console.log(querySnapshot.docs[0].id);
@@ -326,12 +337,12 @@ const FamilyPage = () => {
 
                     const q3 = doc(db, "users", auth.currentUser?.uid);
                     const querySnapshot3 = await getDoc(q3);
-                    if(querySnapshot3.exists()) {
+                    if (querySnapshot3.exists()) {
                         displayName = querySnapshot3.data().displayName;
                     }
                     // zrob nowy dokument w kolekcji requests
                     const requestRef = collection(db, "requests");
-                    
+
 
                     const request = {
                         familyAdminId: querySnapshot.docs[0].data().admins[0],
@@ -372,7 +383,7 @@ const FamilyPage = () => {
                         theme: "dark",
                     });
                 }
-                
+
             }
             else {
                 // Obsługa przypadku braku wyników
@@ -469,11 +480,12 @@ const FamilyPage = () => {
             if (userFamily.createdBy === auth.currentUser.uid) {
                 setIsAdmin(true);
                 // console.log("Admin");
-            } else {
-                // console.log("Not Admin");
             }
             // console.log(userFamily.createdBy);
             // console.log(auth.currentUser.uid);
+        }
+        else{
+            setIsAdmin(false);
         }
     }, [userFamily, auth.currentUser]);
 
@@ -1090,10 +1102,9 @@ const FamilyPage = () => {
                                 <ul>
                                     {familyRequests.length > 0 ? (
                                         familyRequests.map((request, index) => (
-                                            // zrob to jako przyciski
-                                            <li style={{ display: "flex", flexDirection: "row", gap: "10px"}}><Text truncate>{"Prośba od " + request.displayName}</Text>
-                                            <ActionIcon color="teal" variant="filled" onClick={() => requestAccept(request.submittinUserId)}><IconCheck></IconCheck></ActionIcon>
-                                            <ActionIcon color="red" variant="filled" onClick={() => requestDecline(request.submittinUserId)}><IconX></IconX></ActionIcon></li>
+                                            <li style={{ display: "flex", flexDirection: "row", gap: "10px" }}><Text truncate>{"Prośba od " + request.displayName}</Text>
+                                                <ActionIcon color="teal" variant="filled" onClick={() => requestAccept(request.submittinUserId)}><IconCheck></IconCheck></ActionIcon>
+                                                <ActionIcon color="red" variant="filled" onClick={() => requestDecline(request.submittinUserId)}><IconX></IconX></ActionIcon></li>
                                         ))
                                     ) : (
                                         <li>Brak prośb o dołączenie</li>
